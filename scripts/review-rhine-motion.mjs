@@ -152,10 +152,25 @@ if (researchEnd.opacity !== '1') failures.push(`research UI final opacity is ${r
 const researchBreathingPeak = await page.locator('.rhine-blackhole-field').evaluate((node) => {
   const animation = node.getAnimations({ subtree: true }).find((item) => item.animationName === 'rhine-blackhole-breathe')
   animation.pause()
-  animation.currentTime = 8640
+  animation.currentTime = 9180
   return Number(getComputedStyle(node, '::before').opacity)
 })
-if (Math.abs(researchBreathingPeak - .75) > .01) failures.push(`research breathing peak is ${researchBreathingPeak}`)
+if (Math.abs(researchBreathingPeak - .95) > .01) failures.push(`research breathing peak is ${researchBreathingPeak}`)
+
+const viewportHeight = await page.locator('[data-rhine-scroll]').evaluate((node) => { node.style.scrollBehavior = 'auto'; node.scrollTop = 0; return node.clientHeight })
+await page.waitForTimeout(80)
+await page.locator('[data-rhine-scroll]').evaluate((node) => { node.style.scrollBehavior = '' })
+await page.locator('[data-rhine-scroll]').evaluate((node) => node.dispatchEvent(new WheelEvent('wheel', { deltaY: 120, bubbles: true, cancelable: true })))
+await page.waitForTimeout(220)
+const scrollEarly = await page.locator('[data-rhine-scroll]').evaluate((node) => node.scrollTop)
+await page.waitForTimeout(320)
+const scrollMiddle = await page.locator('[data-rhine-scroll]').evaluate((node) => node.scrollTop)
+await page.screenshot({ path: fileURLToPath(new URL('05-scroll-transition-mid.png', output)) })
+await page.waitForTimeout(650)
+const scrollEnd = await page.locator('[data-rhine-scroll]').evaluate((node) => node.scrollTop)
+if (scrollEarly <= 0 || scrollEarly >= viewportHeight * .4) failures.push(`wheel transition jumped at its opening pose: ${scrollEarly}`)
+if (scrollMiddle <= viewportHeight * .15 || scrollMiddle >= viewportHeight * .85) failures.push(`wheel transition has no readable middle pose: ${scrollMiddle}`)
+if (Math.abs(scrollEnd - viewportHeight) > 2) failures.push(`wheel transition did not settle on the next screen: ${scrollEnd}`)
 
 console.log(JSON.stringify({
   failures,
@@ -164,8 +179,9 @@ console.log(JSON.stringify({
     member: { motion: [memberStart, memberMiddle, memberEnd], hologram: { beforePointer: holoBeforePointer, afterPointer: holoAfterPointer, afterEase: holoAfterEase } },
     department: { motion: [departmentStart, departmentMiddle, departmentEnd], titleSize: departmentTitleSize, idleRect: departmentIdleRect, selectedRect: departmentSelectedRect, mediaRect: departmentMediaRect },
     research: { ...researchEnd, breathingPeak: researchBreathingPeak },
+    scroll: { viewportHeight, early: scrollEarly, middle: scrollMiddle, end: scrollEnd },
   },
-  screenshots: 6,
+  screenshots: 7,
 }, null, 2))
 
 await browser.close()

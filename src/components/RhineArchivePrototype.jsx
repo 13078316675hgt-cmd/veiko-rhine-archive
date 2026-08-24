@@ -424,6 +424,58 @@ export function RhineArchivePrototype() {
     return () => observer.disconnect()
   }, [entered])
 
+  useEffect(() => {
+    if (!entered || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    const scroller = rootRef.current?.querySelector('[data-rhine-scroll]')
+    if (!scroller) return undefined
+    const sections = [...scroller.querySelectorAll('[data-rhine-view]')]
+    let scrollTween = null
+    let previousScrollBehavior = ''
+    let previousScrollSnapType = ''
+
+    const finishGlide = () => {
+      scroller.classList.remove('is-gliding')
+      scroller.style.scrollBehavior = previousScrollBehavior
+      scroller.style.scrollSnapType = previousScrollSnapType
+      scrollTween = null
+    }
+
+    const onWheel = (event) => {
+      if (event.ctrlKey || Math.abs(event.deltaY) < 4) return
+      event.preventDefault()
+      if (scrollTween?.isActive()) return
+
+      const currentTop = scroller.scrollTop
+      const currentIndex = sections.reduce((nearest, section, index) => (
+        Math.abs(section.offsetTop - currentTop) < Math.abs(sections[nearest].offsetTop - currentTop) ? index : nearest
+      ), 0)
+      const targetIndex = Math.max(0, Math.min(sections.length - 1, currentIndex + Math.sign(event.deltaY)))
+      const targetTop = sections[targetIndex]?.offsetTop ?? currentTop
+      if (Math.abs(targetTop - currentTop) < 1) return
+
+      previousScrollBehavior = scroller.style.scrollBehavior
+      previousScrollSnapType = scroller.style.scrollSnapType
+      scroller.classList.add('is-gliding')
+      scroller.style.scrollBehavior = 'auto'
+      scroller.style.scrollSnapType = 'none'
+      scrollTween = gsap.to(scroller, {
+        scrollTop: targetTop,
+        duration: 1,
+        ease: 'power2.inOut',
+        overwrite: 'auto',
+        onUpdate: () => ScrollTrigger.update(),
+        onComplete: finishGlide,
+      })
+    }
+
+    scroller.addEventListener('wheel', onWheel, { passive: false })
+    return () => {
+      scroller.removeEventListener('wheel', onWheel)
+      scrollTween?.kill()
+      finishGlide()
+    }
+  }, [entered])
+
   useLayoutEffect(() => {
     const root = rootRef.current
     if (!root || !entered || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined

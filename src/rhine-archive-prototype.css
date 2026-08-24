@@ -71,9 +71,10 @@
 .rhine-main-navigation button.is-active { color: var(--rhine-accent); }
 .rhine-main-navigation.is-light { color: var(--rhine-pale); }
 .rhine-main-navigation.is-light button.is-active { color: var(--rhine-accent); }
-.rhine-scroll { height: 100%; overflow-x: hidden; overflow-y: auto; scroll-behavior: smooth; scroll-snap-type: y mandatory; overscroll-behavior-y: contain; scrollbar-width: none; }
+.rhine-scroll { height: 100%; overflow-x: hidden; overflow-y: auto; scroll-behavior: smooth; scroll-snap-type: y proximity; overscroll-behavior-y: contain; scrollbar-width: none; }
+.rhine-scroll.is-gliding { scroll-behavior: auto; scroll-snap-type: none; }
 .rhine-scroll::-webkit-scrollbar { display: none; }
-.rhine-view { position: relative; min-height: 100svh; overflow: hidden; contain: layout paint style; content-visibility: auto; contain-intrinsic-size: 100vw 100svh; scroll-margin: 0 !important; scroll-snap-align: start; scroll-snap-stop: always; }
+.rhine-view { position: relative; min-height: 100svh; overflow: hidden; contain: layout paint style; content-visibility: visible; scroll-margin: 0 !important; scroll-snap-align: start; scroll-snap-stop: normal; }
 .rhine-home, .rhine-members, .rhine-departments { background: var(--rhine-paper); }
 
 /* Homepage matching the settled frame near 00:25. */
@@ -228,7 +229,7 @@
 .rhine-research-scene, .rhine-research-scene figure { position: absolute; inset: 0; margin: 0; }
 .rhine-research-scene .rhine-blackhole-visual { z-index: 1; inset: 7% 12.6% 12% 16%; overflow: hidden; }
 .rhine-blackhole-field { position: absolute; inset: 0; }
-.rhine-blackhole-field::before { content: ''; position: absolute; z-index: 3; top: 49.8%; left: 50.8%; width: 49%; aspect-ratio: 1.72; border-radius: 50%; background: radial-gradient(ellipse at center, transparent 0 35%, rgba(49,196,255,.42) 43%, rgba(156,87,255,.34) 47%, rgba(255,58,166,.4) 51%, rgba(255,199,65,.26) 55%, transparent 62%); mix-blend-mode: screen; opacity: .16; transform: translate3d(-50%,-50%,0) scale(.965); transform-origin: 50% 50%; animation: rhine-blackhole-breathe 16s cubic-bezier(.37,0,.2,1) infinite alternate; will-change: transform, opacity; pointer-events: none; }
+.rhine-blackhole-field::before { content: ''; position: absolute; z-index: 3; top: 49.8%; left: 50.8%; width: 49%; aspect-ratio: 1.72; border-radius: 50%; background: radial-gradient(ellipse at 47% 48%, transparent 0 34%, rgba(49,196,255,.58) 41%, rgba(88,126,255,.24) 46%, transparent 52%), radial-gradient(ellipse at 53% 52%, transparent 0 36%, rgba(156,87,255,.46) 44%, rgba(255,58,166,.55) 50%, rgba(255,199,65,.38) 55%, transparent 63%); mix-blend-mode: screen; opacity: .2; transform: translate3d(-50%,-50%,0) scale(1); transform-origin: 50% 50%; animation: rhine-blackhole-breathe 17s cubic-bezier(.37,0,.2,1) infinite alternate; will-change: opacity; pointer-events: none; }
 .rhine-blackhole-field::after { content: ''; position: absolute; z-index: 4; top: 57%; left: 36%; width: 28%; height: 2px; border-radius: 50%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.78), rgba(85,204,255,.42), transparent); box-shadow: 0 0 9px rgba(255,255,255,.34); opacity: .58; transform: translate3d(-34%,0,0) rotate(5deg); animation: rhine-blackhole-glint 19s cubic-bezier(.45,.05,.2,1) infinite alternate; will-change: transform, opacity; pointer-events: none; }
 .rhine-blackhole-field img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 .rhine-blackhole-base { filter: saturate(.98) contrast(1.08); transform: scale(1.045); }
@@ -294,9 +295,9 @@
 @keyframes rhine-department-open { 0% { transform: translate(-50%,-50%) scaleX(.08); opacity: 0; } 68% { transform: translate(-50%,-50%) scaleX(1.025); opacity: 1; } 100% { transform: translate(-50%,-50%) scaleX(1); opacity: 1; } }
 @keyframes rhine-department-field { to { transform: rotate(378deg) scale(1.6); } }
 @keyframes rhine-trace-pulse { 50% { opacity: .28; } }
-@keyframes rhine-blackhole-breathe { 0% { opacity: .15; transform: translate3d(-50%,-50%,0) scale(.955); } 54% { opacity: .75; transform: translate3d(-50%,-50%,0) scale(1.025); } 100% { opacity: .24; transform: translate3d(-50%,-50%,0) scale(1.06); } }
-@keyframes rhine-blackhole-lens { 0% { opacity: .16; transform: translate(-50%,-50%) scale(.96); } 52% { opacity: .42; } 100% { opacity: .22; transform: translate(-50%,-50%) scale(1.07); } }
-@keyframes rhine-blackhole-glint { 0%, 18% { opacity: .2; transform: translate3d(-34%,0,0) rotate(5deg); } 64% { opacity: .68; } 100% { opacity: .18; transform: translate3d(66%,0,0) rotate(5deg); } }
+@keyframes rhine-blackhole-breathe { 0% { opacity: .2; } 54% { opacity: .95; } 100% { opacity: .28; } }
+@keyframes rhine-blackhole-lens { 0% { opacity: .22; transform: translate(-50%,-50%) scale(.995); } 52% { opacity: .64; } 100% { opacity: .3; transform: translate(-50%,-50%) scale(1.018); } }
+@keyframes rhine-blackhole-glint { 0%, 18% { opacity: .24; transform: translate3d(-34%,0,0) rotate(5deg); } 64% { opacity: .86; } 100% { opacity: .22; transform: translate3d(66%,0,0) rotate(5deg); } }
 @keyframes rhine-stars-drift { to { transform: translate3d(5%, 3%, 0); } }
 
 /* Only the active screen owns continuous animation work. */
