@@ -6,6 +6,7 @@ import { RHINE_CLONE, RHINE_DEPARTMENTS, RHINE_MEMBERS, RHINE_RESEARCH, rhineAss
 gsap.registerPlugin(ScrollTrigger)
 
 const basePath = () => import.meta.env.BASE_URL
+const RHINE_LOGIN = Object.freeze({ username: 'Marlsa', password: '9029' })
 
 function InfinityLogo({ compact = false }) {
   return <svg className={compact ? 'is-compact' : ''} viewBox="0 0 310 160" aria-hidden="true">
@@ -26,6 +27,27 @@ function Entrance({ onComplete }) {
   const rootRef = useRef(null)
   const [canLogin, setCanLogin] = useState(false)
   const [authorizing, setAuthorizing] = useState(false)
+  const [loginError, setLoginError] = useState('')
+
+  const handleLogin = useCallback((event) => {
+    event.preventDefault()
+    if (!canLogin || authorizing) return
+
+    const form = event.currentTarget
+    const data = new FormData(form)
+    const username = String(data.get('rhine-username') || '').trim()
+    const password = String(data.get('rhine-password') || '')
+    const authorized = username === RHINE_LOGIN.username && password === RHINE_LOGIN.password
+
+    if (!authorized) {
+      setLoginError('INCORRECT USERNAME OR PASSWORD')
+      form.querySelector('input')?.focus()
+      return
+    }
+
+    setLoginError('')
+    setAuthorizing(true)
+  }, [authorizing, canLogin])
 
   useLayoutEffect(() => {
     const root = rootRef.current
@@ -137,10 +159,11 @@ function Entrance({ onComplete }) {
     <div data-entrance-brand><FixedBrand /></div><div data-entrance-footer><FixedFooter /></div>
     <div className="rhine-login" data-login>
       <div className="rhine-login-logo" data-login-logo><InfinityLogo /><span>R H I N E - L A B</span></div>
-      <form className="rhine-login-form" data-login-form onSubmit={(event) => { event.preventDefault(); if (canLogin) setAuthorizing(true) }}>
+      <form className={`rhine-login-form ${loginError ? 'has-error' : ''}`} data-login-form onSubmit={handleLogin} onInput={() => { if (loginError) setLoginError('') }}>
         <h1>WELCOME</h1>
-        <label><span>USERNAME:</span><input name="rhine-username" autoComplete="username" required /></label>
-        <label><span>PASSWORD:</span><input name="rhine-password" type="password" autoComplete="current-password" required /></label>
+        <label><span>USERNAME:</span><input name="rhine-username" autoComplete="username" aria-invalid={Boolean(loginError)} required /></label>
+        <label><span>PASSWORD:</span><input name="rhine-password" type="password" autoComplete="current-password" aria-invalid={Boolean(loginError)} required /></label>
+        <p className="rhine-login-error" role="alert" aria-live="polite">{loginError || '\u00a0'}</p>
         <button type="submit" disabled={!canLogin || authorizing}>LOGIN</button>
         <a href="#rhine-register" onClick={(event) => event.preventDefault()}>REGISTER</a>
       </form>
