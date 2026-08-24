@@ -377,18 +377,18 @@ function BlackHoleSystem({ base }) {
 }
 
 function ResearchScene({ base, onContinue }) {
-  const dots = Array.from({ length: 121 }, (_, index) => {
+  const timeDots = (layer) => Array.from({ length: 121 }, (_, index) => {
     const x = index % 11
     const y = Math.floor(index / 11)
-    const visible = Math.abs(x - 5) <= Math.ceil(Math.abs(y - 5) * .82)
-    return <i className={visible ? 'is-visible' : ''} style={{ '--grain-index': index }} key={index} />
+    const visible = ((x - 5) ** 2) + ((y - 5) ** 2) <= 25
+    return <i className={visible ? 'is-visible' : ''} style={{ '--grain-index': index }} key={`${layer}-${index}`} />
   })
   return <div className="rhine-research-scene">
     <BlackHoleSystem base={base} />
     <div className="rhine-space-stars is-far" aria-hidden="true" /><div className="rhine-space-stars is-near" aria-hidden="true" />
     <div className="rhine-research-shade" />
     <div className="rhine-pioneer-mark" data-research-ui><span>{RHINE_RESEARCH.title}<small>{RHINE_RESEARCH.english}</small></span><MoonProjectLogo /></div>
-    <div className="rhine-progress-system" data-research-ui><div className="rhine-progress-ring"><svg viewBox="0 0 112 116" aria-hidden="true"><path d="M14 8h84M14 108h84M19 10c0 31 25 34 37 48-12 14-37 17-37 48M93 10c0 31-25 34-37 48 12 14 37 17 37 48" /></svg><span>{dots}</span><i /></div><strong>{RHINE_RESEARCH.progress}</strong></div>
+    <div className="rhine-progress-system" data-research-ui><div className="rhine-time-meter" aria-label="Particle time transfer progress"><svg className="rhine-time-dial" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="53" /><path d="M60 2v8M60 110v8M2 60h8M110 60h8M18.3 18.3l5.7 5.7M96 96l5.7 5.7M101.7 18.3L96 24M24 96l-5.7 5.7" /><path className="is-sweep" d="M60 7a53 53 0 0 1 45.9 26.5" /></svg><span className="rhine-time-mass is-source" aria-hidden="true">{timeDots('source')}</span><span className="rhine-time-mass is-target" aria-hidden="true">{timeDots('target')}</span><span className="rhine-time-transfer" aria-hidden="true">{Array.from({ length: 4 }, (_, index) => <i style={{ '--transfer-index': index }} key={index} />)}</span><i className="rhine-time-core" aria-hidden="true" /></div><strong>{RHINE_RESEARCH.progress}</strong></div>
     <div className="rhine-research-copy" data-research-ui><p>{RHINE_RESEARCH.copy.map((line) => <span key={line}>{line}</span>)}</p><button type="button" onClick={onContinue}>{RHINE_RESEARCH.button}<i /></button></div>
     <div className="rhine-research-readout" data-research-ui><b>R / 01 — 037</b><span>{RHINE_RESEARCH.readout.slice(1).map((line) => <small key={line}>{line}</small>)}</span><i /></div>
   </div>

@@ -182,7 +182,29 @@ if (researchBlackHoleProof.innerArcOpacity < .5) failures.push('research event-h
 const researchTitle = (await page.locator('.rhine-pioneer-mark span').innerText()).replace(/\s+/g, ' ').trim()
 if (!researchTitle.startsWith('月之计划')) failures.push(`research title is ${researchTitle}`)
 if (await page.locator('.rhine-moon-project-logo').count() !== 1) failures.push('moon project logo is missing')
-if (await page.locator('.rhine-progress-ring > svg').count() !== 1) failures.push('hourglass progress frame is missing')
+if (await page.locator('.rhine-time-meter .rhine-time-dial').count() !== 1) failures.push('particle time dial is missing')
+if (await page.locator('.rhine-time-mass.is-source').count() !== 1 || await page.locator('.rhine-time-mass.is-target').count() !== 1) failures.push('particle time reservoirs are missing')
+if (await page.locator('.rhine-time-transfer > i').count() !== 4) failures.push('particle transfer stream is incomplete')
+const researchTimeFlow = await page.locator('.rhine-time-meter').evaluate((node) => {
+  const source = node.querySelector('.rhine-time-mass.is-source')
+  const target = node.querySelector('.rhine-time-mass.is-target')
+  const grain = node.querySelector('.rhine-time-transfer > i')
+  const sourceAnimation = source.getAnimations().find((item) => item.animationName === 'rhine-time-source')
+  const targetAnimation = target.getAnimations().find((item) => item.animationName === 'rhine-time-target')
+  const grainAnimation = grain.getAnimations().find((item) => item.animationName === 'rhine-time-transfer')
+  ;[sourceAnimation, targetAnimation, grainAnimation].forEach((animation) => animation.pause())
+  sourceAnimation.currentTime = 0
+  targetAnimation.currentTime = 0
+  grainAnimation.currentTime = 0
+  const start = { source: getComputedStyle(source).clipPath, target: getComputedStyle(target).clipPath, grain: getComputedStyle(grain).transform }
+  sourceAnimation.currentTime = 12320
+  targetAnimation.currentTime = 12320
+  grainAnimation.currentTime = 2400
+  const end = { source: getComputedStyle(source).clipPath, target: getComputedStyle(target).clipPath, grain: getComputedStyle(grain).transform }
+  return { start, end }
+})
+if (researchTimeFlow.start.source === researchTimeFlow.end.source || researchTimeFlow.start.target === researchTimeFlow.end.target) failures.push('particle reservoirs do not transfer over time')
+if (researchTimeFlow.start.grain === researchTimeFlow.end.grain) failures.push('particle transfer stream is static')
 await page.screenshot({ path: fileURLToPath(new URL('06-research-blackhole-peak.png', output)) })
 
 const viewportHeight = await page.locator('[data-rhine-scroll]').evaluate((node) => { node.style.scrollBehavior = 'auto'; node.scrollTop = 0; return node.clientHeight })
@@ -206,7 +228,7 @@ console.log(JSON.stringify({
     home: [homeStart, homeMiddle, homeEnd],
     member: { motion: [memberStart, memberMiddle, memberEnd], hologram: { beforePointer: holoBeforePointer, afterPointer: holoAfterPointer, afterEase: holoAfterEase } },
     department: { motion: [departmentStart, departmentMiddle, departmentEnd], titleSize: departmentTitleSize, idleRect: departmentIdleRect, selectedRect: departmentSelectedRect, mediaRect: departmentMediaRect },
-    research: { ...researchEnd, breathingPeak: researchBreathingPeak, blackHole: researchBlackHoleProof },
+    research: { ...researchEnd, breathingPeak: researchBreathingPeak, blackHole: researchBlackHoleProof, timeFlow: researchTimeFlow },
     scroll: { viewportHeight, early: scrollEarly, middle: scrollMiddle, end: scrollEnd },
   },
   screenshots: 8,

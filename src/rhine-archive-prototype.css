@@ -260,12 +260,21 @@
 .rhine-moon-project-logo .is-crescent, .rhine-moon-project-logo circle { fill: currentColor; }
 .rhine-moon-project-logo .is-orbit, .rhine-moon-project-logo .is-mark { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
 .rhine-progress-system { position: absolute; z-index: 5; top: 31%; left: 3.4%; display: grid; justify-items: center; gap: 12px; }
-.rhine-progress-ring { position: relative; display: grid; width: 112px; height: 116px; place-items: center; }
-.rhine-progress-ring > svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: rgba(118,213,230,.7); stroke-width: 1; }
-.rhine-progress-ring > span { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(11, 5px); gap: 3px; }
-.rhine-progress-ring span i { width: 4px; height: 4px; border-radius: 50%; opacity: 0; background: rgba(226,249,255,.92); }
-.rhine-progress-ring span i.is-visible { opacity: 1; animation: rhine-hourglass-grain 6.8s ease-in-out infinite; animation-delay: calc(var(--grain-index, 0) * -.04s); }
-.rhine-progress-ring > i { position: absolute; z-index: 2; top: 49%; width: 5px; height: 5px; border-radius: 50%; background: #c2a8ff; box-shadow: 0 0 10px rgba(173,140,255,.7); animation: rhine-hourglass-fall 3.8s cubic-bezier(.45,.05,.2,1) infinite; }
+.rhine-time-meter { position: relative; display: grid; width: 112px; height: 112px; place-items: center; contain: layout paint; }
+.rhine-time-dial { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; stroke: rgba(196,241,249,.38); stroke-width: .85; }
+.rhine-time-dial circle { stroke-dasharray: 2 4; }
+.rhine-time-dial path:not(.is-sweep) { stroke: rgba(255,255,255,.66); stroke-width: 1.15; }
+.rhine-time-dial .is-sweep { stroke: var(--rhine-accent); stroke-width: 2; stroke-linecap: round; filter: drop-shadow(0 0 5px rgba(118,213,230,.55)); transform-origin: 60px 60px; animation: rhine-time-sweep 18s linear infinite; }
+.rhine-time-mass { position: absolute; z-index: 1; top: 15px; left: 15px; display: grid; grid-template-columns: repeat(11, 4px); gap: 3px; width: 74px; height: 74px; }
+.rhine-time-mass i { width: 3px; height: 3px; border-radius: 50%; opacity: 0; background: transparent; }
+.rhine-time-mass i.is-visible { opacity: .92; background: rgba(228,250,255,.96); box-shadow: 0 0 4px rgba(118,213,230,.22); animation: rhine-time-dot 5.6s ease-in-out infinite; animation-delay: calc(var(--grain-index, 0) * -.035s); }
+.rhine-time-mass.is-source { clip-path: inset(0 0 50% 0); animation: rhine-time-source 14s cubic-bezier(.45,.05,.22,1) infinite alternate; }
+.rhine-time-mass.is-target { clip-path: inset(50% 0 48% 0); animation: rhine-time-target 14s cubic-bezier(.45,.05,.22,1) infinite alternate; }
+.rhine-time-mass.is-target i.is-visible { background: rgba(190,169,255,.94); box-shadow: 0 0 5px rgba(173,140,255,.28); }
+.rhine-time-transfer { position: absolute; z-index: 3; top: 42px; left: 50%; width: 12px; height: 29px; transform: translateX(-50%); overflow: hidden; }
+.rhine-time-transfer::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: linear-gradient(transparent, rgba(255,255,255,.72), transparent); opacity: .42; transform: translateX(-50%); }
+.rhine-time-transfer i { position: absolute; top: -5px; left: calc(50% + (var(--transfer-index) - 1.5) * 1.2px); width: 2px; height: 2px; border-radius: 50%; background: white; box-shadow: 0 0 5px var(--rhine-accent); animation: rhine-time-transfer 3.8s linear infinite; animation-delay: calc(var(--transfer-index) * -.94s); }
+.rhine-time-core { position: absolute; z-index: 4; top: 50%; left: 50%; width: 7px; height: 7px; border: 1px solid rgba(255,255,255,.9); background: rgba(118,213,230,.18); transform: translate3d(-50%,-50%,0) rotate(45deg); box-shadow: 0 0 10px rgba(118,213,230,.45); animation: rhine-time-core 4.8s ease-in-out infinite; }
 .rhine-progress-system strong { color: var(--rhine-accent); font-size: clamp(17px, 1.25vw, 24px); }
 .rhine-research-copy { position: absolute; z-index: 5; bottom: 8%; left: 3.4%; width: min(24vw, 380px); }
 .rhine-research-copy p { display: grid; margin: 0 0 20px; padding-left: 14px; border-left: 1px solid var(--rhine-accent); color: rgba(255,255,255,.7); font-size: clamp(8px, .58vw, 11px); font-weight: 600; line-height: 1.6; letter-spacing: .06em; }
@@ -307,8 +316,12 @@
 @keyframes rhine-blackhole-flow-upper { 0% { opacity: .14; transform: translate3d(1.5%,-.3%,0) scaleX(1.018); } 55% { opacity: .38; } 100% { opacity: .2; transform: translate3d(-.9%,.18%,0) scaleX(1.055); } }
 @keyframes rhine-blackhole-flow-lower { 0% { opacity: .16; transform: translate3d(-1.2%,.28%,0) scaleX(1.03); } 48% { opacity: .34; } 100% { opacity: .19; transform: translate3d(.85%,-.15%,0) scaleX(1.06); } }
 @keyframes rhine-blackhole-glint { 0%, 18% { opacity: .28; transform: translate3d(-34%,0,0) rotate(5deg); } 64% { opacity: 1; } 100% { opacity: .32; transform: translate3d(66%,0,0) rotate(5deg); } }
-@keyframes rhine-hourglass-grain { 0%, 100% { opacity: .48; } 50% { opacity: 1; } }
-@keyframes rhine-hourglass-fall { 0%, 16% { opacity: 0; transform: translate3d(0,-17px,0); } 32% { opacity: 1; } 82% { opacity: .7; } 100% { opacity: 0; transform: translate3d(0,17px,0); } }
+@keyframes rhine-time-dot { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+@keyframes rhine-time-source { 0%, 12% { clip-path: inset(0 0 50% 0); opacity: 1; } 88%, 100% { clip-path: inset(45% 0 50% 0); opacity: .64; } }
+@keyframes rhine-time-target { 0%, 12% { clip-path: inset(50% 0 45% 0); opacity: .64; } 88%, 100% { clip-path: inset(50% 0 0 0); opacity: 1; } }
+@keyframes rhine-time-transfer { 0% { opacity: 0; transform: translate3d(0,-4px,0) scale(.72); } 14% { opacity: 1; } 82% { opacity: .78; } 100% { opacity: 0; transform: translate3d(0,34px,0) scale(1.12); } }
+@keyframes rhine-time-core { 0%, 100% { opacity: .48; transform: translate3d(-50%,-50%,0) rotate(45deg) scale(.82); } 50% { opacity: 1; transform: translate3d(-50%,-50%,0) rotate(225deg) scale(1.15); } }
+@keyframes rhine-time-sweep { to { transform: rotate(360deg); } }
 @keyframes rhine-stars-drift { to { transform: translate3d(5%, 3%, 0); } }
 
 /* Only the active screen owns continuous animation work. */
@@ -329,8 +342,9 @@
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-field::before,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-field::after,
 .rhine-prototype:not(.rhine-active-research) .rhine-space-stars,
-.rhine-prototype:not(.rhine-active-research) .rhine-progress-ring::before,
-.rhine-prototype:not(.rhine-active-research) .rhine-progress-ring::after { animation-play-state: paused !important; }
+.rhine-prototype:not(.rhine-active-research) .rhine-time-meter *,
+.rhine-prototype:not(.rhine-active-research) .rhine-time-meter *::before,
+.rhine-prototype:not(.rhine-active-research) .rhine-time-meter *::after { animation-play-state: paused !important; }
 
 @media (max-width: 900px) {
   .rhine-fixed-brand { top: 24px; left: 20px; }.rhine-fixed-brand strong { font-size: 17px; }.rhine-fixed-brand small { margin-top: 4px; font-size: 7px; }
@@ -348,7 +362,7 @@
   .rhine-department-tile { width: 22vw; height: 14%; }.rhine-department-console { top: 42%; width: 38vw; height: 20%; }.rhine-department-media { width: 58vw; height: 68%; }.rhine-department-heading { top: 34%; min-width: 240px; }
   .rhine-department-tile:nth-of-type(n) { transform: scale(.82) rotate(var(--tile-tilt)); }
   .rhine-headquarters-gallery { inset: 14% 17% 10% 20px; grid-template-columns: 1fr 30%; }.rhine-headquarters-index { display: none; }.rhine-headquarters-status { bottom: -26px; }
-  .rhine-research-scene .rhine-blackhole-visual { inset: 16% 7% 25% 5%; }.rhine-blackhole-field img { width: 138%; max-width: none; transform-origin: center; }.rhine-pioneer-mark { top: 14%; left: 20px; }.rhine-progress-system { top: 37%; left: 20px; }.rhine-progress-ring { width: 86px; height: 86px; }
+  .rhine-research-scene .rhine-blackhole-visual { inset: 16% 7% 25% 5%; }.rhine-blackhole-field img { width: 138%; max-width: none; transform-origin: center; }.rhine-pioneer-mark { top: 14%; left: 20px; }.rhine-progress-system { top: 37%; left: 20px; }.rhine-time-meter { width: 86px; height: 86px; }.rhine-time-mass { top: 11px; left: 11px; transform: scale(.76); transform-origin: top left; }.rhine-time-transfer { top: 30px; height: 26px; }
   .rhine-research-copy { bottom: 11%; left: 20px; width: 78vw; }.rhine-research-copy button { width: 70vw; }.rhine-research-readout { right: 20px; bottom: 29%; min-width: 250px; transform: scale(.8); transform-origin: right bottom; }
 }
 
