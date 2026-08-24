@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Visual Archive coordinate mark</title>
+  <g fill="none" stroke="#61768A" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M12 22V12h10M42 12h10v10M52 42v10H42M22 52H12V42" stroke-width="4"/>
+    <path d="M19 47 32 16l13 31M24 36h16" stroke-width="4.5"/>
+  </g>
+  <rect x="29.5" y="8" width="5" height="5" fill="#9BAEBD"/>
+</svg>

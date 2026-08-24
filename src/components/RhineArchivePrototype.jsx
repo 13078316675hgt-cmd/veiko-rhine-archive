@@ -1,0 +1,415 @@
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { RHINE_CLONE, RHINE_DEPARTMENTS, RHINE_MEMBERS, RHINE_RESEARCH, rhineAsset } from '../data/rhineArchiveContent'
+
+gsap.registerPlugin(ScrollTrigger)
+
+const basePath = () => import.meta.env.BASE_URL
+
+function InfinityLogo({ compact = false }) {
+  return <svg className={compact ? 'is-compact' : ''} viewBox="0 0 310 160" aria-hidden="true">
+    <path className="rhine-infinity-outline" data-logo-outline d="M154 80 113 39C91 17 54 20 36 45S23 105 48 123c23 17 53 12 72-7l34-36 35-36c19-19 49-24 72-7 25 18 30 53 12 78s-55 28-77 6L154 80Z" fill="none" stroke="currentColor" strokeWidth="20" strokeLinejoin="round" />
+    <path className="rhine-infinity-glyphs" data-logo-glyphs d="M73 58v44M51 80h44M217 80h43" fill="none" stroke="currentColor" strokeWidth="13" />
+  </svg>
+}
+
+function FixedBrand({ light = false }) {
+  return <div className={`rhine-fixed-brand ${light ? 'is-light' : ''}`}><strong>{RHINE_CLONE.brand.title}</strong><small>{RHINE_CLONE.brand.lineOne}<br />{RHINE_CLONE.brand.lineTwo}</small></div>
+}
+
+function FixedFooter({ light = false }) {
+  return <div className={`rhine-fixed-footer ${light ? 'is-light' : ''}`}><span>{RHINE_CLONE.brand.footer}</span><i /></div>
+}
+
+function Entrance({ onComplete }) {
+  const rootRef = useRef(null)
+  const [canLogin, setCanLogin] = useState(false)
+  const [authorizing, setAuthorizing] = useState(false)
+
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (!root) return undefined
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const context = gsap.context(() => {
+      gsap.set('[data-logo-loader], [data-login], [data-entrance-brand], [data-entrance-footer], [data-access], [data-welcome]', { autoAlpha: 0 })
+      gsap.set('[data-logo-loader] [data-logo-outline], [data-welcome] [data-logo-outline]', { strokeDasharray: 920, strokeDashoffset: 920 })
+      gsap.set('[data-logo-loader] [data-logo-glyphs], [data-welcome] [data-logo-glyphs]', { strokeDasharray: 160, strokeDashoffset: 160 })
+      gsap.set('[data-login-logo] [data-logo-outline]', { strokeDasharray: 920, strokeDashoffset: 920 })
+      gsap.set('[data-login-logo] [data-logo-glyphs]', { strokeDasharray: 160, strokeDashoffset: 160 })
+      if (reduced) {
+        gsap.set(root, { background: RHINE_CLONE.colors.paper })
+        gsap.set('[data-warning]', { autoAlpha: 0 })
+        gsap.set('[data-login], [data-entrance-brand], [data-entrance-footer]', { autoAlpha: 1 })
+        setCanLogin(true)
+        return
+      }
+      const intro = gsap.timeline({ defaults: { ease: 'power2.inOut' } })
+        .fromTo('[data-warning-point]', { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .16 })
+        .fromTo('[data-warning-symbol]', { scale: .55, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .28, ease: 'back.out(1.7)' }, '<.03')
+        .fromTo('[data-warning-line]', { scaleY: 0 }, { scaleY: 1, duration: .28, transformOrigin: 'center center' }, '<.08')
+        .fromTo('[data-warning-title]', { clipPath: 'inset(0 100% 0 0)', x: 9, scaleX: .97, autoAlpha: 0 }, { clipPath: 'inset(0 0% 0 0)', x: 0, scaleX: 1, autoAlpha: 1, duration: .58, ease: 'power2.inOut' }, '<.03')
+        .fromTo('[data-warning-row]', { x: 10, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .2, stagger: .16 }, '<.22')
+        .to('[data-warning]', { autoAlpha: 0, duration: .2 }, '+=.48')
+        .fromTo('[data-entrance-flash]', { scaleX: 0, scaleY: 1, autoAlpha: 0 }, { scaleX: 1, autoAlpha: 1, duration: .22, transformOrigin: 'center center', ease: 'power4.out' })
+        .to('[data-entrance-flash]', { scaleX: 6.5, scaleY: 430, duration: .3, ease: 'power4.in' })
+        .set(root, { background: RHINE_CLONE.colors.paper })
+        .set('[data-entrance-flash]', { autoAlpha: 0 })
+        .fromTo('[data-logo-seed]', { width: 0, rotation: -18, autoAlpha: 0 }, { width: 52, rotation: -18, autoAlpha: 1, duration: .22, ease: 'power3.out' })
+        .to('[data-logo-seed]', { width: 8, rotation: 40, autoAlpha: 0, duration: .24, ease: 'power3.in' }, '+=.06')
+        .to('[data-logo-loader]', { autoAlpha: 1, duration: .01 })
+        .fromTo('[data-logo-loader] [data-logo-outline]', { strokeDasharray: 920, strokeDashoffset: 920 }, { strokeDashoffset: 0, duration: .8, ease: 'power2.inOut' })
+        .fromTo('[data-logo-loader] [data-logo-glyphs]', { strokeDasharray: 160, strokeDashoffset: 160 }, { strokeDashoffset: 0, duration: .36, ease: 'power2.out' }, '<.36')
+        .fromTo('[data-logo-loader-copy]', { width: 0 }, { width: '9.2ch', duration: .38, ease: 'steps(9)' }, '<.12')
+        .fromTo('[data-logo-loader-cursor]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .08, repeat: 3, yoyo: true }, '<.15')
+        .to('[data-logo-loader]', { autoAlpha: 1, duration: .24 })
+        .to('[data-login]', { autoAlpha: 1, duration: .01 })
+        .fromTo('[data-login-logo]', { x: '10.5vw', scale: .9, autoAlpha: 0 }, { x: 0, scale: 1, autoAlpha: 1, duration: .58, ease: 'power4.inOut' })
+        .to('[data-logo-loader]', { autoAlpha: 0, duration: .12 }, '<.05')
+        .to('[data-login-logo] [data-logo-outline]', { strokeDashoffset: 0, duration: .48, ease: 'power2.inOut' }, '<.04')
+        .to('[data-login-logo] [data-logo-glyphs]', { strokeDashoffset: 0, duration: .26, ease: 'power2.out' }, '<.2')
+        .fromTo('[data-login-logo] > span', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: .42, ease: 'steps(13)' }, '<.08')
+        .fromTo('[data-login-form]', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: .52, ease: 'power4.inOut' }, '<.02')
+        .fromTo('[data-login-form] > *', { x: 16, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .28, stagger: .065 }, '<.12')
+        .to('[data-entrance-brand], [data-entrance-footer]', { autoAlpha: 1, duration: .3 }, '<.08')
+        .call(() => setCanLogin(true))
+      intro.timeScale(.72)
+    }, root)
+    return () => context.revert()
+  }, [])
+
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (!root || !authorizing) return undefined
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onComplete()
+      return undefined
+    }
+    const context = gsap.context(() => {
+      const authorize = gsap.timeline({ defaults: { ease: 'power3.inOut' } })
+        .to('[data-login]', { autoAlpha: 0, duration: .2 })
+        .to('[data-access]', { autoAlpha: 1, duration: .01 })
+        .fromTo('[data-access-copy]', { width: 0 }, { width: '27ch', duration: .7, ease: 'steps(27)' })
+        .fromTo('[data-access-corner]', { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: .26, stagger: .045, ease: 'back.out(2)' }, '<.16')
+        .to('[data-access-copy], [data-access-corner]', { autoAlpha: 0, duration: .16 }, '+=.24')
+        .fromTo('[data-access-seed]', { width: 0, rotation: -18, autoAlpha: 0 }, { width: 58, rotation: -18, autoAlpha: 1, duration: .22, ease: 'power3.out' })
+        .to('[data-access-seed]', { width: 10, rotation: 42, autoAlpha: 0, duration: .2, ease: 'power3.in' }, '+=.04')
+        .fromTo('[data-auth-ring]', { scale: 4.4, rotation: -24, autoAlpha: 0 }, { scale: 1, rotation: 0, autoAlpha: 1, duration: 1.18, ease: 'power4.inOut' })
+        .fromTo('[data-auth-orbit]', { strokeDashoffset: 1400 }, { strokeDashoffset: 0, duration: .96, stagger: .045 }, '<.08')
+        .fromTo('[data-auth-text]', { width: 0, autoAlpha: 1 }, { width: '21ch', duration: .68, ease: 'steps(21)' }, '<.14')
+        .fromTo('[data-auth-node]', { scale: 0, transformOrigin: 'center' }, { scale: 1, duration: .24, stagger: .04, ease: 'back.out(2)' }, '<.48')
+        .to('[data-auth-text]', { autoAlpha: 0, duration: .16 }, '+=.34')
+        .to('[data-auth-ring]', { scale: .94, rotation: 18, autoAlpha: 0, duration: .36 })
+        .to('[data-access]', { autoAlpha: 0, duration: .01 })
+        .to('[data-welcome]', { autoAlpha: 1, duration: .01 })
+        .fromTo('[data-welcome] > strong', { clipPath: 'inset(0 100% 0 0)', autoAlpha: 0 }, { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .7, ease: 'power2.inOut' })
+        .fromTo('[data-welcome] > b', { scaleX: 0, autoAlpha: 0, transformOrigin: 'left center' }, { scaleX: 1, autoAlpha: 1, duration: .38, ease: 'power4.out' }, '<.24')
+        .fromTo('[data-welcome-logo]', { scale: 0, rotation: -45, autoAlpha: 0 }, { scale: 1, rotation: 0, autoAlpha: 1, duration: .26, ease: 'back.out(2)' }, '<.18')
+        .to('[data-welcome-logo]', { autoAlpha: 0, scale: .35, duration: .14 }, '+=.16')
+        .fromTo('[data-welcome] [data-logo-outline]', { strokeDasharray: 920, strokeDashoffset: 920, autoAlpha: 1 }, { strokeDashoffset: 0, duration: .58, ease: 'power2.inOut' })
+        .fromTo('[data-welcome] [data-logo-glyphs]', { strokeDasharray: 160, strokeDashoffset: 160, autoAlpha: 1 }, { strokeDashoffset: 0, duration: .28 }, '<.28')
+        .to('[data-welcome] > strong, [data-welcome] > svg', { autoAlpha: 0, y: -5, duration: .2 }, '+=.48')
+        .to('[data-welcome] > b', { scaleX: .06, duration: .32, ease: 'power4.in', transformOrigin: 'center center' }, '<')
+        .to('[data-welcome] > b', { scaleY: .2, autoAlpha: 0, duration: .18 })
+        .call(onComplete, null, '+=.2')
+      authorize.timeScale(.74)
+    }, root)
+    return () => context.revert()
+  }, [authorizing, onComplete])
+
+  return <div className="rhine-entrance" ref={rootRef}>
+    <div className="rhine-warning" data-warning>
+      <i className="rhine-warning-point" data-warning-point />
+      <span className="rhine-warning-symbol" data-warning-symbol><i>!</i></span>
+      <div className="rhine-warning-panel"><span data-warning-line /><strong data-warning-title>WARNING</strong><span data-warning-line /></div>
+      <div className="rhine-warning-copy" data-warning-copy>
+        <span data-warning-row><small>INCORRECT USERNAME OR PASSWORD</small><i /></span>
+        <span data-warning-row><small>LOGIN FAILED</small><i /></span>
+        <span data-warning-row><small>RETURN TO LOGIN INTERFACE</small><i /></span>
+      </div>
+    </div>
+    <i className="rhine-logo-seed" data-logo-seed />
+    <div className="rhine-logo-loader" data-logo-loader>
+      <InfinityLogo />
+      <div><span data-logo-loader-copy>R H I N E</span><i data-logo-loader-cursor /></div>
+    </div>
+    <i className="rhine-entrance-flash" data-entrance-flash />
+    <div data-entrance-brand><FixedBrand /></div><div data-entrance-footer><FixedFooter /></div>
+    <div className="rhine-login" data-login>
+      <div className="rhine-login-logo" data-login-logo><InfinityLogo /><span>R H I N E - L A B</span></div>
+      <form className="rhine-login-form" data-login-form onSubmit={(event) => { event.preventDefault(); if (canLogin) setAuthorizing(true) }}>
+        <h1>WELCOME</h1>
+        <label><span>USERNAME:</span><input name="rhine-username" autoComplete="username" required /></label>
+        <label><span>PASSWORD:</span><input name="rhine-password" type="password" autoComplete="current-password" required /></label>
+        <button type="submit" disabled={!canLogin || authorizing}>LOGIN</button>
+        <a href="#rhine-register" onClick={(event) => event.preventDefault()}>REGISTER</a>
+      </form>
+    </div>
+    <div className="rhine-access" data-access>
+      <div className="rhine-access-typing"><span data-access-copy>ACCESS PERMISSION EXPIRED</span><span className="rhine-access-corners" aria-hidden="true"><i data-access-corner /><i data-access-corner /><i data-access-corner /><i data-access-corner /></span></div>
+      <i className="rhine-access-seed" data-access-seed />
+      <svg className="rhine-auth-ring" data-auth-ring viewBox="0 0 520 520" aria-hidden="true">
+        <circle cx="260" cy="260" r="210" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="1400" data-auth-orbit />
+        <circle className="is-pale" cx="260" cy="260" r="187" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="1400" data-auth-orbit />
+        <path d="M170 225a102 102 0 0 1 180 0M170 295a102 102 0 0 0 180 0" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="380" data-auth-orbit />
+        <path d="M154 226a40 40 0 1 0 0 68M366 226a40 40 0 1 1 0 68" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="280" data-auth-orbit />
+        <g fill="currentColor"><circle cx="260" cy="260" r="9" data-auth-node /><circle cx="260" cy="228" r="5" data-auth-node /><circle cx="260" cy="292" r="5" data-auth-node /><circle cx="228" cy="244" r="5" data-auth-node /><circle cx="292" cy="244" r="5" data-auth-node /><circle cx="228" cy="276" r="5" data-auth-node /><circle cx="292" cy="276" r="5" data-auth-node /></g>
+        <g className="rhine-auth-orange"><circle cx="260" cy="73" r="8" data-auth-node /><circle cx="260" cy="447" r="8" data-auth-node /></g>
+      </svg>
+      <strong className="rhine-auth-text" data-auth-text>PERMISSION AUTHORIZED</strong>
+    </div>
+    <div className="rhine-welcome" data-welcome><strong>WELCOME TO</strong><b>RHINE LAB.LLC.</b><InfinityLogo compact /><i data-welcome-logo /></div>
+  </div>
+}
+
+function HomeSystem() {
+  return <div className="rhine-home-system" aria-hidden="true">
+    <svg viewBox="0 0 600 1000" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <filter id="rhine-black-blur" x="-32%" y="-32%" width="164%" height="164%"><feGaussianBlur stdDeviation="22" /></filter>
+        <linearGradient id="rhine-tile-white" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#fff" /><stop offset=".58" stopColor="#f8f8f5" /><stop offset="1" stopColor="#a5a5a3" /></linearGradient>
+        <linearGradient id="rhine-tile-dark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#4a4a49" /><stop offset="1" stopColor="#090a09" /></linearGradient>
+      </defs>
+      <circle className="rhine-home-black" cx="300" cy="515" r="214" filter="url(#rhine-black-blur)" />
+      <g className="rhine-home-diamonds" data-home-diamonds>
+        <rect className="is-white" x="109" y="445" width="75" height="75" transform="rotate(45 146.5 482.5)" />
+        <rect className="is-white" x="163" y="499" width="75" height="75" transform="rotate(45 200.5 536.5)" />
+        <rect className="is-dark" x="217" y="445" width="75" height="75" transform="rotate(45 254.5 482.5)" />
+        <rect className="is-dark" x="217" y="553" width="75" height="75" transform="rotate(45 254.5 590.5)" />
+        <rect className="is-dark" x="337" y="433" width="75" height="75" transform="rotate(45 374.5 470.5)" />
+        <rect className="is-dark" x="391" y="487" width="75" height="75" transform="rotate(45 428.5 524.5)" />
+        <rect className="is-white" x="391" y="595" width="75" height="75" transform="rotate(45 428.5 632.5)" />
+        <rect className="is-white" x="445" y="541" width="75" height="75" transform="rotate(45 482.5 578.5)" />
+        <rect className="is-white is-lower" x="255" y="669" width="67" height="67" transform="rotate(45 288.5 702.5)" />
+      </g>
+      <g className="rhine-home-white" data-home-white>
+        <path d="M242 92v270l-23 30v508" /><path d="M257 76v325l-19 22v482" /><path d="M274 88v352l-17 18v452" />
+        <path d="M468 108v797" />
+      </g>
+      <g className="rhine-home-orange" data-home-orange>
+        <path d="M300 0v1000" /><path d="M300 515 0 0" /><path d="M300 515c10-73 200-118 200-250V0" />
+      </g>
+      <g className="rhine-home-nodes" data-home-nodes>
+        <circle className="is-core" cx="300" cy="515" r="15" /><circle className="is-core-center" cx="300" cy="515" r="6" />
+        <circle cx="242" cy="166" r="5" /><circle cx="257" cy="166" r="5" /><circle cx="274" cy="166" r="5" /><circle cx="300" cy="166" r="5" /><circle cx="500" cy="166" r="5" />
+        <circle cx="219" cy="515" r="5" /><circle cx="238" cy="515" r="5" /><circle cx="257" cy="515" r="5" /><circle cx="274" cy="515" r="5" /><circle cx="468" cy="515" r="5" />
+        <circle cx="219" cy="905" r="5" /><circle cx="238" cy="905" r="5" /><circle cx="257" cy="905" r="5" /><circle cx="274" cy="905" r="5" /><circle cx="468" cy="905" r="5" />
+      </g>
+      <g className="rhine-home-microcopy"><text x="287" y="541">M</text><text x="220" y="890">A</text><text x="238" y="890">B</text><text x="256" y="890">C</text></g>
+      <text className="rhine-home-label" x="330" y="532">Tomorrow.</text>
+    </svg>
+  </div>
+}
+
+function HeadquartersGallery({ base, active }) {
+  const scenes = RHINE_CLONE.scenes.headquarters
+  const [current, setCurrent] = useState(0)
+
+  useEffect(() => {
+    if (!active) return undefined
+    const timer = window.setInterval(() => setCurrent((index) => (index + 1) % scenes.length), 7600)
+    return () => window.clearInterval(timer)
+  }, [active, scenes.length])
+
+  const sceneAt = (offset) => scenes[(current + offset) % scenes.length]
+  const primary = sceneAt(0)
+
+  return <div className="rhine-headquarters-gallery" data-headquarters-gallery>
+    <figure className="rhine-headquarters-primary" key={primary.image}>
+      <img src={rhineAsset(base, primary.image)} alt={primary.label} decoding="async" fetchPriority="high" />
+      <figcaption><b>{primary.code}</b><span>{primary.label}<small>SECURE ENVIRONMENT / LIVE OPTICAL FEED</small></span></figcaption>
+    </figure>
+    <div className="rhine-headquarters-side">
+      {[1, 2].map((offset) => {
+        const scene = sceneAt(offset)
+        return <button type="button" onClick={() => setCurrent((current + offset) % scenes.length)} aria-label={`Open ${scene.label}`} key={scene.image}>
+          <img src={rhineAsset(base, scene.image)} alt="" decoding="async" />
+          <span><b>{scene.code}</b>{scene.label}</span>
+        </button>
+      })}
+    </div>
+    <div className="rhine-headquarters-index" aria-hidden="true"><span>HEADQUARTERS</span><b>BIOSAFETY LEVEL 4</b><i /></div>
+    <div className="rhine-headquarters-status" aria-hidden="true"><span>{scenes.map((_, index) => <i className={index === current ? 'is-active' : ''} key={index} />)}</span><InfinityLogo compact /><b>ALL SYSTEMS NOMINAL</b></div>
+  </div>
+}
+
+function DepartmentMark({ code }) {
+  const lines = code.split('\n')
+  return <strong>{lines.map((line) => <span key={line}>{line}</span>)}</strong>
+}
+
+function MemberCarousel({ base, selected, onSelect, folding, onFoldEnd }) {
+  const length = RHINE_MEMBERS.length
+  const move = (direction) => onSelect((selected + direction + length) % length)
+  return <div className="rhine-member-stage" data-member-stage tabIndex="0" aria-label="Member carousel" onKeyDown={(event) => { if (event.key === 'ArrowLeft') move(-1); if (event.key === 'ArrowRight') move(1) }}>
+    {RHINE_MEMBERS.map((member, index) => {
+      let slot = index - selected
+      if (slot > length / 2) slot -= length
+      if (slot < -length / 2) slot += length
+      const distance = Math.abs(slot)
+      const foldClass = folding?.index === index ? `is-folding-${folding.direction}` : ''
+      const zIndex = slot === 0 ? 30 : folding?.index === index ? 24 : distance === 1 ? 18 : distance === 2 ? 8 : 0
+      return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${distance > 2 ? 'is-distant' : ''} ${foldClass}`} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => onSelect(index)} onAnimationEnd={(event) => { if (event.target === event.currentTarget && folding?.index === index) onFoldEnd() }} aria-pressed={slot === 0} aria-hidden={distance > 2} tabIndex={distance > 2 ? -1 : 0} key={member.name}>
+        <div className="rhine-member-code"><DepartmentMark code={member.code} /><small>{member.section}</small></div>
+        <span className="rhine-member-section">{member.section}<br />DIRECTOR PROFILE / RHINE LAB</span>
+        <img src={rhineAsset(base, member.image)} alt={slot === 0 ? member.name : ''} style={{ '--member-scale': member.scale, '--member-x': `${member.x}%`, '--member-y': `${member.y}%` }} loading="eager" decoding="async" />
+        <span className="rhine-member-profile">莱茵生命<br />科研主任<br />内部资料</span>
+        <span className="rhine-member-name"><b>{member.name}</b><small>{member.role}</small></span>
+        <span className="rhine-member-logos"><InfinityLogo compact /><i /></span>
+      </button>
+    })}
+    <span className="rhine-member-stage-holo" aria-hidden="true" />
+    <span className="rhine-member-stage-scan" aria-hidden="true" />
+    <span className="rhine-member-stage-glint" aria-hidden="true" />
+    <button className="rhine-carousel-control is-left" type="button" onClick={() => move(-1)} aria-label="Previous member"><i /></button>
+    <button className="rhine-carousel-control is-right" type="button" onClick={() => move(1)} aria-label="Next member"><i /></button>
+  </div>
+}
+
+const DEPARTMENT_LAYOUT = [
+  { left: '13%', top: '16%' }, { left: '13%', top: '40%' }, { left: '13%', top: '64%' },
+  { left: '26%', top: '28%' }, { left: '26%', top: '54%' },
+  { left: '65.5%', top: '28%' }, { left: '65.5%', top: '54%' },
+  { left: '79.5%', top: '16%' }, { left: '79.5%', top: '40%' }, { left: '79.5%', top: '64%' },
+]
+
+function DepartmentMatrix({ base, selected, onSelect }) {
+  const current = selected == null ? null : RHINE_DEPARTMENTS[selected]
+  return <div className={`rhine-department-stage ${current ? 'has-selection' : 'is-idle'}`} data-department-stage>
+    <div className="rhine-department-lines" aria-hidden="true">{Array.from({ length: 8 }, (_, index) => <i key={index} />)}</div>
+    {current && <div className="rhine-department-heading"><strong>{current.title}</strong><span>{current.label}</span></div>}
+    <div className="rhine-department-console" data-department-preview>
+      <div className="rhine-department-placeholder" aria-label="Select a department"><i /><InfinityLogo /></div>
+      {current && <div className="rhine-department-media" key={current.preview}>
+        <img src={rhineAsset(base, current.preview)} alt={`${current.label} interior`} loading="lazy" decoding="async" />
+        <i /><i /><i /><i />
+      </div>}
+    </div>
+    {RHINE_DEPARTMENTS.map((department, index) => <button className={`rhine-department-tile ${selected === index ? 'is-selected' : ''}`} style={{ ...DEPARTMENT_LAYOUT[index], '--tile-tilt': `${index < 5 ? (index % 2 ? -2 : 2) : (index % 2 ? 2 : -2)}deg`, '--tile-order': index, '--tile-delay': `${index * -.47}s` }} type="button" onPointerEnter={() => onSelect(index)} onPointerLeave={() => onSelect(null)} onFocus={() => onSelect(index)} onBlur={() => onSelect(null)} onClick={() => onSelect(index)} aria-pressed={selected === index} key={department.code}>
+      <span className="rhine-department-orbit" aria-hidden="true"><i /><i /><i /></span><span className="rhine-department-trace" aria-hidden="true" />
+      <DepartmentMark code={department.code} /><small>{department.label}</small>
+    </button>)}
+    <div className="rhine-department-signatures" aria-hidden="true"><i /><InfinityLogo compact /></div>
+  </div>
+}
+
+function BlackHoleSystem({ base }) {
+  const source = rhineAsset(base, RHINE_CLONE.scenes.research)
+  return <figure className="rhine-blackhole-visual" aria-label="Chromatic black hole with slowly moving accretion light">
+    <div className="rhine-blackhole-field">
+      <img className="rhine-blackhole-base" src={source} alt="" />
+      <img className="rhine-blackhole-flow is-upper" src={source} alt="" aria-hidden="true" />
+      <img className="rhine-blackhole-flow is-lower" src={source} alt="" aria-hidden="true" />
+      <i className="rhine-blackhole-lensing" aria-hidden="true" />
+    </div>
+    <figcaption><span>GRAVITATIONAL LENSING</span><b>BH / SPECTRUM-01</b></figcaption>
+  </figure>
+}
+
+function ResearchScene({ base, onContinue }) {
+  const dots = Array.from({ length: 121 }, (_, index) => {
+    const x = index % 11
+    const y = Math.floor(index / 11)
+    const visible = Math.hypot(x - 5, y - 5) <= 5.1
+    return <i className={visible ? 'is-visible' : ''} key={index} />
+  })
+  return <div className="rhine-research-scene">
+    <BlackHoleSystem base={base} />
+    <div className="rhine-space-stars is-far" aria-hidden="true" /><div className="rhine-space-stars is-near" aria-hidden="true" />
+    <div className="rhine-research-shade" />
+    <div className="rhine-pioneer-mark" data-research-ui><span>{RHINE_RESEARCH.title}<small>{RHINE_RESEARCH.english}</small></span><i /><b /></div>
+    <div className="rhine-progress-system" data-research-ui><div className="rhine-progress-ring"><span>{dots}</span><i /></div><strong>{RHINE_RESEARCH.progress}</strong></div>
+    <div className="rhine-research-copy" data-research-ui><p>{RHINE_RESEARCH.copy.map((line) => <span key={line}>{line}</span>)}</p><button type="button" onClick={onContinue}>{RHINE_RESEARCH.button}<i /></button></div>
+    <div className="rhine-research-readout" data-research-ui><b>R / 01 — 037</b><span>{RHINE_RESEARCH.readout.slice(1).map((line) => <small key={line}>{line}</small>)}</span><i /></div>
+  </div>
+}
+
+export function RhineArchivePrototype() {
+  const bypass = new URLSearchParams(window.location.search).get('rhineBypass') === '1'
+  const rootRef = useRef(null)
+  const [entered, setEntered] = useState(bypass)
+  const [active, setActive] = useState('home')
+  const [memberIndex, setMemberIndex] = useState(1)
+  const [memberFold, setMemberFold] = useState(null)
+  const [departmentIndex, setDepartmentIndex] = useState(null)
+  const base = basePath()
+  const finishEntrance = useCallback(() => setEntered(true), [])
+  const chooseMember = useCallback((nextIndex) => {
+    if (memberFold || nextIndex === memberIndex) return
+    const length = RHINE_MEMBERS.length
+    const forwardDistance = (nextIndex - memberIndex + length) % length
+    setMemberFold({ index: memberIndex, direction: forwardDistance <= length / 2 ? 'left' : 'right' })
+    setMemberIndex(nextIndex)
+  }, [memberFold, memberIndex])
+
+  useEffect(() => {
+    if (!entered) return undefined
+    const root = rootRef.current
+    const scroller = root?.querySelector('[data-rhine-scroll]')
+    if (!scroller) return undefined
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+      if (visible) setActive(visible.target.dataset.rhineView)
+    }, { root: scroller, threshold: [.45, .6, .75] })
+    root.querySelectorAll('[data-rhine-view]').forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [entered])
+
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (!root || !entered || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    const scroller = root.querySelector('[data-rhine-scroll]')
+    const context = gsap.context(() => {
+      gsap.timeline({ defaults: { ease: 'power3.out' } })
+        .fromTo('[data-main-chrome]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .28, stagger: .04 })
+        .fromTo('.rhine-home-copy', { x: '38vw', y: '-2vh', scale: 1.28, transformOrigin: 'left center' }, { x: 0, y: 0, scale: 1, duration: .92, ease: 'power4.inOut' }, '<')
+        .fromTo('.rhine-home-copy > *', { autoAlpha: 0 }, { autoAlpha: 1, duration: .32, stagger: .055 }, '<.12')
+        .fromTo('.rhine-home-black', { scale: 0, autoAlpha: 0, transformOrigin: 'center' }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out' }, '<.28')
+        .fromTo('[data-home-orange] path, [data-home-white] path', { strokeDasharray: 1100, strokeDashoffset: 1100 }, { strokeDashoffset: 0, duration: 1.02, stagger: .055 }, '<.05')
+        .fromTo('[data-home-diamonds] rect, [data-home-nodes] circle', { scale: 0, transformOrigin: 'center' }, { scale: 1, duration: .3, stagger: .045, ease: 'back.out(2)' }, '<.45')
+
+      gsap.fromTo('[data-member-stage]', { scale: .95, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out', scrollTrigger: { trigger: '#rhine-members', scroller, start: 'top 65%', toggleActions: 'play none none reverse' } })
+      gsap.fromTo('[data-department-stage]', { scale: .97, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out', scrollTrigger: { trigger: '#rhine-departments', scroller, start: 'top 65%', toggleActions: 'play none none reverse' } })
+      gsap.fromTo('[data-department-preview]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .42, ease: 'power3.out', scrollTrigger: { trigger: '#rhine-departments', scroller, start: 'top 65%', toggleActions: 'play none none reverse' } })
+      gsap.fromTo('[data-research-ui]', { x: -28, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .7, stagger: .1, ease: 'power4.out', scrollTrigger: { trigger: '#rhine-research', scroller, start: 'top 66%', toggleActions: 'play none none reverse' } })
+      gsap.fromTo('#rhine-headquarters [data-headquarters-gallery]', { y: '3.5vh', scale: .975, autoAlpha: .55 }, { y: 0, scale: 1, autoAlpha: 1, ease: 'none', scrollTrigger: { trigger: '#rhine-headquarters', scroller, start: 'top bottom', end: 'top 8%', scrub: .85 } })
+      ScrollTrigger.refresh()
+    }, root)
+    return () => context.revert()
+  }, [entered])
+
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (!root || !entered || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    const context = gsap.context(() => {
+      gsap.fromTo('[data-department-preview] img', { autoAlpha: 0, scale: 1.035 }, { autoAlpha: 1, scale: 1, duration: .42, ease: 'power3.out' })
+    }, root)
+    return () => context.revert()
+  }, [departmentIndex, entered])
+
+  const jumpTo = (id) => {
+    setActive(id)
+    rootRef.current?.querySelector(`#rhine-${id}`)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
+  }
+
+  return <main className={`rhine-prototype rhine-active-${active}`} ref={rootRef} style={{ '--rhine-paper': RHINE_CLONE.colors.paper, '--rhine-ink': RHINE_CLONE.colors.ink, '--rhine-accent': RHINE_CLONE.colors.accent, '--rhine-pale': RHINE_CLONE.colors.pale, '--rhine-cyan': RHINE_CLONE.colors.cyan }}>
+    {!entered && <Entrance onComplete={finishEntrance} />}
+    {entered && <>
+      <header data-main-chrome><FixedBrand light={active === 'research'} /></header>
+      <nav className={`rhine-main-navigation ${active === 'research' ? 'is-light' : ''}`} data-main-chrome aria-label="Rhine Lab navigation">{RHINE_CLONE.sections.map((section) => <button type="button" className={active === section.id ? 'is-active' : ''} onClick={() => jumpTo(section.id)} aria-pressed={active === section.id} key={section.id}>{section.label}</button>)}</nav>
+      <div data-main-chrome><FixedFooter light={active === 'research'} /></div>
+      <div className="rhine-scroll" data-rhine-scroll>
+        <section id="rhine-home" className="rhine-view rhine-home" data-rhine-view="home">
+          <div className="rhine-home-copy"><h1><span>{RHINE_CLONE.home.eyebrow}</span>{RHINE_CLONE.home.title}<b>{RHINE_CLONE.home.accent}</b></h1><p>{RHINE_CLONE.home.copy}</p><strong><i />{RHINE_CLONE.home.partner}</strong></div>
+          <HomeSystem />
+        </section>
+        <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersGallery base={base} active={active === 'headquarters'} /></section>
+        <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} folding={memberFold} onFoldEnd={() => setMemberFold(null)} /></section>
+        <section id="rhine-departments" className="rhine-view rhine-departments" data-rhine-view="departments"><DepartmentMatrix base={base} selected={departmentIndex} onSelect={setDepartmentIndex} /></section>
+        <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene base={base} onContinue={() => jumpTo('home')} /></section>
+      </div>
+    </>}
+  </main>
+}
+
+export default RhineArchivePrototype

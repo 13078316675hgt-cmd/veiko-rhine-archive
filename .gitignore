@@ -1,0 +1,36 @@
+# This repository publishes only the independent Rhine archive site.
+*
+!/.gitignore
+!/index.html
+!/package.json
+!/pnpm-lock.yaml
+!/vite.config.js
+!/README-VEIKO.md
+!/.github/
+!/.github/workflows/
+!/.github/workflows/deploy-pages.yml
+!/public/
+!/public/CNAME
+!/public/favicon.svg
+!/public/rhine-reference/
+!/public/rhine-reference/**
+!/public/assets/
+!/public/assets/rhine-clone/
+!/public/assets/rhine-clone/**
+!/src/
+!/src/rhine-main.jsx
+!/src/rhine-archive-prototype.css
+!/src/components/
+!/src/components/RhineArchivePrototype.jsx
+!/src/data/
+!/src/data/rhineArchiveContent.js
+!/scripts/
+!/scripts/review-rhine-archive.mjs
+!/scripts/review-rhine-motion.mjs
+!/scripts/review-rhine-entrance.mjs
+!/scripts/review-rhine-performance.mjs
+!/scripts/publish-veiko.ps1
+
+# Generated output and local dependencies are never published.
+/dist/
+/node_modules/

@@ -1,0 +1,44 @@
+import { mkdir } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import { chromium } from 'playwright'
+
+const baseUrl = process.env.RHINE_REVIEW_URL || 'http://127.0.0.1:5173/#rhine-archive'
+const output = new URL('../review/rhine-archive/entrance/', import.meta.url)
+await mkdir(output, { recursive: true })
+const browser = await chromium.launch({ headless: true })
+const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 })
+const failures = []
+page.on('console', (message) => { if (message.type() === 'error') failures.push(`console: ${message.text()}`) })
+page.on('pageerror', (error) => failures.push(`page: ${error.message}`))
+page.on('response', (response) => { if (response.status() >= 400) failures.push(`${response.status()}: ${response.url()}`) })
+
+const shot = async (name) => page.screenshot({ path: fileURLToPath(new URL(`${name}.png`, output)) })
+await page.goto(baseUrl, { waitUntil: 'networkidle' })
+await page.waitForTimeout(900)
+await shot('01-warning')
+await page.waitForTimeout(1650)
+await shot('02-logo-seed')
+await page.waitForTimeout(900)
+await shot('03-logo-lockup')
+await page.locator('.rhine-login-form button').waitFor({ state: 'visible', timeout: 7000 })
+await shot('04-login')
+await page.locator('.rhine-login-form button').click()
+await page.waitForTimeout(120)
+const invalidFields = await page.locator('.rhine-login-form input:invalid').count()
+if (invalidFields !== 2 || await page.locator('.rhine-login').isHidden()) failures.push('empty login did not retain the native validation state')
+await page.locator('input[name="rhine-username"]').fill('RHINE')
+await page.locator('input[name="rhine-password"]').fill('001')
+await page.locator('.rhine-login-form button').click()
+await page.waitForTimeout(450)
+await shot('05-access')
+await page.waitForTimeout(1750)
+await shot('06-authorized')
+await page.waitForTimeout(2300)
+await shot('07-welcome')
+if (await page.locator('.rhine-entry-transition').count()) failures.push('removed entrance transition video is still mounted')
+await page.locator('.rhine-main-navigation').waitFor({ state: 'visible', timeout: 9000 })
+await page.waitForTimeout(900)
+await shot('08-home-entered')
+console.log(JSON.stringify({ failures, screenshots: 8 }, null, 2))
+await browser.close()
+process.exitCode = failures.length ? 1 : 0
