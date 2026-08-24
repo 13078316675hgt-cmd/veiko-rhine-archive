@@ -274,7 +274,7 @@ function MemberCardBody({ base, member, current = false }) {
   </>
 }
 
-const MEMBER_SLOT_X = { '-2': -44, '-1': -21.3, '0': 0, '1': 21.3, '2': 44 }
+const MEMBER_SLOT_X = { '-2': -42.6, '-1': -21.3, '0': 0, '1': 21.3, '2': 42.6 }
 
 function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
   const length = RHINE_MEMBERS.length
@@ -306,8 +306,14 @@ function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
         const outgoing = Boolean(moving && slot === 0)
         const incoming = moving?.target === index
         const foldClass = outgoing ? `is-folding-${moving.direction}` : ''
+        let sideMotionClass = ''
+        if (moving?.steps === 1 && !outgoing && !incoming) {
+          const nextSlot = slot + (moving.direction === 'left' ? -1 : 1)
+          if (Math.abs(nextSlot) <= 2 && Math.abs(nextSlot) > Math.abs(slot)) sideMotionClass = 'is-side-receding'
+          if (Math.abs(nextSlot) <= 2 && Math.abs(nextSlot) < Math.abs(slot)) sideMotionClass = 'is-side-approaching'
+        }
         const zIndex = incoming ? 32 : slot === 0 ? 30 : distance === 1 ? 18 : distance === 2 ? 8 : 0
-        return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${outgoing ? 'is-outgoing' : ''} ${incoming ? 'is-incoming' : ''} ${foldClass}`} data-member-index={index} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => onSelect(index)} aria-pressed={slot === 0} key={member.name}>
+        return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${outgoing ? 'is-outgoing' : ''} ${incoming ? 'is-incoming' : ''} ${foldClass} ${sideMotionClass}`} data-member-index={index} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => onSelect(index)} aria-pressed={slot === 0} key={member.name}>
           <MemberCardBody base={base} member={member} current={slot === 0 || incoming} />
         </button>
       })}
@@ -399,10 +405,10 @@ export function RhineArchivePrototype() {
     if (slot > length / 2) slot -= length
     if (slot < -length / 2) slot += length
     const limitedSlot = Math.max(-2, Math.min(2, slot))
-    const mobileSlots = { '-2': -62, '-1': -30, '0': 0, '1': 30, '2': 62 }
+    const mobileSlots = { '-2': -60, '-1': -30, '0': 0, '1': 30, '2': 60 }
     const slots = window.matchMedia('(max-width: 900px)').matches ? mobileSlots : MEMBER_SLOT_X
     const x = slots[String(limitedSlot)] ?? (limitedSlot * 21.3)
-    setMemberMove({ target: nextIndex, direction: slot > 0 ? 'left' : 'right', shift: -x })
+    setMemberMove({ target: nextIndex, direction: slot > 0 ? 'left' : 'right', shift: -x, steps: Math.abs(limitedSlot) })
   }, [memberMove, memberIndex])
 
   useEffect(() => {

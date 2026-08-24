@@ -52,20 +52,24 @@ await memberHolo.evaluate((node) => node.getAnimations().filter((animation) => a
 const holoAfterEase = await styleOf('.rhine-member-stage-scan', ['transform', 'filter'])
 if (holoBeforePointer.transform !== holoAfterPointer.transform) failures.push('member hologram changed in response to pointer movement')
 if (holoBeforePointer.transform === holoAfterEase.transform) failures.push('member hologram has no autonomous easing motion')
-const freezeFoldStyle = await page.addStyleTag({ content: '.rhine-member-track:is(.is-sliding-left,.is-sliding-right), .rhine-member-card:is(.is-folding-left,.is-folding-right,.is-incoming) { animation-play-state: paused !important; }' })
+const freezeFoldStyle = await page.addStyleTag({ content: '.rhine-member-track:is(.is-sliding-left,.is-sliding-right), .rhine-member-card:is(.is-folding-left,.is-folding-right,.is-incoming,.is-side-receding,.is-side-approaching) { animation-play-state: paused !important; }' })
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
 const memberTrack = page.locator('.rhine-member-track:is(.is-sliding-left,.is-sliding-right)')
 const outgoingCard = page.locator('.rhine-member-card:is(.is-folding-left, .is-folding-right)')
 const incomingCard = page.locator('.rhine-member-card.is-incoming')
+const exitingSideCard = page.locator('.rhine-member-card[data-member-slot="-1"]')
+const sideMotionCards = page.locator('.rhine-member-card:is(.is-side-receding,.is-side-approaching)')
 await memberTrack.waitFor({ state: 'attached' })
 await outgoingCard.waitFor({ state: 'attached' })
 await incomingCard.waitFor({ state: 'attached' })
 const setMemberTime = async (time) => {
   await Promise.all([memberTrack, outgoingCard, incomingCard].map((locator) => locator.evaluate((node, currentTime) => node.getAnimations().filter((animation) => animation.effect?.target === node).forEach((animation) => { animation.pause(); animation.currentTime = currentTime }), time)))
+  await sideMotionCards.evaluateAll((nodes, currentTime) => nodes.forEach((node) => node.getAnimations().filter((animation) => animation.effect?.target === node).forEach((animation) => { animation.pause(); animation.currentTime = currentTime })), time)
 }
 await setMemberTime(0)
 const outgoingCount = await outgoingCard.count()
 const incomingMotionCount = await incomingCard.count()
+const sideMotionCount = await sideMotionCards.count()
 const fullOutgoingCard = await outgoingCard.locator(':scope > .rhine-member-code, :scope > .rhine-member-name').count()
 const fullIncomingCard = await incomingCard.locator(':scope > .rhine-member-code, :scope > .rhine-member-name').count()
 const memberStart = {
@@ -87,17 +91,22 @@ const memberEnd = {
   incoming: await styleOf('.rhine-member-card.is-incoming', ['transform', 'filter', 'opacity', 'animationName']),
   outgoing: await outgoingCard.evaluate((node) => { const style = getComputedStyle(node); return { transform: style.transform, filter: style.filter, opacity: style.opacity, animationName: style.animationName } }),
 }
+const exitingSideIndex = await exitingSideCard.getAttribute('data-member-index')
+const sideEndRect = await exitingSideCard.evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
 await page.screenshot({ path: fileURLToPath(new URL('02c-member-fold-end.png', output)) })
 await memberTrack.evaluate((node) => node.dispatchEvent(new AnimationEvent('animationend', { animationName: getComputedStyle(node).animationName, bubbles: true })))
 await freezeFoldStyle.evaluate((node) => node.remove())
 await page.waitForTimeout(40)
 const selectedMember = await page.locator('.rhine-member-card.is-current .rhine-member-name b').textContent()
+const sideCommittedRect = await page.locator(`.rhine-member-card[data-member-index="${exitingSideIndex}"]`).evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
 if (outgoingCount !== 1) failures.push(`member outgoing animation count: ${outgoingCount}`)
 if (incomingMotionCount !== 1) failures.push(`member incoming animation count: ${incomingMotionCount}`)
+if (sideMotionCount !== 2) failures.push(`member side depth animation count: ${sideMotionCount}`)
 if (fullOutgoingCard !== 2 || fullIncomingCard !== 2) failures.push('member switch did not keep both complete card compositions')
 if (new Set([memberStart.track.transform, memberMiddle.track.transform, memberEnd.track.transform]).size < 3) failures.push('member stack has no coherent horizontal track motion')
 if (new Set([memberStart.outgoing.transform, memberMiddle.outgoing.transform, memberEnd.outgoing.transform]).size < 3) failures.push('outgoing member card has no fold progression')
 if (new Set([memberStart.incoming.transform, memberMiddle.incoming.transform, memberEnd.incoming.transform]).size < 3) failures.push('incoming member card has no depth promotion')
+if (Math.abs(sideEndRect.x - sideCommittedRect.x) > 1 || Math.abs(sideEndRect.y - sideCommittedRect.y) > 1 || Math.abs(sideEndRect.width - sideCommittedRect.width) > 1 || Math.abs(sideEndRect.height - sideCommittedRect.height) > 1) failures.push('outer member card jumped when the track committed')
 if (selectedMember?.trim() !== 'KRISTEN WRIGHT') failures.push(`member carousel ended on ${selectedMember}`)
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
@@ -114,6 +123,8 @@ if (reverseMember?.trim() !== 'KRISTEN WRIGHT') failures.push(`reverse member fo
 await page.getByRole('button', { name: 'DEPARTMENT', exact: true }).click()
 await page.waitForTimeout(1100)
 const departmentIdleRect = await page.locator('[data-department-preview]').evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, centerX: rect.x + rect.width / 2, centerY: rect.y + rect.height / 2 } })
+const departmentTitleSize = await page.locator('.rhine-department-tile strong').first().evaluate((node) => Number.parseFloat(getComputedStyle(node).fontSize))
+if (departmentTitleSize > 30) failures.push(`department title remained oversized at ${departmentTitleSize}px`)
 await page.locator('.rhine-department-tile').nth(6).hover()
 await page.waitForTimeout(40)
 const departmentStart = await styleOf('[data-department-preview] img', ['transform', 'opacity'])
@@ -138,14 +149,21 @@ await page.screenshot({ path: fileURLToPath(new URL('04-research-entry-mid.png',
 await page.waitForTimeout(900)
 const researchEnd = await styleOf('.rhine-progress-system', ['transform', 'opacity'])
 if (researchEnd.opacity !== '1') failures.push(`research UI final opacity is ${researchEnd.opacity}`)
+const researchBreathingPeak = await page.locator('.rhine-blackhole-field').evaluate((node) => {
+  const animation = node.getAnimations({ subtree: true }).find((item) => item.animationName === 'rhine-blackhole-breathe')
+  animation.pause()
+  animation.currentTime = 8640
+  return Number(getComputedStyle(node, '::before').opacity)
+})
+if (Math.abs(researchBreathingPeak - .75) > .01) failures.push(`research breathing peak is ${researchBreathingPeak}`)
 
 console.log(JSON.stringify({
   failures,
   states: {
     home: [homeStart, homeMiddle, homeEnd],
     member: { motion: [memberStart, memberMiddle, memberEnd], hologram: { beforePointer: holoBeforePointer, afterPointer: holoAfterPointer, afterEase: holoAfterEase } },
-    department: { motion: [departmentStart, departmentMiddle, departmentEnd], idleRect: departmentIdleRect, selectedRect: departmentSelectedRect, mediaRect: departmentMediaRect },
-    research: researchEnd,
+    department: { motion: [departmentStart, departmentMiddle, departmentEnd], titleSize: departmentTitleSize, idleRect: departmentIdleRect, selectedRect: departmentSelectedRect, mediaRect: departmentMediaRect },
+    research: { ...researchEnd, breathingPeak: researchBreathingPeak },
   },
   screenshots: 6,
 }, null, 2))
