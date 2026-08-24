@@ -97,7 +97,6 @@ if ($parents.Count -eq 0) {
   } | Out-Null
 }
 
-git --git-dir="$gitDirectory" update-ref refs/heads/main $commit.sha
 git --git-dir="$gitDirectory" config branch.main.remote origin
 git --git-dir="$gitDirectory" config branch.main.merge refs/heads/main
 Write-Progress -Activity 'Publishing VEIKO' -Completed
