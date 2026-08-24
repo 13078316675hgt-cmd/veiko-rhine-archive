@@ -15,8 +15,18 @@ function InfinityLogo({ compact = false }) {
   </svg>
 }
 
+function MoonProjectLogo() {
+  return <svg className="rhine-moon-project-logo" viewBox="0 0 92 34" aria-hidden="true">
+    <path className="is-crescent" d="M19 3a14 14 0 1 0 14 22A11.5 11.5 0 0 1 19 3Z" />
+    <path className="is-orbit" d="M4 22C21 11 49 8 82 14C61 14 37 20 17 31" />
+    <circle cx="80" cy="14" r="3" />
+    <path className="is-mark" d="M44 24h19M52 20v8M59 20v8" />
+  </svg>
+}
+
 function FixedBrand({ light = false }) {
-  return <div className={`rhine-fixed-brand ${light ? 'is-light' : ''}`}><strong>{RHINE_CLONE.brand.title}</strong><small>{RHINE_CLONE.brand.lineOne}<br />{RHINE_CLONE.brand.lineTwo}</small></div>
+  const hasMeta = RHINE_CLONE.brand.lineOne || RHINE_CLONE.brand.lineTwo
+  return <div className={`rhine-fixed-brand ${light ? 'is-light' : ''}`}><strong>{RHINE_CLONE.brand.title}</strong>{hasMeta && <small>{RHINE_CLONE.brand.lineOne}{RHINE_CLONE.brand.lineTwo && <><br />{RHINE_CLONE.brand.lineTwo}</>}</small>}</div>
 }
 
 function FixedFooter({ light = false }) {
@@ -370,15 +380,15 @@ function ResearchScene({ base, onContinue }) {
   const dots = Array.from({ length: 121 }, (_, index) => {
     const x = index % 11
     const y = Math.floor(index / 11)
-    const visible = Math.hypot(x - 5, y - 5) <= 5.1
-    return <i className={visible ? 'is-visible' : ''} key={index} />
+    const visible = Math.abs(x - 5) <= Math.ceil(Math.abs(y - 5) * .82)
+    return <i className={visible ? 'is-visible' : ''} style={{ '--grain-index': index }} key={index} />
   })
   return <div className="rhine-research-scene">
     <BlackHoleSystem base={base} />
     <div className="rhine-space-stars is-far" aria-hidden="true" /><div className="rhine-space-stars is-near" aria-hidden="true" />
     <div className="rhine-research-shade" />
-    <div className="rhine-pioneer-mark" data-research-ui><span>{RHINE_RESEARCH.title}<small>{RHINE_RESEARCH.english}</small></span><i /><b /></div>
-    <div className="rhine-progress-system" data-research-ui><div className="rhine-progress-ring"><span>{dots}</span><i /></div><strong>{RHINE_RESEARCH.progress}</strong></div>
+    <div className="rhine-pioneer-mark" data-research-ui><span>{RHINE_RESEARCH.title}<small>{RHINE_RESEARCH.english}</small></span><MoonProjectLogo /></div>
+    <div className="rhine-progress-system" data-research-ui><div className="rhine-progress-ring"><svg viewBox="0 0 112 116" aria-hidden="true"><path d="M14 8h84M14 108h84M19 10c0 31 25 34 37 48-12 14-37 17-37 48M93 10c0 31-25 34-37 48 12 14 37 17 37 48" /></svg><span>{dots}</span><i /></div><strong>{RHINE_RESEARCH.progress}</strong></div>
     <div className="rhine-research-copy" data-research-ui><p>{RHINE_RESEARCH.copy.map((line) => <span key={line}>{line}</span>)}</p><button type="button" onClick={onContinue}>{RHINE_RESEARCH.button}<i /></button></div>
     <div className="rhine-research-readout" data-research-ui><b>R / 01 — 037</b><span>{RHINE_RESEARCH.readout.slice(1).map((line) => <small key={line}>{line}</small>)}</span><i /></div>
   </div>

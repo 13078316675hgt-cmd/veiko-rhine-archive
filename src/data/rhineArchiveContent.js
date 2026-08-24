@@ -10,9 +10,9 @@ export const RHINE_CLONE = {
     cyan: '#22aabc',
   },
   brand: {
-    title: 'RHINE LAB',
-    lineOne: 'SYNTHESIZE INFORMATION',
-    lineTwo: 'ANALYSLS OS',
+    title: 'THE PLAN OF THE MONTH',
+    lineOne: '',
+    lineTwo: '',
     footer: 'POWERED BY RHINE LAB',
   },
   sections: [
@@ -24,8 +24,8 @@ export const RHINE_CLONE = {
   ],
   home: {
     eyebrow: 'WELCOME TO',
-    title: 'RHINE LAB.',
-    accent: 'LLC.',
+    title: 'STEAL THE ',
+    accent: 'MOON',
     copy: 'Rhine Lab is a Columbian company dedicated to life science, chemical manufacturing, and biological applications. It is a key technology group supported by Columbia, with a wide range of projects and many publicly announced achievements that have become the focus of attention in the industry.',
     partner: 'fserant',
   },
@@ -65,8 +65,8 @@ export const RHINE_DEPARTMENTS = [
 ]
 
 export const RHINE_RESEARCH = {
-  title: '先锋计划',
-  english: 'RHINE LAB PIONEER PROJECT',
+  title: '月之计划',
+  english: 'THE PLAN OF THE MONTH',
   progress: '100%',
   copy: ['我们的事业将触及星海。', '探索未知，直至抵达天穹之外。'],
   button: 'CONTINUE',
