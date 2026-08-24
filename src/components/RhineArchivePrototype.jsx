@@ -263,9 +263,21 @@ function DepartmentMark({ code }) {
   return <strong>{lines.map((line) => <span key={line}>{line}</span>)}</strong>
 }
 
-function MemberCarousel({ base, selected, onSelect, folding, onFoldEnd }) {
+function MemberCardBody({ base, member, current = false }) {
+  return <>
+    <div className="rhine-member-code"><DepartmentMark code={member.code} /><small>{member.section}</small></div>
+    <span className="rhine-member-section">{member.section}<br />DIRECTOR PROFILE / RHINE LAB</span>
+    <img src={rhineAsset(base, member.image)} alt={current ? member.name : ''} style={{ '--member-scale': member.scale, '--member-x': `${member.x}%`, '--member-y': `${member.y}%` }} loading="eager" decoding="async" />
+    <span className="rhine-member-profile">莱茵生命<br />科研主任<br />内部资料</span>
+    <span className="rhine-member-name"><b>{member.name}</b><small>{member.role}</small></span>
+    <span className="rhine-member-logos"><InfinityLogo compact /><i /></span>
+  </>
+}
+
+function MemberCarousel({ base, selected, onSelect, ghost, onGhostEnd }) {
   const length = RHINE_MEMBERS.length
   const move = (direction) => onSelect((selected + direction + length) % length)
+  const ghostMember = ghost ? RHINE_MEMBERS[ghost.index] : null
 
   useEffect(() => {
     RHINE_MEMBERS.forEach((member) => {
@@ -276,24 +288,21 @@ function MemberCarousel({ base, selected, onSelect, folding, onFoldEnd }) {
     })
   }, [base])
 
-  return <div className={`rhine-member-stage ${folding ? 'is-switching' : ''}`} data-member-stage tabIndex="0" aria-label="Member carousel" onKeyDown={(event) => { if (event.key === 'ArrowLeft') move(-1); if (event.key === 'ArrowRight') move(1) }}>
+  return <div className={`rhine-member-stage ${ghost ? 'is-switching' : ''}`} data-member-stage tabIndex="0" aria-label="Member carousel" onKeyDown={(event) => { if (event.key === 'ArrowLeft') move(-1); if (event.key === 'ArrowRight') move(1) }}>
     {RHINE_MEMBERS.map((member, index) => {
       let slot = index - selected
       if (slot > length / 2) slot -= length
       if (slot < -length / 2) slot += length
       const distance = Math.abs(slot)
       if (distance > 2) return null
-      const foldClass = folding?.index === index ? `is-folding-${folding.direction}` : ''
-      const zIndex = slot === 0 ? 30 : folding?.index === index ? 24 : distance === 1 ? 18 : distance === 2 ? 8 : 0
-      return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${foldClass}`} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => onSelect(index)} onAnimationEnd={(event) => { if (event.target === event.currentTarget && folding?.index === index) onFoldEnd() }} aria-pressed={slot === 0} key={member.name}>
-        <div className="rhine-member-code"><DepartmentMark code={member.code} /><small>{member.section}</small></div>
-        <span className="rhine-member-section">{member.section}<br />DIRECTOR PROFILE / RHINE LAB</span>
-        <img src={rhineAsset(base, member.image)} alt={slot === 0 ? member.name : ''} style={{ '--member-scale': member.scale, '--member-x': `${member.x}%`, '--member-y': `${member.y}%` }} loading="eager" decoding="async" />
-        <span className="rhine-member-profile">莱茵生命<br />科研主任<br />内部资料</span>
-        <span className="rhine-member-name"><b>{member.name}</b><small>{member.role}</small></span>
-        <span className="rhine-member-logos"><InfinityLogo compact /><i /></span>
+      const zIndex = slot === 0 ? 30 : distance === 1 ? 18 : distance === 2 ? 8 : 0
+      return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${ghost?.index === index ? 'is-ghost-source' : ''}`} data-member-index={index} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => onSelect(index)} aria-pressed={slot === 0} key={member.name}>
+        <MemberCardBody base={base} member={member} current={slot === 0} />
       </button>
     })}
+    {ghostMember && <div className={`rhine-member-card rhine-member-ghost is-folding-${ghost.direction}`} data-member-name={ghostMember.name} data-member-slot={ghost.direction === 'left' ? -1 : 1} style={{ zIndex: 36 }} onAnimationEnd={(event) => { if (event.target === event.currentTarget) onGhostEnd() }} aria-hidden="true">
+      <img src={rhineAsset(base, ghostMember.image)} alt="" style={{ '--member-scale': ghostMember.scale, '--member-x': `${ghostMember.x}%`, '--member-y': `${ghostMember.y}%` }} decoding="async" />
+    </div>}
     <span className="rhine-member-stage-holo" aria-hidden="true" />
     <span className="rhine-member-stage-scan" aria-hidden="true" />
     <span className="rhine-member-stage-glint" aria-hidden="true" />
@@ -366,17 +375,18 @@ export function RhineArchivePrototype() {
   const [entered, setEntered] = useState(bypass)
   const [active, setActive] = useState('home')
   const [memberIndex, setMemberIndex] = useState(1)
-  const [memberFold, setMemberFold] = useState(null)
+  const [memberGhost, setMemberGhost] = useState(null)
   const [departmentIndex, setDepartmentIndex] = useState(null)
   const base = basePath()
   const finishEntrance = useCallback(() => setEntered(true), [])
   const chooseMember = useCallback((nextIndex) => {
-    if (memberFold || nextIndex === memberIndex) return
+    if (memberGhost || nextIndex === memberIndex) return
     const length = RHINE_MEMBERS.length
     const forwardDistance = (nextIndex - memberIndex + length) % length
-    setMemberFold({ index: memberIndex, direction: forwardDistance <= length / 2 ? 'left' : 'right' })
+    const direction = forwardDistance <= length / 2 ? 'left' : 'right'
+    setMemberGhost({ index: memberIndex, direction })
     setMemberIndex(nextIndex)
-  }, [memberFold, memberIndex])
+  }, [memberGhost, memberIndex])
 
   useEffect(() => {
     if (!entered) return undefined
@@ -440,7 +450,7 @@ export function RhineArchivePrototype() {
           <HomeSystem />
         </section>
         <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersGallery base={base} active={active === 'headquarters'} /></section>
-        <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} folding={memberFold} onFoldEnd={() => setMemberFold(null)} /></section>
+        <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} ghost={memberGhost} onGhostEnd={() => setMemberGhost(null)} /></section>
         <section id="rhine-departments" className="rhine-view rhine-departments" data-rhine-view="departments"><DepartmentMatrix base={base} selected={departmentIndex} onSelect={setDepartmentIndex} /></section>
         <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene base={base} onContinue={() => jumpTo('home')} /></section>
       </div>
