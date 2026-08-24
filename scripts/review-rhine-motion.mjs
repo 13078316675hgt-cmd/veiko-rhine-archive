@@ -67,9 +67,15 @@ await memberTrack.waitFor({ state: 'attached' })
 await outgoingCard.waitFor({ state: 'attached' })
 await incomingCard.waitFor({ state: 'attached' })
 const setMemberTime = async (time) => {
-  await Promise.all([memberTrack, outgoingCard, incomingCard].map((locator) => locator.evaluate((node, currentTime) => node.getAnimations().filter((animation) => animation.effect?.target === node).forEach((animation) => { animation.pause(); animation.currentTime = currentTime }), time)))
-  await sideMotionCards.evaluateAll((nodes, currentTime) => nodes.forEach((node) => node.getAnimations().filter((animation) => animation.effect?.target === node).forEach((animation) => { animation.pause(); animation.currentTime = currentTime })), time)
+  await memberTrack.evaluate((node, currentTime) => {
+    const controlled = new Set(['rhine-member-track-shift', 'rhine-member-fold-left', 'rhine-member-fold-right', 'rhine-member-promote', 'rhine-member-side-recede', 'rhine-member-side-approach'])
+    node.getAnimations({ subtree: true }).filter((animation) => controlled.has(animation.animationName)).forEach((animation) => { animation.pause(); animation.currentTime = currentTime })
+  }, time)
 }
+await setMemberTime(0)
+const memberTrackStartX = await memberTrack.evaluate((node) => new DOMMatrixReadOnly(getComputedStyle(node).transform).m41)
+await setMemberTime(20)
+const memberTrackEarlyX = await memberTrack.evaluate((node) => new DOMMatrixReadOnly(getComputedStyle(node).transform).m41)
 await setMemberTime(0)
 const outgoingCount = await outgoingCard.count()
 const incomingMotionCount = await incomingCard.count()
@@ -82,26 +88,29 @@ const memberStart = {
   outgoing: await outgoingCard.evaluate((node) => { const style = getComputedStyle(node); return { transform: style.transform, filter: style.filter, opacity: style.opacity, animationName: style.animationName, animationDuration: style.animationDuration } }),
 }
 await page.screenshot({ path: fileURLToPath(new URL('02a-member-fold-start.png', output)) })
-await setMemberTime(260)
+await setMemberTime(310)
 const memberMiddle = {
   track: await styleOf('.rhine-member-track', ['transform', 'animationName']),
   incoming: await styleOf('.rhine-member-card.is-incoming', ['transform', 'filter', 'opacity', 'animationName']),
   outgoing: await outgoingCard.evaluate((node) => { const style = getComputedStyle(node); return { transform: style.transform, filter: style.filter, opacity: style.opacity, animationName: style.animationName, animationDuration: style.animationDuration } }),
 }
 await page.screenshot({ path: fileURLToPath(new URL('02b-member-fold-mid.png', output)) })
-await setMemberTime(519)
+await setMemberTime(619)
 const memberEnd = {
   track: await styleOf('.rhine-member-track', ['transform', 'animationName']),
   incoming: await styleOf('.rhine-member-card.is-incoming', ['transform', 'filter', 'opacity', 'animationName']),
   outgoing: await outgoingCard.evaluate((node) => { const style = getComputedStyle(node); return { transform: style.transform, filter: style.filter, opacity: style.opacity, animationName: style.animationName } }),
 }
+const memberTrackEndX = await memberTrack.evaluate((node) => new DOMMatrixReadOnly(getComputedStyle(node).transform).m41)
 const incomingIndex = await incomingCard.getAttribute('data-member-index')
+const outgoingIndex = await outgoingCard.getAttribute('data-member-index')
 const switchingVisuals = {
   scan: await styleOf('.rhine-member-stage-scan', ['display', 'opacity']),
   glint: await styleOf('.rhine-member-stage-glint', ['display', 'opacity']),
   cardAfter: await incomingCard.evaluate((node) => { const style = getComputedStyle(node, '::after'); return { display: style.display, opacity: style.opacity } }),
 }
 const incomingEndRect = await incomingCard.evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
+const outgoingEndRect = await outgoingCard.evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
 const exitingSideIndex = await exitingSideCard.getAttribute('data-member-index')
 const sideEndRect = await exitingSideCard.evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
 await page.screenshot({ path: fileURLToPath(new URL('02c-member-fold-end.png', output)) })
@@ -111,6 +120,8 @@ await page.waitForTimeout(40)
 const selectedMember = await page.locator('.rhine-member-card.is-current .rhine-member-name b').textContent()
 const sideCommittedRect = await page.locator(`.rhine-member-card[data-member-index="${exitingSideIndex}"]`).evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
 const incomingCommittedRect = await page.locator(`.rhine-member-card[data-member-index="${incomingIndex}"]`).evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
+const outgoingCommittedCard = page.locator(`.rhine-member-card[data-member-index="${outgoingIndex}"]`)
+const outgoingCommittedRect = await outgoingCommittedCard.evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
 const committedVisuals = {
   scan: await styleOf('.rhine-member-stage-scan', ['display', 'opacity']),
   glint: await styleOf('.rhine-member-stage-glint', ['display', 'opacity']),
@@ -123,20 +134,23 @@ if (fullOutgoingCard !== 2 || fullIncomingCard !== 2) failures.push('member swit
 if (new Set([memberStart.track.transform, memberMiddle.track.transform, memberEnd.track.transform]).size < 3) failures.push('member stack has no coherent horizontal track motion')
 if (new Set([memberStart.outgoing.transform, memberMiddle.outgoing.transform, memberEnd.outgoing.transform]).size < 3) failures.push('outgoing member card has no fold progression')
 if (new Set([memberStart.incoming.transform, memberMiddle.incoming.transform, memberEnd.incoming.transform]).size < 3) failures.push('incoming member card has no depth promotion')
+const memberTrackTotalX = memberTrackEndX - memberTrackStartX
+if (Math.abs(memberTrackEarlyX - memberTrackStartX) > Math.abs(memberTrackTotalX) * .02) failures.push(`member track still jumps in its first 20ms: ${memberTrackEarlyX - memberTrackStartX}px`)
 if (Math.abs(sideEndRect.x - sideCommittedRect.x) > 1 || Math.abs(sideEndRect.y - sideCommittedRect.y) > 1 || Math.abs(sideEndRect.width - sideCommittedRect.width) > 1 || Math.abs(sideEndRect.height - sideCommittedRect.height) > 1) failures.push('outer member card jumped when the track committed')
 if (Math.abs(incomingEndRect.x - incomingCommittedRect.x) > 1 || Math.abs(incomingEndRect.y - incomingCommittedRect.y) > 1 || Math.abs(incomingEndRect.width - incomingCommittedRect.width) > 1 || Math.abs(incomingEndRect.height - incomingCommittedRect.height) > 1) failures.push('incoming member card jumped when the track committed')
+if (Math.abs(outgoingEndRect.x - outgoingCommittedRect.x) > 1 || Math.abs(outgoingEndRect.y - outgoingCommittedRect.y) > 1 || Math.abs(outgoingEndRect.width - outgoingCommittedRect.width) > 1 || Math.abs(outgoingEndRect.height - outgoingCommittedRect.height) > 1) failures.push('outgoing member card jumped when the track committed')
 if (switchingVisuals.scan.display === 'none' || switchingVisuals.glint.display === 'none' || switchingVisuals.cardAfter.display === 'none') failures.push('member laser layers disappeared during the card transition')
 if (JSON.stringify(switchingVisuals) !== JSON.stringify(committedVisuals)) failures.push('member laser layers flashed when the card transition committed')
 if (selectedMember?.trim() !== 'KRISTEN WRIGHT') failures.push(`member carousel ended on ${selectedMember}`)
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
-await page.waitForTimeout(650)
+await page.waitForTimeout(760)
 const rapidMember = await page.locator('.rhine-member-card.is-current .rhine-member-name b').textContent()
 if (rapidMember?.trim() !== 'JARA. B. WILSON JR.') failures.push(`rapid member click bypassed the transition lock and ended on ${rapidMember}`)
 await page.getByRole('button', { name: 'Previous member', exact: true }).click()
 await page.waitForTimeout(20)
 if (await page.locator('.rhine-member-card.is-folding-right').count() !== 1) failures.push('previous member did not produce one reverse fold')
-await page.waitForTimeout(650)
+await page.waitForTimeout(760)
 const reverseMember = await page.locator('.rhine-member-card.is-current .rhine-member-name b').textContent()
 if (reverseMember?.trim() !== 'KRISTEN WRIGHT') failures.push(`reverse member fold ended on ${reverseMember}`)
 
@@ -181,15 +195,18 @@ const researchBlackHoleProof = await page.locator('.rhine-blackhole-field').eval
   const baseTransform = getComputedStyle(base).transform
   return {
     baseTransform,
+    baseClipPath: getComputedStyle(base).clipPath,
+    slicedCopies: node.querySelectorAll('.rhine-blackhole-flow').length,
     innerArc: getComputedStyle(lens, '::before').content,
     outerArc: getComputedStyle(lens, '::after').content,
     innerArcOpacity: Number(getComputedStyle(lens, '::before').opacity),
     outerArcOpacity: Number(getComputedStyle(lens, '::after').opacity),
   }
 })
-if (Math.abs(researchBreathingPeak - 1) > .01) failures.push(`research breathing peak is ${researchBreathingPeak}`)
+if (researchBreathingPeak < .75 || researchBreathingPeak > .9) failures.push(`research breathing peak is ${researchBreathingPeak}`)
 if (researchBlackHoleProof.innerArc === 'none') failures.push('research event-horizon arc is missing')
 if (researchBlackHoleProof.outerArc !== 'none') failures.push('research outer lens ring was not removed')
+if (researchBlackHoleProof.slicedCopies !== 0 || researchBlackHoleProof.baseClipPath !== 'none') failures.push('research black hole is still split into clipped image layers')
 if (researchBlackHoleProof.innerArcOpacity < .5) failures.push('research event-horizon arc is too faint')
 const researchTitle = (await page.locator('.rhine-pioneer-mark span').innerText()).replace(/\s+/g, ' ').trim()
 if (!researchTitle.startsWith('月之计划')) failures.push(`research title is ${researchTitle}`)

@@ -130,31 +130,31 @@
 /* Member perspective corridor. */
 .rhine-members::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 48%, rgba(255,255,255,.6), transparent 58%); }
 .rhine-member-stage { position: absolute; inset: 0; overflow: hidden; outline: 0; }
-.rhine-member-track { --member-shift-duration: .52s; position: absolute; inset: 0; transform: translate3d(0,0,0); }
-.rhine-member-track:is(.is-sliding-left, .is-sliding-right) { animation: rhine-member-track-shift var(--member-shift-duration) cubic-bezier(.22,.61,.36,1) both; will-change: transform; }
-.rhine-member-card { --card-x: 0vw; --card-y: 0vh; --card-scale: 1; --card-rotate: 0deg; --card-opacity: 1; position: absolute; top: 9.5%; left: 50%; width: clamp(250px, 20.2vw, 388px); height: 83.5%; padding: 0; overflow: visible; background: linear-gradient(180deg, transparent 0 3%, #9f9f9c 3% 100%); box-shadow: none; color: white; text-align: left; transform: translate3d(calc(-50% + var(--card-x)),var(--card-y),0) rotate(var(--card-rotate)) scale(var(--card-scale)); transform-origin: 50% 52%; opacity: var(--card-opacity); }
-.rhine-member-card[data-member-slot="-1"] { --card-x: -21.3vw; --card-y: .5vh; --card-z: -62px; --card-scale: .96; --card-rotate: 2.5deg; --card-opacity: .5; }
-.rhine-member-card[data-member-slot="1"] { --card-x: 21.3vw; --card-y: .5vh; --card-z: -62px; --card-scale: .96; --card-rotate: -2.5deg; --card-opacity: .5; }
-.rhine-member-card[data-member-slot="-2"] { --card-x: -42.6vw; --card-y: .5vh; --card-scale: .96; --card-rotate: 2.5deg; --card-opacity: .14; }
-.rhine-member-card[data-member-slot="2"] { --card-x: 42.6vw; --card-y: .5vh; --card-scale: .96; --card-rotate: -2.5deg; --card-opacity: .14; }
+.rhine-member-track { --member-shift-duration: .62s; position: absolute; inset: 0; transform: translate3d(0,0,0); backface-visibility: hidden; will-change: transform; }
+.rhine-member-track:is(.is-sliding-left, .is-sliding-right) { animation: rhine-member-track-shift var(--member-shift-duration) cubic-bezier(.4,0,.2,1) both; }
+.rhine-member-card { --card-x: 0vw; --card-y: 0vh; --card-scale: 1; --card-rotate: 0deg; --card-opacity: 1; position: absolute; top: 9.5%; left: 50%; width: clamp(250px, 20.2vw, 388px); height: 83.5%; padding: 0; overflow: visible; background: linear-gradient(180deg, transparent 0 3%, #9f9f9c 3% 100%); box-shadow: none; color: white; text-align: left; transform: translate3d(calc(-50% + var(--card-x)),var(--card-y),0) rotate(var(--card-rotate)) scale(var(--card-scale)); transform-origin: 50% 52%; backface-visibility: hidden; opacity: var(--card-opacity); will-change: transform, opacity; }
+.rhine-member-card[data-member-slot="-1"] { --card-x: -21.3vw; --card-y: .5vh; --card-z: -62px; --card-scale: .96; --card-rotate: 2.5deg; --card-opacity: .5; transform-origin: 100% 52%; }
+.rhine-member-card[data-member-slot="1"] { --card-x: 21.3vw; --card-y: .5vh; --card-z: -62px; --card-scale: .96; --card-rotate: -2.5deg; --card-opacity: .5; transform-origin: 0% 52%; }
+.rhine-member-card[data-member-slot="-2"] { --card-x: -42.6vw; --card-y: .5vh; --card-scale: .96; --card-rotate: 2.5deg; --card-opacity: .14; transform-origin: 100% 52%; }
+.rhine-member-card[data-member-slot="2"] { --card-x: 42.6vw; --card-y: .5vh; --card-scale: .96; --card-rotate: -2.5deg; --card-opacity: .14; transform-origin: 0% 52%; }
 .rhine-member-card[data-member-slot="-3"] { --card-x: -66vw; --card-y: 1.6vh; --card-z: -210px; --card-scale: .86; --card-rotate: 5deg; --card-opacity: 0; }
 .rhine-member-card[data-member-slot="3"] { --card-x: 66vw; --card-y: 1.6vh; --card-z: -210px; --card-scale: .86; --card-rotate: -5deg; --card-opacity: 0; }
 .rhine-member-card[data-member-slot="-4"] { --card-x: -88vw; --card-y: 2vh; --card-z: -260px; --card-scale: .82; --card-rotate: 6deg; --card-opacity: 0; }
 .rhine-member-card[data-member-slot="4"] { --card-x: 88vw; --card-y: 2vh; --card-z: -260px; --card-scale: .82; --card-rotate: -6deg; --card-opacity: 0; }
 .rhine-member-card.is-current { box-shadow: none; filter: none; }
-.rhine-member-card.is-folding-left { transform-origin: 100% 52%; pointer-events: none; animation: rhine-member-fold-left var(--member-shift-duration) cubic-bezier(.22,.61,.36,1) both; }
-.rhine-member-card.is-folding-right { transform-origin: 0% 52%; pointer-events: none; animation: rhine-member-fold-right var(--member-shift-duration) cubic-bezier(.22,.61,.36,1) both; }
-.rhine-member-card.is-incoming { pointer-events: none; animation: rhine-member-promote var(--member-shift-duration) cubic-bezier(.22,.61,.36,1) both; }
-.rhine-member-card.is-side-receding { animation: rhine-member-side-recede var(--member-shift-duration) cubic-bezier(.22,.61,.36,1) both; }
-.rhine-member-card.is-side-approaching { animation: rhine-member-side-approach var(--member-shift-duration) cubic-bezier(.22,.61,.36,1) both; }
+.rhine-member-card.is-folding-left { transform-origin: 100% 52%; pointer-events: none; animation: rhine-member-fold-left var(--member-shift-duration) cubic-bezier(.4,0,.2,1) both; }
+.rhine-member-card.is-folding-right { transform-origin: 0% 52%; pointer-events: none; animation: rhine-member-fold-right var(--member-shift-duration) cubic-bezier(.4,0,.2,1) both; }
+.rhine-member-card.is-incoming { pointer-events: none; animation: rhine-member-promote var(--member-shift-duration) cubic-bezier(.4,0,.2,1) both; }
+.rhine-member-card.is-side-receding { animation: rhine-member-side-recede var(--member-shift-duration) cubic-bezier(.4,0,.2,1) both; }
+.rhine-member-card.is-side-approaching { animation: rhine-member-side-approach var(--member-shift-duration) cubic-bezier(.4,0,.2,1) both; }
 .rhine-member-card:is(.is-incoming, .is-outgoing, .is-folding-left, .is-folding-right) { will-change: transform, opacity; }
 .rhine-member-card:is(.is-side-receding, .is-side-approaching) { will-change: opacity; }
 .rhine-member-stage.is-switching .rhine-member-card { pointer-events: none; }
 .rhine-member-stage.is-switching .rhine-member-track.is-sliding-left .rhine-member-card[data-member-slot="-2"],
 .rhine-member-stage.is-switching .rhine-member-track.is-sliding-right .rhine-member-card[data-member-slot="2"] { visibility: hidden; }
 .rhine-member-card::before { content: ''; position: absolute; z-index: 1; inset: 3% 0 0; background: linear-gradient(0deg, rgba(38,38,36,.5), transparent 34%), linear-gradient(90deg, transparent 72%, rgba(255,255,255,.12)); pointer-events: none; }
-.rhine-member-card::after { content: ''; position: absolute; z-index: 2; right: -12%; bottom: 4%; width: 70%; height: 58%; background: linear-gradient(110deg, transparent 0 62%, rgba(255,255,255,.28) 63% 63.8%, transparent 64.5%), linear-gradient(74deg, transparent 0 57%, rgba(243,207,94,.2) 58% 59%, transparent 60%); opacity: .7; mix-blend-mode: screen; pointer-events: none; }
-.rhine-member-card > img { position: absolute; z-index: 1; inset: 3% -21% -2%; width: 142%; height: 97%; object-fit: contain; transform: translate3d(var(--member-x), calc(var(--member-y) - 5%), 0) scale(var(--member-scale)); transform-origin: 50% 55%; }
+.rhine-member-card::after { content: ''; position: absolute; z-index: 2; right: -12%; bottom: 4%; width: 70%; height: 58%; background: linear-gradient(110deg, transparent 0 62%, rgba(255,255,255,.28) 63% 63.8%, transparent 64.5%), linear-gradient(74deg, transparent 0 57%, rgba(243,207,94,.2) 58% 59%, transparent 60%); opacity: .7; pointer-events: none; }
+.rhine-member-card > img { position: absolute; z-index: 1; left: var(--member-image-left); top: var(--member-image-top); width: var(--member-image-width); height: var(--member-image-height); object-fit: contain; }
 .rhine-member-holo { position: absolute; z-index: 3; inset: 3% 0 0; overflow: hidden; background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,.88) 0 1.2%, rgba(255,255,255,.42) 2.8%, transparent 8%), conic-gradient(from 218deg at 50% 50%, transparent 0 6%, rgba(0,242,255,.4) 10%, rgba(123,74,255,.44) 13%, rgba(255,63,140,.4) 16%, rgba(255,225,62,.43) 19%, transparent 24% 64%, rgba(0,242,255,.3) 70%, transparent 77%); background-repeat: no-repeat; background-size: 145% 145%, 152% 152%; background-position: center; opacity: .38; mix-blend-mode: screen; pointer-events: none; transform: translate3d(-7%,-4%,0) scale(1.08); }
 .rhine-member-card.is-current .rhine-member-holo { opacity: .78; }
 .rhine-member-scan { position: absolute; z-index: 4; inset: 3% 0 0; overflow: hidden; background: linear-gradient(110deg, transparent 35%, rgba(80,225,255,.03) 42%, rgba(255,255,255,.45) 48.5%, rgba(255,75,207,.2) 51%, rgba(255,224,85,.1) 55%, transparent 64%); background-size: 260% 260%; mix-blend-mode: normal; opacity: .42; transform: translateX(-46%); pointer-events: none; animation: rhine-laser-scan 28s cubic-bezier(.42,0,.22,1) infinite; will-change: transform; }
@@ -164,7 +164,6 @@
 .rhine-member-stage-holo { background: conic-gradient(from 218deg at 50% 50%, transparent 0 7%, rgba(0,242,255,.18) 11%, rgba(123,74,255,.2) 14%, rgba(255,63,140,.18) 17%, rgba(255,225,62,.2) 20%, transparent 25% 66%, rgba(0,242,255,.14) 71%, transparent 78%); opacity: .52; transform: translate3d(-50%,0,0); }
 .rhine-member-stage-scan { background: linear-gradient(110deg, transparent 39%, rgba(255,255,255,.07) 45%, rgba(255,255,255,.38) 49%, rgba(255,75,207,.12) 52%, transparent 59%); opacity: .38; transform: translate3d(-88%,0,0); animation: rhine-stage-laser 28s cubic-bezier(.42,0,.22,1) infinite; will-change: transform; }
 .rhine-member-stage-glint { top: 69%; left: 48%; width: clamp(100px, 8vw, 155px); height: 3px; border-radius: 50%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.82), rgba(96,225,255,.34), transparent); box-shadow: 0 0 8px rgba(255,255,255,.38); opacity: .5; transform: translate3d(-90%,0,0) rotate(-7deg); animation: rhine-member-glint 23s ease-in-out infinite alternate; will-change: transform, opacity; }
-.rhine-member-stage.is-switching :is(.rhine-member-stage-scan, .rhine-member-stage-glint, .rhine-member-scan) { animation-play-state: paused; }
 
 .rhine-member-code { position: absolute; z-index: 7; top: -4.6%; left: -4.4%; display: grid; width: 29%; min-height: 14%; align-content: center; padding: 9px 8px; background: #080908; box-shadow: 0 7px 15px rgba(0,0,0,.16); }
 .rhine-member-code strong { display: grid; font-family: Haettenschweiler, "Arial Narrow", sans-serif; font-size: clamp(17px, 1.55vw, 30px); font-weight: 400; line-height: .64; letter-spacing: -.018em; }
@@ -230,13 +229,10 @@
 .rhine-research-scene, .rhine-research-scene figure { position: absolute; inset: 0; margin: 0; }
 .rhine-research-scene .rhine-blackhole-visual { z-index: 1; inset: 7% 12.6% 12% 16%; overflow: hidden; }
 .rhine-blackhole-field { position: absolute; inset: 0; }
-.rhine-blackhole-field::before { content: ''; position: absolute; z-index: 3; top: 49.8%; left: 50.8%; width: 34%; aspect-ratio: 1.48; border-radius: 50%; background: radial-gradient(ellipse at 46% 47%, transparent 0 29%, rgba(43,207,255,.96) 38%, rgba(76,117,255,.58) 46%, transparent 55%), radial-gradient(ellipse at 54% 53%, transparent 0 31%, rgba(154,75,255,.88) 42%, rgba(255,55,169,.96) 50%, rgba(255,200,68,.76) 57%, transparent 66%); mix-blend-mode: screen; opacity: .18; transform: translate3d(-50%,-50%,0); transform-origin: 50% 50%; animation: rhine-blackhole-breathe 13s cubic-bezier(.37,0,.2,1) infinite alternate; will-change: transform, opacity; pointer-events: none; }
+.rhine-blackhole-field::before { content: ''; position: absolute; z-index: 3; top: 49.8%; left: 50.8%; width: 31%; aspect-ratio: 1.48; border-radius: 50%; background: radial-gradient(ellipse at 46% 47%, transparent 0 32%, rgba(43,207,255,.82) 41%, rgba(76,117,255,.34) 47%, transparent 56%), radial-gradient(ellipse at 54% 53%, transparent 0 34%, rgba(154,75,255,.62) 44%, rgba(255,55,169,.72) 51%, rgba(255,200,68,.44) 57%, transparent 66%); mix-blend-mode: screen; opacity: .24; transform: translate3d(-50%,-50%,0); transform-origin: 50% 50%; animation: rhine-blackhole-breathe 14s cubic-bezier(.37,0,.2,1) infinite alternate; will-change: transform, opacity; pointer-events: none; }
 .rhine-blackhole-field::after { content: ''; position: absolute; z-index: 5; top: 55.8%; left: 38%; width: 25%; height: 2px; border-radius: 50%; background: linear-gradient(90deg, transparent, rgba(255,255,255,1), rgba(74,210,255,.9), rgba(255,73,177,.68), transparent); box-shadow: 0 0 15px rgba(255,255,255,.72), 0 0 28px rgba(58,181,255,.42); opacity: .36; transform: translate3d(-38%,0,0) rotate(5deg); animation: rhine-blackhole-glint 17s cubic-bezier(.45,.05,.2,1) infinite alternate; will-change: transform, opacity; pointer-events: none; }
 .rhine-blackhole-field img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-.rhine-blackhole-base { filter: saturate(.98) contrast(1.08); transform: scale(1.045); }
-.rhine-blackhole-flow { opacity: .22; mix-blend-mode: normal; }
-.rhine-blackhole-flow.is-upper { clip-path: inset(17% 0 45%); transform: translate3d(2.8%,-.5%,0) scaleX(1.04); animation: rhine-blackhole-flow-upper 18s cubic-bezier(.37,0,.2,1) infinite alternate; will-change: transform, opacity; }
-.rhine-blackhole-flow.is-lower { clip-path: inset(48% 0 20%); opacity: .18; transform: translate3d(-2.4%,.45%,0) scaleX(1.05); animation: rhine-blackhole-flow-lower 21s cubic-bezier(.37,0,.2,1) infinite alternate; will-change: transform, opacity; }
+.rhine-blackhole-base { filter: saturate(1.02) contrast(1.06); transform: scale(1.035); transform-origin: center; }
 .rhine-blackhole-lensing { position: absolute; z-index: 4; top: 49.7%; left: 50.8%; width: 22.5%; aspect-ratio: 1.36; border: 0; border-radius: 50%; box-shadow: none; opacity: .32; transform: translate(-50%,-50%) scale(1); animation: rhine-blackhole-lens 14s cubic-bezier(.37,0,.2,1) infinite alternate; will-change: opacity; pointer-events: none; }
 .rhine-blackhole-lensing::before, .rhine-blackhole-lensing::after { content: ''; position: absolute; border-radius: 50%; pointer-events: none; }
 .rhine-blackhole-lensing::before { inset: -25% -31%; border: 1px solid transparent; border-top-color: rgba(68,213,255,.88); border-right-color: rgba(255,64,177,.68); box-shadow: 0 -5px 15px rgba(52,189,255,.32), 7px 0 18px rgba(255,50,165,.22); opacity: .72; transform: rotate(-5deg) scale(.995); }
@@ -312,10 +308,8 @@
 @keyframes rhine-department-open { 0% { transform: translate(-50%,-50%) scaleX(.08); opacity: 0; } 68% { transform: translate(-50%,-50%) scaleX(1.025); opacity: 1; } 100% { transform: translate(-50%,-50%) scaleX(1); opacity: 1; } }
 @keyframes rhine-department-field { to { transform: rotate(378deg) scale(1.6); } }
 @keyframes rhine-trace-pulse { 50% { opacity: .28; } }
-@keyframes rhine-blackhole-breathe { 0% { opacity: .18; transform: translate3d(-50%,-50%,0) scale(.9); } 52% { opacity: 1; transform: translate3d(-50%,-50%,0) scale(1.12); } 100% { opacity: .3; transform: translate3d(-50%,-50%,0) scale(.94); } }
-@keyframes rhine-blackhole-lens { 0% { opacity: .22; } 52% { opacity: 1; } 100% { opacity: .3; } }
-@keyframes rhine-blackhole-flow-upper { 0% { opacity: .08; transform: translate3d(3.2%,-.55%,0) scaleX(1.03); } 55% { opacity: .72; } 100% { opacity: .14; transform: translate3d(-3.4%,.4%,0) scaleX(1.12); } }
-@keyframes rhine-blackhole-flow-lower { 0% { opacity: .08; transform: translate3d(-3%,.55%,0) scaleX(1.04); } 48% { opacity: .68; } 100% { opacity: .12; transform: translate3d(3.1%,-.35%,0) scaleX(1.13); } }
+@keyframes rhine-blackhole-breathe { 0% { opacity: .24; transform: translate3d(-50%,-50%,0) scale(.97); } 52% { opacity: .82; transform: translate3d(-50%,-50%,0) scale(1.045); } 100% { opacity: .32; transform: translate3d(-50%,-50%,0) scale(.985); } }
+@keyframes rhine-blackhole-lens { 0% { opacity: .25; } 52% { opacity: .82; } 100% { opacity: .34; } }
 @keyframes rhine-blackhole-glint { 0%, 12% { opacity: .18; transform: translate3d(-38%,0,0) rotate(5deg); } 58% { opacity: 1; } 100% { opacity: .26; transform: translate3d(78%,0,0) rotate(5deg); } }
 @keyframes rhine-time-dot { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
 @keyframes rhine-time-source { 0%, 12% { clip-path: inset(0 0 50% 0); opacity: 1; } 88%, 100% { clip-path: inset(45% 0 50% 0); opacity: .64; } }
@@ -339,7 +333,6 @@
 .rhine-prototype:not(.rhine-active-departments) .rhine-department-orbit,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-base,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-field,
-.rhine-prototype:not(.rhine-active-research) .rhine-blackhole-flow,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-lensing,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-lensing::before,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-lensing::after,

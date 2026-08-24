@@ -273,10 +273,14 @@ function DepartmentMark({ code }) {
 }
 
 function MemberCardBody({ base, member, current = false }) {
+  const imageWidth = 142 * member.scale
+  const imageHeight = 97 * member.scale
+  const imageLeft = -21 + (member.x / 100 * 142) + ((1 - member.scale) * 71)
+  const imageTop = 3 + ((member.y - 5) / 100 * 97) + ((1 - member.scale) * 53.35)
   return <>
     <div className="rhine-member-code"><DepartmentMark code={member.code} /><small>{member.section}</small></div>
     <span className="rhine-member-section">{member.section}<br />DIRECTOR PROFILE / RHINE LAB</span>
-    <img src={rhineAsset(base, member.image)} alt={current ? member.name : ''} style={{ '--member-scale': member.scale, '--member-x': `${member.x}%`, '--member-y': `${member.y}%` }} loading="eager" decoding="async" />
+    <img src={rhineAsset(base, member.image)} alt={current ? member.name : ''} style={{ '--member-image-left': `${imageLeft}%`, '--member-image-top': `${imageTop}%`, '--member-image-width': `${imageWidth}%`, '--member-image-height': `${imageHeight}%` }} loading="eager" decoding="async" />
     <span className="rhine-member-profile">莱茵生命<br />科研主任<br />内部资料</span>
     <span className="rhine-member-name"><b>{member.name}</b><small>{member.role}</small></span>
     <span className="rhine-member-logos"><InfinityLogo compact /><i /></span>
@@ -367,8 +371,6 @@ function BlackHoleSystem({ base }) {
   return <figure className="rhine-blackhole-visual" aria-label="Chromatic black hole with slowly moving accretion light">
     <div className="rhine-blackhole-field">
       <img className="rhine-blackhole-base" src={source} alt="" />
-      <img className="rhine-blackhole-flow is-upper" src={source} alt="" aria-hidden="true" />
-      <img className="rhine-blackhole-flow is-lower" src={source} alt="" aria-hidden="true" />
       <i className="rhine-blackhole-lensing" aria-hidden="true" />
     </div>
     <figcaption><span>GRAVITATIONAL LENSING</span><b>BH / SPECTRUM-01</b></figcaption>
