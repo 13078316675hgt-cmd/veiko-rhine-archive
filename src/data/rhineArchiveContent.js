@@ -67,7 +67,7 @@ export const RHINE_DEPARTMENTS = [
 export const RHINE_RESEARCH = {
   title: '月之计划',
   english: 'THE PLAN OF THE MONTH',
-  progress: '100%',
+  progress: 'T−00:00:00',
   copy: ['我们的事业将触及星海。', '探索未知，直至抵达天穹之外。'],
   button: 'CONTINUE',
   readout: ['R / 01 — 037', 'ORBITAL DATA STREAM', 'RESEARCH TERMINAL ONLINE'],

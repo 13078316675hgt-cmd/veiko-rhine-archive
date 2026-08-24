@@ -96,6 +96,11 @@ const memberEnd = {
   outgoing: await outgoingCard.evaluate((node) => { const style = getComputedStyle(node); return { transform: style.transform, filter: style.filter, opacity: style.opacity, animationName: style.animationName } }),
 }
 const incomingIndex = await incomingCard.getAttribute('data-member-index')
+const switchingVisuals = {
+  scan: await styleOf('.rhine-member-stage-scan', ['display', 'opacity']),
+  glint: await styleOf('.rhine-member-stage-glint', ['display', 'opacity']),
+  cardAfter: await incomingCard.evaluate((node) => { const style = getComputedStyle(node, '::after'); return { display: style.display, opacity: style.opacity } }),
+}
 const incomingEndRect = await incomingCard.evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
 const exitingSideIndex = await exitingSideCard.getAttribute('data-member-index')
 const sideEndRect = await exitingSideCard.evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
@@ -106,6 +111,11 @@ await page.waitForTimeout(40)
 const selectedMember = await page.locator('.rhine-member-card.is-current .rhine-member-name b').textContent()
 const sideCommittedRect = await page.locator(`.rhine-member-card[data-member-index="${exitingSideIndex}"]`).evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
 const incomingCommittedRect = await page.locator(`.rhine-member-card[data-member-index="${incomingIndex}"]`).evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height } })
+const committedVisuals = {
+  scan: await styleOf('.rhine-member-stage-scan', ['display', 'opacity']),
+  glint: await styleOf('.rhine-member-stage-glint', ['display', 'opacity']),
+  cardAfter: await page.locator(`.rhine-member-card[data-member-index="${incomingIndex}"]`).evaluate((node) => { const style = getComputedStyle(node, '::after'); return { display: style.display, opacity: style.opacity } }),
+}
 if (outgoingCount !== 1) failures.push(`member outgoing animation count: ${outgoingCount}`)
 if (incomingMotionCount !== 1) failures.push(`member incoming animation count: ${incomingMotionCount}`)
 if (sideMotionCount !== 2) failures.push(`member side depth animation count: ${sideMotionCount}`)
@@ -115,6 +125,8 @@ if (new Set([memberStart.outgoing.transform, memberMiddle.outgoing.transform, me
 if (new Set([memberStart.incoming.transform, memberMiddle.incoming.transform, memberEnd.incoming.transform]).size < 3) failures.push('incoming member card has no depth promotion')
 if (Math.abs(sideEndRect.x - sideCommittedRect.x) > 1 || Math.abs(sideEndRect.y - sideCommittedRect.y) > 1 || Math.abs(sideEndRect.width - sideCommittedRect.width) > 1 || Math.abs(sideEndRect.height - sideCommittedRect.height) > 1) failures.push('outer member card jumped when the track committed')
 if (Math.abs(incomingEndRect.x - incomingCommittedRect.x) > 1 || Math.abs(incomingEndRect.y - incomingCommittedRect.y) > 1 || Math.abs(incomingEndRect.width - incomingCommittedRect.width) > 1 || Math.abs(incomingEndRect.height - incomingCommittedRect.height) > 1) failures.push('incoming member card jumped when the track committed')
+if (switchingVisuals.scan.display === 'none' || switchingVisuals.glint.display === 'none' || switchingVisuals.cardAfter.display === 'none') failures.push('member laser layers disappeared during the card transition')
+if (JSON.stringify(switchingVisuals) !== JSON.stringify(committedVisuals)) failures.push('member laser layers flashed when the card transition committed')
 if (selectedMember?.trim() !== 'KRISTEN WRIGHT') failures.push(`member carousel ended on ${selectedMember}`)
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
@@ -160,7 +172,7 @@ if (researchEnd.opacity !== '1') failures.push(`research UI final opacity is ${r
 const researchBreathingPeak = await page.locator('.rhine-blackhole-field').evaluate((node) => {
   const animation = node.getAnimations({ subtree: true }).find((item) => item.animationName === 'rhine-blackhole-breathe')
   animation.pause()
-  animation.currentTime = 8840
+  animation.currentTime = Number(animation.effect.getTiming().duration) * .52
   return Number(getComputedStyle(node, '::before').opacity)
 })
 const researchBlackHoleProof = await page.locator('.rhine-blackhole-field').evaluate((node) => {
@@ -182,6 +194,7 @@ if (researchBlackHoleProof.innerArcOpacity < .5) failures.push('research event-h
 const researchTitle = (await page.locator('.rhine-pioneer-mark span').innerText()).replace(/\s+/g, ' ').trim()
 if (!researchTitle.startsWith('月之计划')) failures.push(`research title is ${researchTitle}`)
 if (await page.locator('.rhine-moon-project-logo').count() !== 1) failures.push('moon project logo is missing')
+if ((await page.locator('.rhine-timecode').innerText()).trim() !== 'T−00:00:00') failures.push('temporal glitch readout is missing')
 if (await page.locator('.rhine-time-meter .rhine-time-dial').count() !== 1) failures.push('particle time dial is missing')
 if (await page.locator('.rhine-time-mass.is-source').count() !== 1 || await page.locator('.rhine-time-mass.is-target').count() !== 1) failures.push('particle time reservoirs are missing')
 if (await page.locator('.rhine-time-transfer > i').count() !== 4) failures.push('particle transfer stream is incomplete')
