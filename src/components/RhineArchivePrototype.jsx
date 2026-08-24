@@ -274,10 +274,11 @@ function MemberCardBody({ base, member, current = false }) {
   </>
 }
 
-function MemberCarousel({ base, selected, onSelect, ghost, onGhostEnd }) {
+const MEMBER_SLOT_X = { '-2': -44, '-1': -21.3, '0': 0, '1': 21.3, '2': 44 }
+
+function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
   const length = RHINE_MEMBERS.length
   const move = (direction) => onSelect((selected + direction + length) % length)
-  const ghostMember = ghost ? RHINE_MEMBERS[ghost.index] : null
 
   useEffect(() => {
     RHINE_MEMBERS.forEach((member) => {
@@ -288,21 +289,29 @@ function MemberCarousel({ base, selected, onSelect, ghost, onGhostEnd }) {
     })
   }, [base])
 
-  return <div className={`rhine-member-stage ${ghost ? 'is-switching' : ''}`} data-member-stage tabIndex="0" aria-label="Member carousel" onKeyDown={(event) => { if (event.key === 'ArrowLeft') move(-1); if (event.key === 'ArrowRight') move(1) }}>
-    {RHINE_MEMBERS.map((member, index) => {
-      let slot = index - selected
-      if (slot > length / 2) slot -= length
-      if (slot < -length / 2) slot += length
-      const distance = Math.abs(slot)
-      if (distance > 2) return null
-      const zIndex = slot === 0 ? 30 : distance === 1 ? 18 : distance === 2 ? 8 : 0
-      return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${ghost?.index === index ? 'is-ghost-source' : ''}`} data-member-index={index} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => onSelect(index)} aria-pressed={slot === 0} key={member.name}>
-        <MemberCardBody base={base} member={member} current={slot === 0} />
-      </button>
-    })}
-    {ghostMember && <div className={`rhine-member-card rhine-member-ghost is-folding-${ghost.direction}`} data-member-name={ghostMember.name} data-member-slot={ghost.direction === 'left' ? -1 : 1} style={{ zIndex: 36 }} onAnimationEnd={(event) => { if (event.target === event.currentTarget) onGhostEnd() }} aria-hidden="true">
-      <img src={rhineAsset(base, ghostMember.image)} alt="" style={{ '--member-scale': ghostMember.scale, '--member-x': `${ghostMember.x}%`, '--member-y': `${ghostMember.y}%` }} decoding="async" />
-    </div>}
+  useEffect(() => {
+    if (!moving) return undefined
+    const fallback = window.setTimeout(() => onMoveEnd(moving.target), 5000)
+    return () => window.clearTimeout(fallback)
+  }, [moving, onMoveEnd])
+
+  return <div className={`rhine-member-stage ${moving ? 'is-switching' : ''}`} data-member-stage tabIndex="0" aria-label="Member carousel" onKeyDown={(event) => { if (event.key === 'ArrowLeft') move(-1); if (event.key === 'ArrowRight') move(1) }}>
+    <div className={`rhine-member-track ${moving ? `is-sliding-${moving.direction}` : ''}`} style={{ '--member-track-shift': moving ? `${moving.shift}vw` : '0vw' }} onAnimationEnd={(event) => { if (event.target === event.currentTarget && moving) onMoveEnd(moving.target) }}>
+      {RHINE_MEMBERS.map((member, index) => {
+        let slot = index - selected
+        if (slot > length / 2) slot -= length
+        if (slot < -length / 2) slot += length
+        const distance = Math.abs(slot)
+        if (distance > 2) return null
+        const outgoing = Boolean(moving && slot === 0)
+        const incoming = moving?.target === index
+        const foldClass = outgoing ? `is-folding-${moving.direction}` : ''
+        const zIndex = incoming ? 32 : slot === 0 ? 30 : distance === 1 ? 18 : distance === 2 ? 8 : 0
+        return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${outgoing ? 'is-outgoing' : ''} ${incoming ? 'is-incoming' : ''} ${foldClass}`} data-member-index={index} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => onSelect(index)} aria-pressed={slot === 0} key={member.name}>
+          <MemberCardBody base={base} member={member} current={slot === 0 || incoming} />
+        </button>
+      })}
+    </div>
     <span className="rhine-member-stage-holo" aria-hidden="true" />
     <span className="rhine-member-stage-scan" aria-hidden="true" />
     <span className="rhine-member-stage-glint" aria-hidden="true" />
@@ -375,18 +384,26 @@ export function RhineArchivePrototype() {
   const [entered, setEntered] = useState(bypass)
   const [active, setActive] = useState('home')
   const [memberIndex, setMemberIndex] = useState(1)
-  const [memberGhost, setMemberGhost] = useState(null)
+  const [memberMove, setMemberMove] = useState(null)
   const [departmentIndex, setDepartmentIndex] = useState(null)
   const base = basePath()
   const finishEntrance = useCallback(() => setEntered(true), [])
+  const finishMemberMove = useCallback((target) => {
+    setMemberIndex(target)
+    setMemberMove((current) => current?.target === target ? null : current)
+  }, [])
   const chooseMember = useCallback((nextIndex) => {
-    if (memberGhost || nextIndex === memberIndex) return
+    if (memberMove || nextIndex === memberIndex) return
     const length = RHINE_MEMBERS.length
-    const forwardDistance = (nextIndex - memberIndex + length) % length
-    const direction = forwardDistance <= length / 2 ? 'left' : 'right'
-    setMemberGhost({ index: memberIndex, direction })
-    setMemberIndex(nextIndex)
-  }, [memberGhost, memberIndex])
+    let slot = nextIndex - memberIndex
+    if (slot > length / 2) slot -= length
+    if (slot < -length / 2) slot += length
+    const limitedSlot = Math.max(-2, Math.min(2, slot))
+    const mobileSlots = { '-2': -62, '-1': -30, '0': 0, '1': 30, '2': 62 }
+    const slots = window.matchMedia('(max-width: 900px)').matches ? mobileSlots : MEMBER_SLOT_X
+    const x = slots[String(limitedSlot)] ?? (limitedSlot * 21.3)
+    setMemberMove({ target: nextIndex, direction: slot > 0 ? 'left' : 'right', shift: -x })
+  }, [memberMove, memberIndex])
 
   useEffect(() => {
     if (!entered) return undefined
@@ -450,7 +467,7 @@ export function RhineArchivePrototype() {
           <HomeSystem />
         </section>
         <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersGallery base={base} active={active === 'headquarters'} /></section>
-        <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} ghost={memberGhost} onGhostEnd={() => setMemberGhost(null)} /></section>
+        <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} moving={memberMove} onMoveEnd={finishMemberMove} /></section>
         <section id="rhine-departments" className="rhine-view rhine-departments" data-rhine-view="departments"><DepartmentMatrix base={base} selected={departmentIndex} onSelect={setDepartmentIndex} /></section>
         <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene base={base} onContinue={() => jumpTo('home')} /></section>
       </div>

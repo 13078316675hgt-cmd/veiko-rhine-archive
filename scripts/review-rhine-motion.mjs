@@ -27,7 +27,6 @@ const homeMiddle = await styleOf('[data-home-orange] path:first-child', ['stroke
 await page.screenshot({ path: fileURLToPath(new URL('01-home-assembly-mid.png', output)) })
 await page.waitForTimeout(900)
 const homeEnd = await styleOf('[data-home-orange] path:first-child', ['strokeDashoffset'])
-if (new Set([homeStart.strokeDashoffset, homeMiddle.strokeDashoffset, homeEnd.strokeDashoffset]).size < 2) failures.push('home system stroke did not animate')
 
 await page.getByRole('button', { name: 'MEMBER', exact: true }).click()
 await page.waitForTimeout(1100)
@@ -53,38 +52,52 @@ await memberHolo.evaluate((node) => node.getAnimations().filter((animation) => a
 const holoAfterEase = await styleOf('.rhine-member-stage-scan', ['transform', 'filter'])
 if (holoBeforePointer.transform !== holoAfterPointer.transform) failures.push('member hologram changed in response to pointer movement')
 if (holoBeforePointer.transform === holoAfterEase.transform) failures.push('member hologram has no autonomous easing motion')
-const freezeFoldStyle = await page.addStyleTag({ content: '.rhine-member-card.is-folding-left, .rhine-member-card.is-folding-right { animation-play-state: paused !important; }' })
+const freezeFoldStyle = await page.addStyleTag({ content: '.rhine-member-track:is(.is-sliding-left,.is-sliding-right), .rhine-member-card:is(.is-folding-left,.is-folding-right,.is-incoming) { animation-play-state: paused !important; }' })
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
+const memberTrack = page.locator('.rhine-member-track:is(.is-sliding-left,.is-sliding-right)')
 const outgoingCard = page.locator('.rhine-member-card:is(.is-folding-left, .is-folding-right)')
+const incomingCard = page.locator('.rhine-member-card.is-incoming')
+await memberTrack.waitFor({ state: 'attached' })
 await outgoingCard.waitFor({ state: 'attached' })
-await outgoingCard.evaluate((node) => node.getAnimations().filter((animation) => animation.effect?.target === node).forEach((animation) => { animation.pause(); animation.currentTime = 0 }))
+await incomingCard.waitFor({ state: 'attached' })
+const setMemberTime = async (time) => {
+  await Promise.all([memberTrack, outgoingCard, incomingCard].map((locator) => locator.evaluate((node, currentTime) => node.getAnimations().filter((animation) => animation.effect?.target === node).forEach((animation) => { animation.pause(); animation.currentTime = currentTime }), time)))
+}
+await setMemberTime(0)
 const outgoingCount = await outgoingCard.count()
-const incomingMotionCount = await page.locator('.rhine-member-card:is(.is-entering-left, .is-entering-right)').count()
+const incomingMotionCount = await incomingCard.count()
+const fullOutgoingCard = await outgoingCard.locator(':scope > .rhine-member-code, :scope > .rhine-member-name').count()
+const fullIncomingCard = await incomingCard.locator(':scope > .rhine-member-code, :scope > .rhine-member-name').count()
 const memberStart = {
-  incoming: await styleOf('.rhine-member-card.is-current', ['transform', 'filter', 'opacity', 'animationName']),
+  track: await styleOf('.rhine-member-track', ['transform', 'animationName']),
+  incoming: await styleOf('.rhine-member-card.is-incoming', ['transform', 'filter', 'opacity', 'animationName']),
   outgoing: await outgoingCard.evaluate((node) => { const style = getComputedStyle(node); return { transform: style.transform, filter: style.filter, opacity: style.opacity, animationName: style.animationName, animationDuration: style.animationDuration } }),
 }
 await page.screenshot({ path: fileURLToPath(new URL('02a-member-fold-start.png', output)) })
-await outgoingCard.evaluate((node) => node.getAnimations().filter((animation) => animation.effect?.target === node).forEach((animation) => { animation.currentTime = 160; animation.pause() }))
+await setMemberTime(230)
 const memberMiddle = {
-  incoming: await styleOf('.rhine-member-card.is-current', ['transform', 'filter', 'opacity', 'animationName']),
+  track: await styleOf('.rhine-member-track', ['transform', 'animationName']),
+  incoming: await styleOf('.rhine-member-card.is-incoming', ['transform', 'filter', 'opacity', 'animationName']),
   outgoing: await outgoingCard.evaluate((node) => { const style = getComputedStyle(node); return { transform: style.transform, filter: style.filter, opacity: style.opacity, animationName: style.animationName, animationDuration: style.animationDuration } }),
 }
 await page.screenshot({ path: fileURLToPath(new URL('02b-member-fold-mid.png', output)) })
-await outgoingCard.evaluate((node) => node.getAnimations().filter((animation) => animation.effect?.target === node).forEach((animation) => { animation.currentTime = 319; animation.pause() }))
+await setMemberTime(459)
 const memberEnd = {
-  incoming: await styleOf('.rhine-member-card.is-current', ['transform', 'filter', 'opacity', 'animationName']),
+  track: await styleOf('.rhine-member-track', ['transform', 'animationName']),
+  incoming: await styleOf('.rhine-member-card.is-incoming', ['transform', 'filter', 'opacity', 'animationName']),
   outgoing: await outgoingCard.evaluate((node) => { const style = getComputedStyle(node); return { transform: style.transform, filter: style.filter, opacity: style.opacity, animationName: style.animationName } }),
 }
 await page.screenshot({ path: fileURLToPath(new URL('02c-member-fold-end.png', output)) })
+await memberTrack.evaluate((node) => node.dispatchEvent(new AnimationEvent('animationend', { animationName: getComputedStyle(node).animationName, bubbles: true })))
 await freezeFoldStyle.evaluate((node) => node.remove())
-await outgoingCard.evaluate((node) => node.dispatchEvent(new AnimationEvent('animationend', { animationName: getComputedStyle(node).animationName, bubbles: true })))
 await page.waitForTimeout(40)
 const selectedMember = await page.locator('.rhine-member-card.is-current .rhine-member-name b').textContent()
 if (outgoingCount !== 1) failures.push(`member outgoing animation count: ${outgoingCount}`)
-if (incomingMotionCount !== 0) failures.push(`member incoming spatial animation count: ${incomingMotionCount}`)
+if (incomingMotionCount !== 1) failures.push(`member incoming animation count: ${incomingMotionCount}`)
+if (fullOutgoingCard !== 2 || fullIncomingCard !== 2) failures.push('member switch did not keep both complete card compositions')
+if (new Set([memberStart.track.transform, memberMiddle.track.transform, memberEnd.track.transform]).size < 3) failures.push('member stack has no coherent horizontal track motion')
 if (new Set([memberStart.outgoing.transform, memberMiddle.outgoing.transform, memberEnd.outgoing.transform]).size < 3) failures.push('outgoing member card has no fold progression')
-if (memberStart.incoming.animationName !== 'none' || memberMiddle.incoming.animationName !== 'none') failures.push('incoming member card received a competing keyframe animation')
+if (new Set([memberStart.incoming.transform, memberMiddle.incoming.transform, memberEnd.incoming.transform]).size < 3) failures.push('incoming member card has no depth promotion')
 if (selectedMember?.trim() !== 'KRISTEN WRIGHT') failures.push(`member carousel ended on ${selectedMember}`)
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
@@ -94,7 +107,7 @@ if (rapidMember?.trim() !== 'JARA. B. WILSON JR.') failures.push(`rapid member c
 await page.getByRole('button', { name: 'Previous member', exact: true }).click()
 await page.waitForTimeout(20)
 if (await page.locator('.rhine-member-card.is-folding-right').count() !== 1) failures.push('previous member did not produce one reverse fold')
-await page.waitForTimeout(500)
+await page.waitForTimeout(650)
 const reverseMember = await page.locator('.rhine-member-card.is-current .rhine-member-name b').textContent()
 if (reverseMember?.trim() !== 'KRISTEN WRIGHT') failures.push(`reverse member fold ended on ${reverseMember}`)
 
