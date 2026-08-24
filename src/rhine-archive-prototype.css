@@ -148,7 +148,7 @@
 .rhine-member-card.is-distant { pointer-events: none; }
 .rhine-member-card::before { content: ''; position: absolute; z-index: 1; inset: 3% 0 0; background: linear-gradient(0deg, rgba(38,38,36,.5), transparent 34%), linear-gradient(90deg, transparent 72%, rgba(255,255,255,.12)); pointer-events: none; }
 .rhine-member-card::after { content: ''; position: absolute; z-index: 2; right: -12%; bottom: 4%; width: 70%; height: 58%; background: linear-gradient(110deg, transparent 0 62%, rgba(255,255,255,.38) 63% 63.8%, transparent 64.5%), linear-gradient(74deg, transparent 0 57%, rgba(243,207,94,.28) 58% 59%, transparent 60%); mix-blend-mode: screen; pointer-events: none; }
-.rhine-member-card > img { position: absolute; z-index: 1; inset: 3% -21% -2%; width: 142%; height: 97%; object-fit: contain; transform: translate3d(var(--member-x), calc(var(--member-y) - 13%), 0) scale(var(--member-scale)); transform-origin: 50% 55%; }
+.rhine-member-card > img { position: absolute; z-index: 1; inset: 3% -21% -2%; width: 142%; height: 97%; object-fit: contain; transform: translate3d(var(--member-x), calc(var(--member-y) - 5%), 0) scale(var(--member-scale)); transform-origin: 50% 55%; }
 .rhine-member-holo { position: absolute; z-index: 3; inset: 3% 0 0; overflow: hidden; background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,.88) 0 1.2%, rgba(255,255,255,.42) 2.8%, transparent 8%), conic-gradient(from 218deg at 50% 50%, transparent 0 6%, rgba(0,242,255,.4) 10%, rgba(123,74,255,.44) 13%, rgba(255,63,140,.4) 16%, rgba(255,225,62,.43) 19%, transparent 24% 64%, rgba(0,242,255,.3) 70%, transparent 77%); background-repeat: no-repeat; background-size: 145% 145%, 152% 152%; background-position: center; opacity: .38; mix-blend-mode: screen; pointer-events: none; transform: translate3d(-7%,-4%,0) scale(1.08); }
 .rhine-member-card.is-current .rhine-member-holo { opacity: .78; }
 .rhine-member-scan { position: absolute; z-index: 4; inset: 3% 0 0; overflow: hidden; background: linear-gradient(110deg, transparent 35%, rgba(80,225,255,.03) 42%, rgba(255,255,255,.45) 48.5%, rgba(255,75,207,.2) 51%, rgba(255,224,85,.1) 55%, transparent 64%); background-size: 260% 260%; mix-blend-mode: normal; opacity: .42; transform: translateX(-46%); pointer-events: none; animation: rhine-laser-scan 28s cubic-bezier(.42,0,.22,1) infinite; will-change: transform; }
@@ -228,7 +228,7 @@
 .rhine-blackhole-flow { opacity: .2; mix-blend-mode: normal; filter: saturate(1.25) contrast(1.06); will-change: transform; }
 .rhine-blackhole-flow.is-upper { clip-path: polygon(0 17%, 100% 17%, 100% 55%, 0 55%); transform: translate3d(1.2%,-.2%,0) scaleX(1.025); }
 .rhine-blackhole-flow.is-lower { clip-path: polygon(0 48%, 100% 48%, 100% 80%, 0 80%); opacity: .16; transform: translate3d(-1.1%,.25%,0) scaleX(1.035); }
-.rhine-blackhole-lensing { position: absolute; top: 49.7%; left: 50.8%; width: 23%; aspect-ratio: 1.36; border: 1px solid rgba(255,255,255,.28); border-radius: 50%; box-shadow: 0 0 28px rgba(87,186,255,.12), inset 0 0 22px rgba(255,78,174,.1); opacity: .35; filter: blur(4px); transform: translate(-50%,-50%) scale(1.02); }
+.rhine-blackhole-lensing { position: absolute; top: 49.7%; left: 50.8%; width: 23%; aspect-ratio: 1.36; border: 1px solid rgba(255,255,255,.24); border-radius: 50%; box-shadow: 0 0 20px rgba(87,186,255,.12), inset 0 0 16px rgba(255,78,174,.09); opacity: .28; transform: translate(-50%,-50%) scale(1.01); animation: rhine-blackhole-lens 32s ease-in-out infinite alternate; will-change: transform, opacity; }
 .rhine-blackhole-visual figcaption { position: absolute; right: 3.2%; bottom: 3.5%; display: grid; justify-items: end; gap: 5px; color: rgba(255,255,255,.7); font-size: 7px; letter-spacing: .18em; }
 .rhine-blackhole-visual figcaption b { color: white; font-size: 1.45em; }
 .rhine-space-stars { position: absolute; inset: -12%; pointer-events: none; background-image: radial-gradient(circle, rgba(255,255,255,.38) 0 1px, transparent 1.6px), radial-gradient(circle, rgba(245,130,0,.24) 0 1px, transparent 1.5px); background-position: 0 0, 42px 63px; background-size: 127px 111px, 191px 177px; mix-blend-mode: normal; }
@@ -280,10 +280,9 @@
 @keyframes rhine-department-open { 0% { transform: translate(-50%,-50%) scaleX(.08); opacity: 0; } 68% { transform: translate(-50%,-50%) scaleX(1.025); opacity: 1; } 100% { transform: translate(-50%,-50%) scaleX(1); opacity: 1; } }
 @keyframes rhine-department-field { to { transform: rotate(378deg) scale(1.6); } }
 @keyframes rhine-trace-pulse { 50% { opacity: .28; } }
-@keyframes rhine-blackhole-breathe { 0% { transform: scale(1.025) translate3d(-.5%,.15%,0); } 100% { transform: scale(1.075) translate3d(.8%,-.35%,0); } }
 @keyframes rhine-blackhole-flow-upper { 0% { transform: translate3d(-2.2%,.45%,0) scaleX(1.015); } 100% { transform: translate3d(2.6%,-.35%,0) scaleX(1.04); } }
 @keyframes rhine-blackhole-flow-lower { 0% { transform: translate3d(1.8%,-.35%,0) scaleX(1.025); } 100% { transform: translate3d(-2.4%,.4%,0) scaleX(1.055); } }
-@keyframes rhine-blackhole-lens { 0% { opacity: .24; transform: translate(-50%,-50%) scale(.96); } 100% { opacity: .5; transform: translate(-50%,-50%) scale(1.08); } }
+@keyframes rhine-blackhole-lens { 0% { opacity: .18; transform: translate(-50%,-50%) scale(.985); } 100% { opacity: .38; transform: translate(-50%,-50%) scale(1.04); } }
 @keyframes rhine-blackhole-glint { 0%, 18% { opacity: .2; transform: translate3d(-34%,0,0) rotate(5deg); } 64% { opacity: .68; } 100% { opacity: .18; transform: translate3d(66%,0,0) rotate(5deg); } }
 @keyframes rhine-stars-drift { to { transform: translate3d(5%, 3%, 0); } }
 
@@ -297,6 +296,7 @@
 .rhine-prototype:not(.rhine-active-departments) .rhine-department-tile::before,
 .rhine-prototype:not(.rhine-active-departments) .rhine-department-orbit,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-base,
+.rhine-prototype:not(.rhine-active-research) .rhine-blackhole-field,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-flow,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-lensing,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-field::after,
