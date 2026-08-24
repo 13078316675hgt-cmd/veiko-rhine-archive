@@ -155,7 +155,22 @@ const researchBreathingPeak = await page.locator('.rhine-blackhole-field').evalu
   animation.currentTime = 9180
   return Number(getComputedStyle(node, '::before').opacity)
 })
-if (Math.abs(researchBreathingPeak - .95) > .01) failures.push(`research breathing peak is ${researchBreathingPeak}`)
+const researchBlackHoleProof = await page.locator('.rhine-blackhole-field').evaluate((node) => {
+  const base = node.querySelector('.rhine-blackhole-base')
+  const lens = node.querySelector('.rhine-blackhole-lensing')
+  const baseTransform = getComputedStyle(base).transform
+  return {
+    baseTransform,
+    innerArc: getComputedStyle(lens, '::before').content,
+    outerArc: getComputedStyle(lens, '::after').content,
+    innerArcOpacity: Number(getComputedStyle(lens, '::before').opacity),
+    outerArcOpacity: Number(getComputedStyle(lens, '::after').opacity),
+  }
+})
+if (Math.abs(researchBreathingPeak - 1) > .01) failures.push(`research breathing peak is ${researchBreathingPeak}`)
+if (researchBlackHoleProof.innerArc === 'none' || researchBlackHoleProof.outerArc === 'none') failures.push('research event-horizon arcs are missing')
+if (researchBlackHoleProof.innerArcOpacity < .35 || researchBlackHoleProof.outerArcOpacity < .3) failures.push('research event-horizon arcs are too faint')
+await page.screenshot({ path: fileURLToPath(new URL('06-research-blackhole-peak.png', output)) })
 
 const viewportHeight = await page.locator('[data-rhine-scroll]').evaluate((node) => { node.style.scrollBehavior = 'auto'; node.scrollTop = 0; return node.clientHeight })
 await page.waitForTimeout(80)
@@ -178,10 +193,10 @@ console.log(JSON.stringify({
     home: [homeStart, homeMiddle, homeEnd],
     member: { motion: [memberStart, memberMiddle, memberEnd], hologram: { beforePointer: holoBeforePointer, afterPointer: holoAfterPointer, afterEase: holoAfterEase } },
     department: { motion: [departmentStart, departmentMiddle, departmentEnd], titleSize: departmentTitleSize, idleRect: departmentIdleRect, selectedRect: departmentSelectedRect, mediaRect: departmentMediaRect },
-    research: { ...researchEnd, breathingPeak: researchBreathingPeak },
+    research: { ...researchEnd, breathingPeak: researchBreathingPeak, blackHole: researchBlackHoleProof },
     scroll: { viewportHeight, early: scrollEarly, middle: scrollMiddle, end: scrollEnd },
   },
-  screenshots: 7,
+  screenshots: 8,
 }, null, 2))
 
 await browser.close()
