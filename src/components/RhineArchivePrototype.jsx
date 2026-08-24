@@ -54,48 +54,54 @@ function Entrance({ onComplete }) {
     if (!root) return undefined
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const context = gsap.context(() => {
-      gsap.set('[data-logo-loader], [data-login], [data-entrance-brand], [data-entrance-footer], [data-access], [data-welcome]', { autoAlpha: 0 })
-      gsap.set('[data-logo-loader] [data-logo-outline], [data-welcome] [data-logo-outline]', { strokeDasharray: 920, strokeDashoffset: 920 })
-      gsap.set('[data-logo-loader] [data-logo-glyphs], [data-welcome] [data-logo-glyphs]', { strokeDasharray: 160, strokeDashoffset: 160 })
-      gsap.set('[data-login-logo] [data-logo-outline]', { strokeDasharray: 920, strokeDashoffset: 920 })
-      gsap.set('[data-login-logo] [data-logo-glyphs]', { strokeDasharray: 160, strokeDashoffset: 160 })
+      const introLogo = root.querySelector('[data-intro-logo]')
+      const logoRect = introLogo?.getBoundingClientRect()
+      const introLogoOffset = logoRect ? (window.innerWidth / 2) - (logoRect.left + logoRect.width / 2) : 0
+      const primeStroke = (path) => {
+        const length = path.getTotalLength()
+        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length })
+      }
+
+      root.querySelectorAll('[data-intro-logo] [data-logo-outline], [data-intro-logo] [data-logo-glyphs], [data-welcome] [data-logo-outline], [data-welcome] [data-logo-glyphs]').forEach(primeStroke)
+      gsap.set('[data-login], [data-entrance-brand], [data-entrance-footer], [data-access], [data-welcome], [data-paper-wash]', { autoAlpha: 0 })
+      gsap.set('[data-intro-logo]', { x: introLogoOffset, scale: .86, autoAlpha: 0, transformOrigin: '50% 50%' })
+      gsap.set('[data-logo-loader-copy]', { clipPath: 'inset(0 100% 0 0)', autoAlpha: 0 })
+      gsap.set('[data-logo-dot]', { scale: 0, autoAlpha: 0, transformOrigin: '50% 50%' })
+      gsap.set('[data-login-form]', { autoAlpha: 0, clipPath: 'inset(0 100% 0 0)' })
+      gsap.set('[data-login-form] > *', { x: 14, autoAlpha: 0 })
       if (reduced) {
         gsap.set(root, { background: RHINE_CLONE.colors.paper })
         gsap.set('[data-warning]', { autoAlpha: 0 })
-        gsap.set('[data-login], [data-entrance-brand], [data-entrance-footer]', { autoAlpha: 1 })
+        gsap.set('[data-login], [data-intro-logo], [data-logo-loader-copy], [data-login-form], [data-login-form] > *, [data-entrance-brand], [data-entrance-footer]', { x: 0, scale: 1, clipPath: 'inset(0 0% 0 0)', autoAlpha: 1 })
+        root.querySelectorAll('[data-intro-logo] [data-logo-outline], [data-intro-logo] [data-logo-glyphs]').forEach((path) => gsap.set(path, { strokeDashoffset: 0 }))
         setCanLogin(true)
         return
       }
       const intro = gsap.timeline({ defaults: { ease: 'power2.inOut' } })
-        .fromTo('[data-warning-point]', { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .16 })
-        .fromTo('[data-warning-symbol]', { scale: .55, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .28, ease: 'back.out(1.7)' }, '<.03')
-        .fromTo('[data-warning-line]', { scaleY: 0 }, { scaleY: 1, duration: .28, transformOrigin: 'center center' }, '<.08')
-        .fromTo('[data-warning-title]', { clipPath: 'inset(0 100% 0 0)', x: 9, scaleX: .97, autoAlpha: 0 }, { clipPath: 'inset(0 0% 0 0)', x: 0, scaleX: 1, autoAlpha: 1, duration: .58, ease: 'power2.inOut' }, '<.03')
-        .fromTo('[data-warning-row]', { x: 10, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .2, stagger: .16 }, '<.22')
-        .to('[data-warning]', { autoAlpha: 0, duration: .2 }, '+=.48')
-        .fromTo('[data-entrance-flash]', { scaleX: 0, scaleY: 1, autoAlpha: 0 }, { scaleX: 1, autoAlpha: 1, duration: .22, transformOrigin: 'center center', ease: 'power4.out' })
-        .to('[data-entrance-flash]', { scaleX: 6.5, scaleY: 430, duration: .3, ease: 'power4.in' })
-        .set(root, { background: RHINE_CLONE.colors.paper })
-        .set('[data-entrance-flash]', { autoAlpha: 0 })
-        .fromTo('[data-logo-seed]', { width: 0, rotation: -18, autoAlpha: 0 }, { width: 52, rotation: -18, autoAlpha: 1, duration: .22, ease: 'power3.out' })
-        .to('[data-logo-seed]', { width: 8, rotation: 40, autoAlpha: 0, duration: .24, ease: 'power3.in' }, '+=.06')
-        .to('[data-logo-loader]', { autoAlpha: 1, duration: .01 })
-        .fromTo('[data-logo-loader] [data-logo-outline]', { strokeDasharray: 920, strokeDashoffset: 920 }, { strokeDashoffset: 0, duration: .8, ease: 'power2.inOut' })
-        .fromTo('[data-logo-loader] [data-logo-glyphs]', { strokeDasharray: 160, strokeDashoffset: 160 }, { strokeDashoffset: 0, duration: .36, ease: 'power2.out' }, '<.36')
-        .fromTo('[data-logo-loader-copy]', { width: 0 }, { width: '9.2ch', duration: .38, ease: 'steps(9)' }, '<.12')
-        .fromTo('[data-logo-loader-cursor]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .08, repeat: 3, yoyo: true }, '<.15')
-        .to('[data-logo-loader]', { autoAlpha: 1, duration: .24 })
-        .to('[data-login]', { autoAlpha: 1, duration: .01 })
-        .fromTo('[data-login-logo]', { x: '10.5vw', scale: .9, autoAlpha: 0 }, { x: 0, scale: 1, autoAlpha: 1, duration: .58, ease: 'power4.inOut' })
-        .to('[data-logo-loader]', { autoAlpha: 0, duration: .12 }, '<.05')
-        .to('[data-login-logo] [data-logo-outline]', { strokeDashoffset: 0, duration: .48, ease: 'power2.inOut' }, '<.04')
-        .to('[data-login-logo] [data-logo-glyphs]', { strokeDashoffset: 0, duration: .26, ease: 'power2.out' }, '<.2')
-        .fromTo('[data-login-logo] > span', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: .42, ease: 'steps(13)' }, '<.08')
-        .fromTo('[data-login-form]', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: .52, ease: 'power4.inOut' }, '<.02')
-        .fromTo('[data-login-form] > *', { x: 16, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .28, stagger: .065 }, '<.12')
-        .to('[data-entrance-brand], [data-entrance-footer]', { autoAlpha: 1, duration: .3 }, '<.08')
-        .call(() => setCanLogin(true))
-      intro.timeScale(.72)
+        .addLabel('warning', 0)
+        .fromTo('[data-warning-panel]', { xPercent: -185, autoAlpha: 0 }, { xPercent: 0, autoAlpha: 1, duration: .34, ease: 'power4.out' }, 'warning')
+        .fromTo('[data-warning-title]', { clipPath: 'inset(0 100% 0 0)', x: 10, autoAlpha: 0 }, { clipPath: 'inset(0 0% 0 0)', x: 0, autoAlpha: 1, duration: .46, ease: 'power3.out' }, 'warning+=.08')
+        .fromTo('[data-warning-symbol]', { scale: .72, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .32, ease: 'power2.out' }, 'warning+=.48')
+        .fromTo('[data-warning-row]', { x: 12, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .24, stagger: .22, ease: 'power2.out' }, 'warning+=.72')
+        .to('[data-warning]', { autoAlpha: 0, duration: .14, ease: 'power2.in' }, 2.02)
+        .fromTo('[data-entrance-flash]', { scaleX: 0, scaleY: 1, autoAlpha: 0 }, { scaleX: 1, autoAlpha: 1, duration: .18, transformOrigin: 'center center', ease: 'power4.out' }, 2.10)
+        .to('[data-entrance-flash]', { scaleX: 5.4, autoAlpha: 0, duration: .22, ease: 'power3.in' }, 2.28)
+        .fromTo('[data-paper-wash]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .5, ease: 'sine.inOut' }, 2.58)
+        .set(root, { background: RHINE_CLONE.colors.paper }, 3.08)
+        .set('[data-paper-wash], [data-entrance-flash]', { autoAlpha: 0 }, 3.09)
+        .set('[data-login]', { autoAlpha: 1 }, 3.42)
+        .to('[data-intro-logo]', { autoAlpha: 1, duration: .01 }, 3.48)
+        .to('[data-intro-logo] [data-logo-outline]', { strokeDashoffset: 0, duration: .76, ease: 'power2.out' }, 3.50)
+        .fromTo('[data-logo-dot]', { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: .48, duration: .18, stagger: .09, ease: 'power2.out' }, 3.56)
+        .to('[data-intro-logo] [data-logo-glyphs]', { strokeDashoffset: 0, duration: .34, ease: 'power2.out' }, 4.12)
+        .to('[data-logo-dot]', { y: -2, autoAlpha: 0, duration: .18, stagger: .05, ease: 'power2.in' }, 4.26)
+        .to('[data-logo-loader-copy]', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .36, ease: 'power2.out' }, 4.30)
+        .to('[data-intro-logo]', { x: 0, scale: 1, duration: .72, ease: 'power3.inOut' }, 4.55)
+        .to('[data-login-form]', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .54, ease: 'power3.inOut' }, 4.68)
+        .to('[data-login-form] > *', { x: 0, autoAlpha: 1, duration: .34, stagger: .055, ease: 'power2.out' }, 4.80)
+        .to('[data-entrance-brand], [data-entrance-footer]', { autoAlpha: 1, duration: .38, ease: 'power2.out' }, 4.78)
+        .call(() => setCanLogin(true), null, 5.52)
+      intro.eventCallback('onComplete', () => gsap.set('[data-intro-logo], [data-login-form]', { clearProps: 'willChange' }))
     }, root)
     return () => context.revert()
   }, [])
@@ -150,15 +156,11 @@ function Entrance({ onComplete }) {
         <span data-warning-row><small>RETURN TO LOGIN INTERFACE</small><i /></span>
       </div>
     </div>
-    <i className="rhine-logo-seed" data-logo-seed />
-    <div className="rhine-logo-loader" data-logo-loader>
-      <InfinityLogo />
-      <div><span data-logo-loader-copy>R H I N E</span><i data-logo-loader-cursor /></div>
-    </div>
     <i className="rhine-entrance-flash" data-entrance-flash />
+    <i className="rhine-paper-wash" data-paper-wash />
     <div data-entrance-brand><FixedBrand /></div><div data-entrance-footer><FixedFooter /></div>
     <div className="rhine-login" data-login>
-      <div className="rhine-login-logo" data-login-logo><InfinityLogo /><span>R H I N E - L A B</span></div>
+      <div className="rhine-login-logo" data-intro-logo><InfinityLogo /><span data-logo-loader-copy>R H I N E - L A B</span><i className="rhine-logo-dots" aria-hidden="true"><b data-logo-dot /><b data-logo-dot /><b data-logo-dot /></i></div>
       <form className={`rhine-login-form ${loginError ? 'has-error' : ''}`} data-login-form onSubmit={handleLogin} onInput={() => { if (loginError) setLoginError('') }}>
         <h1>WELCOME</h1>
         <label><span>USERNAME:</span><input name="rhine-username" autoComplete="username" aria-invalid={Boolean(loginError)} required /></label>
@@ -264,15 +266,26 @@ function DepartmentMark({ code }) {
 function MemberCarousel({ base, selected, onSelect, folding, onFoldEnd }) {
   const length = RHINE_MEMBERS.length
   const move = (direction) => onSelect((selected + direction + length) % length)
-  return <div className="rhine-member-stage" data-member-stage tabIndex="0" aria-label="Member carousel" onKeyDown={(event) => { if (event.key === 'ArrowLeft') move(-1); if (event.key === 'ArrowRight') move(1) }}>
+
+  useEffect(() => {
+    RHINE_MEMBERS.forEach((member) => {
+      const image = new Image()
+      image.decoding = 'async'
+      image.src = rhineAsset(base, member.image)
+      image.decode?.().catch(() => {})
+    })
+  }, [base])
+
+  return <div className={`rhine-member-stage ${folding ? 'is-switching' : ''}`} data-member-stage tabIndex="0" aria-label="Member carousel" onKeyDown={(event) => { if (event.key === 'ArrowLeft') move(-1); if (event.key === 'ArrowRight') move(1) }}>
     {RHINE_MEMBERS.map((member, index) => {
       let slot = index - selected
       if (slot > length / 2) slot -= length
       if (slot < -length / 2) slot += length
       const distance = Math.abs(slot)
+      if (distance > 2) return null
       const foldClass = folding?.index === index ? `is-folding-${folding.direction}` : ''
       const zIndex = slot === 0 ? 30 : folding?.index === index ? 24 : distance === 1 ? 18 : distance === 2 ? 8 : 0
-      return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${distance > 2 ? 'is-distant' : ''} ${foldClass}`} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => onSelect(index)} onAnimationEnd={(event) => { if (event.target === event.currentTarget && folding?.index === index) onFoldEnd() }} aria-pressed={slot === 0} aria-hidden={distance > 2} tabIndex={distance > 2 ? -1 : 0} key={member.name}>
+      return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${foldClass}`} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => onSelect(index)} onAnimationEnd={(event) => { if (event.target === event.currentTarget && folding?.index === index) onFoldEnd() }} aria-pressed={slot === 0} key={member.name}>
         <div className="rhine-member-code"><DepartmentMark code={member.code} /><small>{member.section}</small></div>
         <span className="rhine-member-section">{member.section}<br />DIRECTOR PROFILE / RHINE LAB</span>
         <img src={rhineAsset(base, member.image)} alt={slot === 0 ? member.name : ''} style={{ '--member-scale': member.scale, '--member-x': `${member.x}%`, '--member-y': `${member.y}%` }} loading="eager" decoding="async" />

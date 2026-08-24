@@ -14,7 +14,7 @@
 .rhine-warning-symbol { position: absolute; top: 35%; display: grid; width: 56px; height: 49px; place-items: center; background: rgba(245,130,0,.72); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 .rhine-warning-symbol::before { content: ''; position: absolute; inset: 2px; background: #030403; clip-path: polygon(50% 2%, 98% 98%, 2% 98%); }
 .rhine-warning-symbol i { position: relative; z-index: 1; margin-top: 12px; color: var(--rhine-accent); font-style: normal; font-size: 20px; font-weight: 700; }
-.rhine-warning-panel { display: grid; grid-template-columns: 10px auto 10px; align-items: center; gap: 0; color: var(--rhine-accent); }
+.rhine-warning-panel { display: grid; grid-template-columns: 10px auto 10px; align-items: center; gap: 0; color: var(--rhine-accent); will-change: transform, opacity; }
 .rhine-warning-panel span { width: 10px; height: clamp(38px, 3.1vw, 60px); background: currentColor; }
 .rhine-warning-panel strong { width: min(23vw, 440px); border-block: 1px solid rgba(245,130,0,.72); padding: 8px 16px; font-size: clamp(25px, 2.25vw, 43px); font-weight: 500; line-height: 1; letter-spacing: .16em; text-align: center; }
 .rhine-warning-copy { display: grid; width: min(23vw, 440px); margin-top: 18px; gap: 12px; }
@@ -23,12 +23,7 @@
 .rhine-warning-copy i { width: 12px; height: 12px; border: 1px solid white; }
 .rhine-warning-copy > span:last-child i { background: white; }
 .rhine-entrance-flash { position: absolute; z-index: 3; top: 50%; left: 50%; width: min(17vw, 330px); height: 3px; border-radius: 50%; background: white; box-shadow: 0 0 12px 5px rgba(255,255,255,.8), 0 0 34px 12px rgba(255,255,255,.45); opacity: 0; transform: translateX(-50%); }
-.rhine-logo-seed { position: absolute; z-index: 4; top: 50%; left: 50%; height: 1px; background: var(--rhine-ink); transform-origin: center; }
-.rhine-logo-loader { position: absolute; z-index: 2; inset: 0; display: grid; place-content: center; justify-items: center; color: var(--rhine-ink); }
-.rhine-logo-loader > svg { width: min(13vw, 250px); overflow: visible; }
-.rhine-logo-loader > div { display: flex; align-items: center; min-height: 22px; margin-top: -9px; }
-.rhine-logo-loader span { display: block; overflow: hidden; font-size: clamp(8px, .68vw, 13px); font-weight: 800; letter-spacing: .62em; white-space: nowrap; }
-.rhine-logo-loader i { width: .72em; height: 1.08em; margin-left: 7px; background: currentColor; }
+.rhine-paper-wash { position: absolute; z-index: 2; inset: 0; display: block; background: var(--rhine-paper); opacity: 0; pointer-events: none; will-change: opacity; }
 .rhine-fixed-brand { position: fixed; z-index: 32; top: 8.1%; left: 3.15%; display: grid; color: var(--rhine-ink); pointer-events: none; }
 .rhine-fixed-brand strong { font-size: clamp(20px, 1.55vw, 31px); font-weight: 760; line-height: .9; letter-spacing: .16em; }
 .rhine-fixed-brand small { margin-top: 8px; font-size: clamp(8px, .64vw, 13px); font-weight: 720; line-height: 1.25; letter-spacing: .075em; }
@@ -37,10 +32,12 @@
 .rhine-fixed-footer i { width: 31px; height: 7px; background: currentColor; }
 .rhine-fixed-footer.is-light { color: var(--rhine-pale); }
 .rhine-login { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: clamp(70px, 7.2vw, 138px); color: var(--rhine-ink); }
-.rhine-login-logo { position: relative; left: 4vw; display: grid; justify-items: center; width: min(14.5vw, 280px); }
+.rhine-login-logo { position: relative; left: 4vw; display: grid; justify-items: center; width: min(14.5vw, 280px); will-change: transform, opacity; }
 .rhine-login-logo svg { width: 100%; }
-.rhine-login-logo span { margin-top: -10px; font-size: clamp(12px, 1vw, 20px); font-weight: 800; letter-spacing: .62em; white-space: nowrap; }
-.rhine-login-form { display: grid; width: min(21vw, 405px); gap: 12px; }
+.rhine-login-logo span { display: block; overflow: hidden; margin-top: -10px; font-size: clamp(12px, 1vw, 20px); font-weight: 800; letter-spacing: .62em; white-space: nowrap; }
+.rhine-logo-dots { position: absolute; top: 73%; left: 50%; display: flex; gap: 7px; transform: translateX(-50%); pointer-events: none; }
+.rhine-logo-dots b { display: block; width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.rhine-login-form { display: grid; width: min(21vw, 405px); gap: 12px; will-change: clip-path, opacity; }
 .rhine-login-form h1 { margin: 0 0 9px; font-size: clamp(19px, 1.45vw, 29px); font-weight: 500; text-align: center; }
 .rhine-login-form label { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 9px; font-size: clamp(9px, .78vw, 15px); font-weight: 750; }
 .rhine-login-form input { min-width: 0; height: 32px; border: 0; border-bottom: 1px solid rgba(8,9,8,.18); outline: 0; background: rgba(255,255,255,.65); padding: 4px 8px; }
@@ -131,7 +128,7 @@
 /* Member perspective corridor. */
 .rhine-members::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 48%, rgba(255,255,255,.6), transparent 58%); }
 .rhine-member-stage { position: absolute; inset: 0; overflow: hidden; perspective: 2200px; perspective-origin: 50% 48%; transform-style: preserve-3d; outline: 0; }
-.rhine-member-card { --card-x: 0vw; --card-y: 0vh; --card-z: 0px; --card-scale: 1; --card-rotate: 0deg; --card-opacity: 1; position: absolute; top: 9.5%; left: 50%; width: clamp(250px, 20.2vw, 388px); height: 83.5%; padding: 0; overflow: visible; background: linear-gradient(180deg, transparent 0 3%, #9f9f9c 3% 100%); box-shadow: 0 12px 25px rgba(0,0,0,.1); color: white; text-align: left; transform: translate3d(calc(-50% + var(--card-x)),var(--card-y),var(--card-z)) rotateY(var(--card-rotate)) scale(var(--card-scale)); transform-origin: 50% 52%; backface-visibility: hidden; opacity: var(--card-opacity); transition: transform .32s cubic-bezier(.16,1,.3,1), opacity .28s ease, box-shadow .24s ease; will-change: transform, opacity; }
+.rhine-member-card { --card-x: 0vw; --card-y: 0vh; --card-z: 0px; --card-scale: 1; --card-rotate: 0deg; --card-opacity: 1; position: absolute; top: 9.5%; left: 50%; width: clamp(250px, 20.2vw, 388px); height: 83.5%; padding: 0; overflow: visible; background: linear-gradient(180deg, transparent 0 3%, #9f9f9c 3% 100%); box-shadow: 0 12px 25px rgba(0,0,0,.1); color: white; text-align: left; transform: translate3d(calc(-50% + var(--card-x)),var(--card-y),var(--card-z)) rotateY(var(--card-rotate)) scale(var(--card-scale)); transform-origin: 50% 52%; backface-visibility: hidden; opacity: var(--card-opacity); transition: transform .32s cubic-bezier(.16,1,.3,1), opacity .28s ease; }
 .rhine-member-card[data-member-slot="-1"] { --card-x: -21.3vw; --card-y: .5vh; --card-z: -62px; --card-scale: .96; --card-rotate: 2.5deg; --card-opacity: .5; }
 .rhine-member-card[data-member-slot="1"] { --card-x: 21.3vw; --card-y: .5vh; --card-z: -62px; --card-scale: .96; --card-rotate: -2.5deg; --card-opacity: .5; }
 .rhine-member-card[data-member-slot="-2"] { --card-x: -44vw; --card-y: 1.1vh; --card-z: -150px; --card-scale: .9; --card-rotate: 4deg; --card-opacity: .14; }
@@ -143,9 +140,10 @@
 .rhine-member-card.is-current { box-shadow: 0 22px 55px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.3); filter: none; }
 .rhine-member-card.is-folding-left { transform-origin: 100% 52%; pointer-events: none; animation: rhine-member-fold-left .32s cubic-bezier(.22,.61,.36,1) both; }
 .rhine-member-card.is-folding-right { transform-origin: 0% 52%; pointer-events: none; animation: rhine-member-fold-right .32s cubic-bezier(.22,.61,.36,1) both; }
-.rhine-member-card:is(.is-folding-left, .is-folding-right) { filter: none; }
+.rhine-member-card:is(.is-current, [data-member-slot="-2"], [data-member-slot="-1"], [data-member-slot="1"], [data-member-slot="2"], .is-folding-left, .is-folding-right) { will-change: transform, opacity; }
+.rhine-member-card:is(.is-folding-left, .is-folding-right) { filter: none; transition: none; }
 .rhine-member-card[data-member-slot="-2"], .rhine-member-card[data-member-slot="2"] { transition: none; }
-.rhine-member-card.is-distant { pointer-events: none; }
+.rhine-member-card.is-distant { visibility: hidden; pointer-events: none; content-visibility: hidden; }
 .rhine-member-card::before { content: ''; position: absolute; z-index: 1; inset: 3% 0 0; background: linear-gradient(0deg, rgba(38,38,36,.5), transparent 34%), linear-gradient(90deg, transparent 72%, rgba(255,255,255,.12)); pointer-events: none; }
 .rhine-member-card::after { content: ''; position: absolute; z-index: 2; right: -12%; bottom: 4%; width: 70%; height: 58%; background: linear-gradient(110deg, transparent 0 62%, rgba(255,255,255,.38) 63% 63.8%, transparent 64.5%), linear-gradient(74deg, transparent 0 57%, rgba(243,207,94,.28) 58% 59%, transparent 60%); mix-blend-mode: screen; pointer-events: none; }
 .rhine-member-card > img { position: absolute; z-index: 1; inset: 3% -21% -2%; width: 142%; height: 97%; object-fit: contain; transform: translate3d(var(--member-x), calc(var(--member-y) - 5%), 0) scale(var(--member-scale)); transform-origin: 50% 55%; }
@@ -158,6 +156,7 @@
 .rhine-member-stage-holo { background: conic-gradient(from 218deg at 50% 50%, transparent 0 7%, rgba(0,242,255,.18) 11%, rgba(123,74,255,.2) 14%, rgba(255,63,140,.18) 17%, rgba(255,225,62,.2) 20%, transparent 25% 66%, rgba(0,242,255,.14) 71%, transparent 78%); opacity: .52; transform: translate3d(-50%,0,0); }
 .rhine-member-stage-scan { background: linear-gradient(110deg, transparent 39%, rgba(255,255,255,.07) 45%, rgba(255,255,255,.38) 49%, rgba(255,75,207,.12) 52%, transparent 59%); opacity: .38; transform: translate3d(-88%,0,0); animation: rhine-stage-laser 28s cubic-bezier(.42,0,.22,1) infinite; will-change: transform; }
 .rhine-member-stage-glint { top: 69%; left: 48%; width: clamp(100px, 8vw, 155px); height: 3px; border-radius: 50%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.82), rgba(96,225,255,.34), transparent); box-shadow: 0 0 8px rgba(255,255,255,.38); opacity: .5; transform: translate3d(-90%,0,0) rotate(-7deg); animation: rhine-member-glint 23s ease-in-out infinite alternate; will-change: transform, opacity; }
+.rhine-member-stage.is-switching :is(.rhine-member-stage-scan, .rhine-member-stage-glint) { animation-play-state: paused; }
 .rhine-member-code { position: absolute; z-index: 7; top: -4.6%; left: -4.4%; display: grid; width: 29%; min-height: 14%; align-content: center; padding: 9px 8px; background: #080908; box-shadow: 0 7px 15px rgba(0,0,0,.16); }
 .rhine-member-code strong { display: grid; font-family: Haettenschweiler, "Arial Narrow", sans-serif; font-size: clamp(17px, 1.55vw, 30px); font-weight: 400; line-height: .64; letter-spacing: -.018em; }
 .rhine-member-code strong, .rhine-member-code small { color: #fff !important; }
@@ -222,13 +221,14 @@
 .rhine-research-scene, .rhine-research-scene figure { position: absolute; inset: 0; margin: 0; }
 .rhine-research-scene .rhine-blackhole-visual { z-index: 1; inset: 7% 12.6% 12% 16%; overflow: hidden; }
 .rhine-blackhole-field { position: absolute; inset: 0; }
+.rhine-blackhole-field::before { content: ''; position: absolute; z-index: 3; top: 49.8%; left: 50.8%; width: 49%; aspect-ratio: 1.72; border-radius: 50%; background: radial-gradient(ellipse at center, transparent 0 36%, rgba(255,255,255,.07) 42%, rgba(68,184,255,.1) 47%, rgba(255,62,157,.07) 51%, transparent 59%); opacity: .2; transform: translate3d(-50%,-50%,0) scale(.965); transform-origin: 50% 50%; animation: rhine-blackhole-breathe 15s cubic-bezier(.37,0,.2,1) infinite alternate; will-change: transform, opacity; pointer-events: none; }
 .rhine-blackhole-field::after { content: ''; position: absolute; z-index: 4; top: 57%; left: 36%; width: 28%; height: 2px; border-radius: 50%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.78), rgba(85,204,255,.42), transparent); box-shadow: 0 0 9px rgba(255,255,255,.34); opacity: .58; transform: translate3d(-34%,0,0) rotate(5deg); animation: rhine-blackhole-glint 19s cubic-bezier(.45,.05,.2,1) infinite alternate; will-change: transform, opacity; pointer-events: none; }
 .rhine-blackhole-field img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 .rhine-blackhole-base { filter: saturate(.98) contrast(1.08); transform: scale(1.045); }
-.rhine-blackhole-flow { opacity: .2; mix-blend-mode: normal; filter: saturate(1.25) contrast(1.06); will-change: transform; }
+.rhine-blackhole-flow { opacity: .2; mix-blend-mode: normal; filter: saturate(1.25) contrast(1.06); }
 .rhine-blackhole-flow.is-upper { clip-path: polygon(0 17%, 100% 17%, 100% 55%, 0 55%); transform: translate3d(1.2%,-.2%,0) scaleX(1.025); }
 .rhine-blackhole-flow.is-lower { clip-path: polygon(0 48%, 100% 48%, 100% 80%, 0 80%); opacity: .16; transform: translate3d(-1.1%,.25%,0) scaleX(1.035); }
-.rhine-blackhole-lensing { position: absolute; top: 49.7%; left: 50.8%; width: 23%; aspect-ratio: 1.36; border: 1px solid rgba(255,255,255,.24); border-radius: 50%; box-shadow: 0 0 20px rgba(87,186,255,.12), inset 0 0 16px rgba(255,78,174,.09); opacity: .28; transform: translate(-50%,-50%) scale(1.01); animation: rhine-blackhole-lens 32s ease-in-out infinite alternate; will-change: transform, opacity; }
+.rhine-blackhole-lensing { position: absolute; top: 49.7%; left: 50.8%; width: 23%; aspect-ratio: 1.36; border: 1px solid rgba(255,255,255,.24); border-radius: 50%; box-shadow: 0 0 20px rgba(87,186,255,.12), inset 0 0 16px rgba(255,78,174,.09); opacity: .28; transform: translate(-50%,-50%) scale(1.01); animation: rhine-blackhole-lens 14s cubic-bezier(.37,0,.2,1) infinite alternate; will-change: transform, opacity; }
 .rhine-blackhole-visual figcaption { position: absolute; right: 3.2%; bottom: 3.5%; display: grid; justify-items: end; gap: 5px; color: rgba(255,255,255,.7); font-size: 7px; letter-spacing: .18em; }
 .rhine-blackhole-visual figcaption b { color: white; font-size: 1.45em; }
 .rhine-space-stars { position: absolute; inset: -12%; pointer-events: none; background-image: radial-gradient(circle, rgba(255,255,255,.38) 0 1px, transparent 1.6px), radial-gradient(circle, rgba(245,130,0,.24) 0 1px, transparent 1.5px); background-position: 0 0, 42px 63px; background-size: 127px 111px, 191px 177px; mix-blend-mode: normal; }
@@ -280,9 +280,8 @@
 @keyframes rhine-department-open { 0% { transform: translate(-50%,-50%) scaleX(.08); opacity: 0; } 68% { transform: translate(-50%,-50%) scaleX(1.025); opacity: 1; } 100% { transform: translate(-50%,-50%) scaleX(1); opacity: 1; } }
 @keyframes rhine-department-field { to { transform: rotate(378deg) scale(1.6); } }
 @keyframes rhine-trace-pulse { 50% { opacity: .28; } }
-@keyframes rhine-blackhole-flow-upper { 0% { transform: translate3d(-2.2%,.45%,0) scaleX(1.015); } 100% { transform: translate3d(2.6%,-.35%,0) scaleX(1.04); } }
-@keyframes rhine-blackhole-flow-lower { 0% { transform: translate3d(1.8%,-.35%,0) scaleX(1.025); } 100% { transform: translate3d(-2.4%,.4%,0) scaleX(1.055); } }
-@keyframes rhine-blackhole-lens { 0% { opacity: .18; transform: translate(-50%,-50%) scale(.985); } 100% { opacity: .38; transform: translate(-50%,-50%) scale(1.04); } }
+@keyframes rhine-blackhole-breathe { 0% { opacity: .13; transform: translate3d(-50%,-50%,0) scale(.965); } 54% { opacity: .28; } 100% { opacity: .18; transform: translate3d(-50%,-50%,0) scale(1.045); } }
+@keyframes rhine-blackhole-lens { 0% { opacity: .16; transform: translate(-50%,-50%) scale(.96); } 52% { opacity: .42; } 100% { opacity: .22; transform: translate(-50%,-50%) scale(1.07); } }
 @keyframes rhine-blackhole-glint { 0%, 18% { opacity: .2; transform: translate3d(-34%,0,0) rotate(5deg); } 64% { opacity: .68; } 100% { opacity: .18; transform: translate3d(66%,0,0) rotate(5deg); } }
 @keyframes rhine-stars-drift { to { transform: translate3d(5%, 3%, 0); } }
 
@@ -299,6 +298,7 @@
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-field,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-flow,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-lensing,
+.rhine-prototype:not(.rhine-active-research) .rhine-blackhole-field::before,
 .rhine-prototype:not(.rhine-active-research) .rhine-blackhole-field::after,
 .rhine-prototype:not(.rhine-active-research) .rhine-space-stars,
 .rhine-prototype:not(.rhine-active-research) .rhine-progress-ring::before,
