@@ -10,7 +10,8 @@
     "review:archive": "node scripts/review-rhine-archive.mjs",
     "review:motion": "node scripts/review-rhine-motion.mjs",
     "review:entrance": "node scripts/review-rhine-entrance.mjs",
-    "review:performance": "node scripts/review-rhine-performance.mjs"
+    "review:performance": "node scripts/review-rhine-performance.mjs",
+    "publish:veiko": "powershell -ExecutionPolicy Bypass -File scripts/publish-veiko.ps1"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

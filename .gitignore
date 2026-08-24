@@ -34,3 +34,13 @@
 # Generated output and local dependencies are never published.
 /dist/
 /node_modules/
+
+# Keep local source/reference leftovers out of the public VEIKO repository.
+/public/assets/rhine-clone/members/*.png
+/public/assets/rhine-clone/scenes/headquarters.png
+/public/assets/rhine-clone/scenes/pioneer-planet.png
+/public/assets/rhine-clone/scenes/rhine-logo.png
+/public/assets/rhine-clone/scenes/wallpaper-01.jpg
+/public/assets/rhine-clone/scenes/wallpaper-02.jpg
+/public/rhine-reference/*.mp4
+/public/rhine-reference/headquarters/*.png

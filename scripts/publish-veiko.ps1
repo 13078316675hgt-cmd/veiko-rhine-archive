@@ -43,6 +43,32 @@ function Invoke-GitHubJson {
   Invoke-RestMethod @parameters
 }
 
+Push-Location $projectRoot
+try {
+  pnpm run build
+  if ($LASTEXITCODE -ne 0) {
+    throw 'Production build failed; publication was cancelled.'
+  }
+
+  git --git-dir="$gitDirectory" --work-tree="$projectRoot" add -A
+  if ($LASTEXITCODE -ne 0) {
+    throw 'Unable to stage the VEIKO publication files.'
+  }
+
+  git --git-dir="$gitDirectory" --work-tree="$projectRoot" diff --cached --quiet
+  $diffStatus = $LASTEXITCODE
+  if ($diffStatus -eq 1) {
+    git --git-dir="$gitDirectory" --work-tree="$projectRoot" commit -m $Message
+    if ($LASTEXITCODE -ne 0) {
+      throw 'Unable to create the VEIKO publication commit.'
+    }
+  } elseif ($diffStatus -ne 0) {
+    throw 'Unable to inspect VEIKO publication changes.'
+  }
+} finally {
+  Pop-Location
+}
+
 $relativePaths = @(git --git-dir="$gitDirectory" --work-tree="$projectRoot" ls-tree -r --name-only HEAD)
 if ($LASTEXITCODE -ne 0 -or $relativePaths.Count -eq 0) {
   throw 'No VEIKO deployment files were found.'
