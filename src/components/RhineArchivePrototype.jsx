@@ -187,7 +187,7 @@ function Entrance({ onComplete }) {
     <div className="rhine-warning" data-warning>
       <i className="rhine-warning-point" data-warning-point />
       <span className="rhine-warning-symbol" data-warning-symbol><i>!</i></span>
-      <div className="rhine-warning-panel"><span data-warning-line /><strong data-warning-title>WARNING</strong><span data-warning-line /></div>
+      <div className="rhine-warning-panel" data-warning-panel><span data-warning-line /><strong data-warning-title>WARNING</strong><span data-warning-line /></div>
       <div className="rhine-warning-copy" data-warning-copy>
         <span data-warning-row><small>INCORRECT USERNAME OR PASSWORD</small><i /></span>
         <span data-warning-row><small>LOGIN FAILED</small><i /></span>
