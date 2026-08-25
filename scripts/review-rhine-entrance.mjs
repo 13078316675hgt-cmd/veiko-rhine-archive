@@ -16,6 +16,16 @@ const shot = async (name) => page.screenshot({ path: fileURLToPath(new URL(`${na
 await page.goto(baseUrl, { waitUntil: 'networkidle' })
 await page.waitForTimeout(1200)
 await shot('01-warning')
+const warningGeometry = await page.locator('.rhine-warning-panel').evaluate((panel) => {
+  const symbol = panel.querySelector('.rhine-warning-symbol')
+  const panelRect = panel.getBoundingClientRect()
+  const symbolRect = symbol.getBoundingClientRect()
+  return {
+    centerDelta: Math.abs((panelRect.left + panelRect.width / 2) - (symbolRect.left + symbolRect.width / 2)),
+    gap: panelRect.top - symbolRect.bottom,
+  }
+})
+if (warningGeometry.centerDelta > .5 || warningGeometry.gap < 35 || warningGeometry.gap > 37) failures.push(`warning symbol drifted from the reference anchor: ${JSON.stringify(warningGeometry)}`)
 await page.waitForTimeout(1720)
 await shot('02-flash')
 await page.waitForTimeout(1400)

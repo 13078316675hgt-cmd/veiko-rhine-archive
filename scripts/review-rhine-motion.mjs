@@ -56,7 +56,7 @@ await memberHolo.evaluate((node) => node.getAnimations().filter((animation) => a
 const holoAfterEase = await styleOf('.rhine-member-stage-scan', ['transform', 'filter'])
 if (holoBeforePointer.transform !== holoAfterPointer.transform) failures.push('member hologram changed in response to pointer movement')
 if (holoBeforePointer.transform === holoAfterEase.transform) failures.push('member hologram has no autonomous easing motion')
-const freezeFoldStyle = await page.addStyleTag({ content: '.rhine-member-track:is(.is-sliding-left,.is-sliding-right), .rhine-member-card:is(.is-folding-left,.is-folding-right,.is-incoming,.is-side-receding,.is-side-approaching) { animation-play-state: paused !important; }' })
+const freezeFoldStyle = await page.addStyleTag({ content: '.rhine-member-track:is(.is-sliding-left,.is-sliding-right), .rhine-member-card:is(.is-folding-left,.is-folding-right,.is-incoming,.is-side-receding,.is-side-approaching,.is-edge-exiting) { animation-play-state: paused !important; }' })
 await page.getByRole('button', { name: 'Next member', exact: true }).click()
 const memberTrack = page.locator('.rhine-member-track:is(.is-sliding-left,.is-sliding-right)')
 const outgoingCard = page.locator('.rhine-member-card:is(.is-folding-left, .is-folding-right)')
@@ -68,7 +68,7 @@ await outgoingCard.waitFor({ state: 'attached' })
 await incomingCard.waitFor({ state: 'attached' })
 const setMemberTime = async (time) => {
   await memberTrack.evaluate((node, currentTime) => {
-    const controlled = new Set(['rhine-member-track-shift', 'rhine-member-fold-left', 'rhine-member-fold-right', 'rhine-member-promote', 'rhine-member-side-recede', 'rhine-member-side-approach'])
+    const controlled = new Set(['rhine-member-track-shift', 'rhine-member-fold-left', 'rhine-member-fold-right', 'rhine-member-promote', 'rhine-member-side-recede', 'rhine-member-side-approach', 'rhine-member-edge-exit'])
     node.getAnimations({ subtree: true }).filter((animation) => controlled.has(animation.animationName)).forEach((animation) => { animation.pause(); animation.currentTime = currentTime })
   }, time)
 }
@@ -88,14 +88,14 @@ const memberStart = {
   outgoing: await outgoingCard.evaluate((node) => { const style = getComputedStyle(node); return { transform: style.transform, filter: style.filter, opacity: style.opacity, animationName: style.animationName, animationDuration: style.animationDuration } }),
 }
 await page.screenshot({ path: fileURLToPath(new URL('02a-member-fold-start.png', output)) })
-await setMemberTime(310)
+await setMemberTime(340)
 const memberMiddle = {
   track: await styleOf('.rhine-member-track', ['transform', 'animationName']),
   incoming: await styleOf('.rhine-member-card.is-incoming', ['transform', 'filter', 'opacity', 'animationName']),
   outgoing: await outgoingCard.evaluate((node) => { const style = getComputedStyle(node); return { transform: style.transform, filter: style.filter, opacity: style.opacity, animationName: style.animationName, animationDuration: style.animationDuration } }),
 }
 await page.screenshot({ path: fileURLToPath(new URL('02b-member-fold-mid.png', output)) })
-await setMemberTime(619)
+await setMemberTime(679)
 const memberEnd = {
   track: await styleOf('.rhine-member-track', ['transform', 'animationName']),
   incoming: await styleOf('.rhine-member-card.is-incoming', ['transform', 'filter', 'opacity', 'animationName']),
@@ -211,7 +211,22 @@ if (researchBlackHoleProof.innerArcOpacity < .5) failures.push('research event-h
 const researchTitle = (await page.locator('.rhine-pioneer-mark span').innerText()).replace(/\s+/g, ' ').trim()
 if (!researchTitle.startsWith('月之计划')) failures.push(`research title is ${researchTitle}`)
 if (await page.locator('.rhine-moon-project-logo').count() !== 1) failures.push('moon project logo is missing')
-if ((await page.locator('.rhine-timecode').innerText()).trim() !== 'T−00:00:00') failures.push('temporal glitch readout is missing')
+const researchTimeCodes = await page.locator('.rhine-timecode > span').evaluateAll((nodes) => nodes.map((node) => node.dataset.timeFrame))
+if (researchTimeCodes.length !== 8 || new Set(researchTimeCodes).size !== 8 || !researchTimeCodes.includes('T−00:00:00')) failures.push('temporal glitch sequence is incomplete')
+const changingTimeCodes = await page.locator('.rhine-timecode').evaluate((node) => {
+  const spans = [...node.querySelectorAll(':scope > span')]
+  const samples = []
+  for (const currentTime of [100, 900, 1700]) {
+    spans.forEach((span) => {
+      const cycle = span.getAnimations().find((animation) => animation.animationName === 'rhine-timecode-cycle')
+      cycle.pause()
+      cycle.currentTime = currentTime
+    })
+    samples.push(spans.find((span) => Number(getComputedStyle(span).opacity) > .5)?.dataset.timeFrame || '')
+  }
+  return samples
+})
+if (new Set(changingTimeCodes).size !== 3 || changingTimeCodes.some((value) => !value)) failures.push(`temporal glitch digits did not advance: ${changingTimeCodes.join(', ')}`)
 if (await page.locator('.rhine-time-meter .rhine-time-dial').count() !== 1) failures.push('particle time dial is missing')
 if (await page.locator('.rhine-time-mass.is-source').count() !== 1 || await page.locator('.rhine-time-mass.is-target').count() !== 1) failures.push('particle time reservoirs are missing')
 if (await page.locator('.rhine-time-transfer > i').count() !== 4) failures.push('particle transfer stream is incomplete')

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { RHINE_CLONE, RHINE_DEPARTMENTS, RHINE_MEMBERS, RHINE_RESEARCH, rhineAsset } from '../data/rhineArchiveContent'
@@ -210,8 +210,7 @@ function Entrance({ onPrepare, onComplete }) {
   return <div className="rhine-entrance" ref={rootRef} data-entrance-phase="warning">
     <div className="rhine-warning" data-warning>
       <i className="rhine-warning-point" data-warning-point />
-      <span className="rhine-warning-symbol" data-warning-symbol><i>!</i></span>
-      <div className="rhine-warning-panel" data-warning-panel><span data-warning-line /><strong data-warning-title>WARNING</strong><span data-warning-line /></div>
+      <div className="rhine-warning-panel" data-warning-panel><span className="rhine-warning-symbol" data-warning-symbol><i>!</i></span><span data-warning-line /><strong data-warning-title>WARNING</strong><span data-warning-line /></div>
       <div className="rhine-warning-copy" data-warning-copy>
         <span data-warning-row><small>INCORRECT USERNAME OR PASSWORD</small><i /></span>
         <span data-warning-row><small>LOGIN FAILED</small><i /></span>
@@ -358,7 +357,7 @@ function DepartmentMark({ code }) {
   return <strong>{lines.map((line) => <span key={line}>{line}</span>)}</strong>
 }
 
-function MemberCardBody({ base, member, current = false }) {
+const MemberCardBody = memo(function MemberCardBody({ base, member }) {
   const imageWidth = 142 * member.scale
   const imageHeight = 97 * member.scale
   const imageLeft = -21 + (member.x / 100 * 142) + ((1 - member.scale) * 71)
@@ -366,26 +365,30 @@ function MemberCardBody({ base, member, current = false }) {
   return <>
     <div className="rhine-member-code"><DepartmentMark code={member.code} /><small>{member.section}</small></div>
     <span className="rhine-member-section">{member.section}<br />DIRECTOR PROFILE / RHINE LAB</span>
-    <img src={rhineAsset(base, member.image)} alt={current ? member.name : ''} style={{ '--member-image-left': `${imageLeft}%`, '--member-image-top': `${imageTop}%`, '--member-image-width': `${imageWidth}%`, '--member-image-height': `${imageHeight}%` }} loading="eager" decoding="async" />
+    <img src={rhineAsset(base, member.image)} alt={member.name} style={{ '--member-image-left': `${imageLeft}%`, '--member-image-top': `${imageTop}%`, '--member-image-width': `${imageWidth}%`, '--member-image-height': `${imageHeight}%` }} loading="eager" decoding="async" />
     <span className="rhine-member-profile">莱茵生命<br />科研主任<br />内部资料</span>
     <span className="rhine-member-name"><b>{member.name}</b><small>{member.role}</small></span>
     <span className="rhine-member-logos"><InfinityLogo compact /><i /></span>
   </>
-}
+})
 
 const MEMBER_SLOT_X = { '-2': -42.6, '-1': -21.3, '0': 0, '1': 21.3, '2': 42.6 }
 
 function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
   const length = RHINE_MEMBERS.length
+  const preloadRef = useRef([])
   const move = (direction) => onSelect((selected + direction + length) % length)
 
   useEffect(() => {
-    RHINE_MEMBERS.forEach((member) => {
+    const images = RHINE_MEMBERS.map((member) => {
       const image = new Image()
       image.decoding = 'async'
       image.src = rhineAsset(base, member.image)
       image.decode?.().catch(() => {})
+      return image
     })
+    preloadRef.current = images
+    return () => { preloadRef.current = [] }
   }, [base])
 
   useEffect(() => {
@@ -408,12 +411,13 @@ function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
         let sideMotionClass = ''
         if (moving?.steps === 1 && !outgoing && !incoming) {
           const nextSlot = slot + (moving.direction === 'left' ? -1 : 1)
-          if (Math.abs(nextSlot) <= 2 && Math.abs(nextSlot) > Math.abs(slot)) sideMotionClass = 'is-side-receding'
-          if (Math.abs(nextSlot) <= 2 && Math.abs(nextSlot) < Math.abs(slot)) sideMotionClass = 'is-side-approaching'
+          if (Math.abs(slot) === 2 && Math.abs(nextSlot) === 3) sideMotionClass = 'is-edge-exiting'
+          else if (distance <= 2 && Math.abs(nextSlot) <= 2 && Math.abs(nextSlot) > Math.abs(slot)) sideMotionClass = 'is-side-receding'
+          else if (distance <= 2 && Math.abs(nextSlot) <= 2 && Math.abs(nextSlot) < Math.abs(slot)) sideMotionClass = 'is-side-approaching'
         }
         const zIndex = incoming ? 32 : slot === 0 ? 30 : distance === 1 ? 18 : distance === 2 ? 8 : 0
-        return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${outgoing ? 'is-outgoing' : ''} ${incoming ? 'is-incoming' : ''} ${foldClass} ${sideMotionClass}`} data-member-index={index} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => onSelect(index)} aria-pressed={slot === 0} key={member.name}>
-          <MemberCardBody base={base} member={member} current={slot === 0 || incoming} />
+        return <button className={`rhine-member-card ${slot === 0 ? 'is-current' : ''} ${outgoing ? 'is-outgoing' : ''} ${incoming ? 'is-incoming' : ''} ${foldClass} ${sideMotionClass}`} data-member-index={index} data-member-name={member.name} data-member-slot={slot} type="button" style={{ zIndex }} onClick={() => { if (slot !== 0) move(Math.sign(slot)) }} aria-pressed={slot === 0} key={member.name}>
+          <MemberCardBody base={base} member={member} />
         </button>
       })}
     </div>
@@ -463,6 +467,17 @@ function BlackHoleSystem({ base }) {
   </figure>
 }
 
+const RHINE_TIME_CODES = [
+  'T−00:00:00',
+  'T+00:00:37',
+  'T+00:01:13',
+  'T−00:00:21',
+  'T+88:61:13',
+  'T−03:72:44',
+  'T+14:03:27',
+  'T±00:00:01',
+]
+
 function ResearchScene({ base, onContinue }) {
   const timeDots = (layer) => Array.from({ length: 121 }, (_, index) => {
     const x = index % 11
@@ -475,7 +490,7 @@ function ResearchScene({ base, onContinue }) {
     <div className="rhine-space-stars is-far" aria-hidden="true" /><div className="rhine-space-stars is-near" aria-hidden="true" />
     <div className="rhine-research-shade" />
     <div className="rhine-pioneer-mark" data-research-ui><span>{RHINE_RESEARCH.title}<small>{RHINE_RESEARCH.english}</small></span><MoonProjectLogo /></div>
-    <div className="rhine-progress-system" data-research-ui><div className="rhine-time-meter" aria-label="Particle time transfer progress"><svg className="rhine-time-dial" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="53" /><path d="M60 2v8M60 110v8M2 60h8M110 60h8M18.3 18.3l5.7 5.7M96 96l5.7 5.7M101.7 18.3L96 24M24 96l-5.7 5.7" /><path className="is-sweep" d="M60 7a53 53 0 0 1 45.9 26.5" /></svg><span className="rhine-time-mass is-source" aria-hidden="true">{timeDots('source')}</span><span className="rhine-time-mass is-target" aria-hidden="true">{timeDots('target')}</span><span className="rhine-time-transfer" aria-hidden="true">{Array.from({ length: 4 }, (_, index) => <i style={{ '--transfer-index': index }} key={index} />)}</span><i className="rhine-time-core" aria-hidden="true" /></div><strong className="rhine-timecode" data-glitch-a="T+88:61:13" data-glitch-b="T−--:--:--"><span>{RHINE_RESEARCH.progress}</span></strong></div>
+    <div className="rhine-progress-system" data-research-ui><div className="rhine-time-meter" aria-label="Particle time transfer progress"><svg className="rhine-time-dial" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="53" /><path d="M60 2v8M60 110v8M2 60h8M110 60h8M18.3 18.3l5.7 5.7M96 96l5.7 5.7M101.7 18.3L96 24M24 96l-5.7 5.7" /><path className="is-sweep" d="M60 7a53 53 0 0 1 45.9 26.5" /></svg><span className="rhine-time-mass is-source" aria-hidden="true">{timeDots('source')}</span><span className="rhine-time-mass is-target" aria-hidden="true">{timeDots('target')}</span><span className="rhine-time-transfer" aria-hidden="true">{Array.from({ length: 4 }, (_, index) => <i style={{ '--transfer-index': index }} key={index} />)}</span><i className="rhine-time-core" aria-hidden="true" /></div><strong className="rhine-timecode" aria-label="Temporal anomaly clock">{RHINE_TIME_CODES.map((value, index) => <span data-time-frame={value} style={{ '--time-delay': `${index * .8}s` }} aria-hidden="true" key={value}><i>{value}</i></span>)}</strong></div>
     <div className="rhine-research-copy" data-research-ui><p>{RHINE_RESEARCH.copy.map((line) => <span key={line}>{line}</span>)}</p><button type="button" onClick={onContinue}>{RHINE_RESEARCH.button}<i /></button></div>
     <div className="rhine-research-readout" data-research-ui><b>R / 01 — 037</b><span>{RHINE_RESEARCH.readout.slice(1).map((line) => <small key={line}>{line}</small>)}</span><i /></div>
   </div>
