@@ -37,33 +37,33 @@
 .rhine-login-logo span { display: block; overflow: hidden; margin-top: -10px; font-size: clamp(12px, 1vw, 20px); font-weight: 800; letter-spacing: .62em; white-space: nowrap; }
 .rhine-logo-dots { position: absolute; top: 73%; left: 50%; display: flex; gap: 7px; transform: translateX(-50%); pointer-events: none; }
 .rhine-logo-dots b { display: block; width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
-.rhine-login-form { display: grid; width: min(21vw, 405px); gap: 12px; will-change: clip-path, opacity; }
+.rhine-login-form { display: grid; width: min(21vw, 405px); gap: 12px; will-change: opacity; }
 .rhine-login-form h1 { margin: 0 0 9px; font-size: clamp(19px, 1.45vw, 29px); font-weight: 500; text-align: center; }
 .rhine-login-form label { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 9px; font-size: clamp(9px, .78vw, 15px); font-weight: 750; }
-.rhine-login-form input { min-width: 0; height: 32px; border: 0; border-bottom: 1px solid rgba(8,9,8,.18); outline: 0; background: rgba(255,255,255,.65); padding: 4px 8px; }
+.rhine-login-form input { min-width: 0; height: 32px; border: 0; border-bottom: 1px solid rgba(8,9,8,.18); outline: 0; background: rgba(255,255,255,.65); padding: 4px 8px; transform-origin: left center; backface-visibility: hidden; will-change: transform; }
 .rhine-login-form input:focus { border-bottom-color: var(--rhine-accent); }
 .rhine-login-form.has-error input { border-bottom-color: #c32318; background: rgba(195,35,24,.055); }
 .rhine-login-error { min-height: 1em; margin: -4px 0 -3px 101px; color: #c32318; font-size: clamp(8px, .62vw, 12px); font-weight: 760; letter-spacing: .08em; }
-.rhine-login-form button { margin-top: 3px; padding: 13px; background: #050605; color: white; font-size: clamp(10px, .82vw, 16px); font-weight: 750; transition: background .18s ease; }
+.rhine-login-form button { margin-top: 3px; padding: 13px; background: #050605; color: white; font-size: clamp(10px, .82vw, 16px); font-weight: 750; transform-origin: left center; backface-visibility: hidden; will-change: transform, opacity; transition: background .18s ease; }
 .rhine-login-form button:hover, .rhine-login-form button:focus-visible { background: var(--rhine-accent); color: var(--rhine-ink); }
 .rhine-login-form button:disabled { cursor: wait; opacity: 1; }
 .rhine-login-form a { justify-self: center; font-size: clamp(9px, .72vw, 14px); font-weight: 700; }
-.rhine-access { position: absolute; inset: 0; display: grid; place-items: center; color: var(--rhine-ink); }
+.rhine-access { position: absolute; inset: 0; display: grid; place-items: center; color: var(--rhine-ink); backface-visibility: hidden; will-change: opacity; }
 .rhine-access-typing { position: absolute; display: grid; place-items: center; min-width: min(28vw, 540px); min-height: 118px; }
-.rhine-access-typing > span:first-child { display: block; overflow: hidden; font-size: clamp(11px, .92vw, 18px); font-weight: 600; letter-spacing: .14em; white-space: nowrap; }
+.rhine-access-typing > span:first-child { display: block; overflow: hidden; font-size: clamp(11px, .92vw, 18px); font-weight: 600; letter-spacing: .14em; white-space: nowrap; will-change: clip-path, opacity; }
 .rhine-access-corners { position: absolute; inset: 0; display: block !important; overflow: visible !important; }
 .rhine-access-corners i { position: absolute; width: 8px; height: 8px; background: currentColor; }
 .rhine-access-corners i:nth-child(1) { top: 0; left: 0; }.rhine-access-corners i:nth-child(2) { top: 0; right: 0; }.rhine-access-corners i:nth-child(3) { right: 0; bottom: 0; }.rhine-access-corners i:nth-child(4) { bottom: 0; left: 0; }
 .rhine-access-seed { position: absolute; width: 10px; height: 1px; background: currentColor; transform-origin: center; }
-.rhine-auth-ring { position: absolute; width: min(34vw, 520px); color: var(--rhine-ink); opacity: 0; }
+.rhine-auth-ring { position: absolute; width: min(34vw, 520px); color: var(--rhine-ink); opacity: 0; backface-visibility: hidden; will-change: transform, opacity; }
 .rhine-auth-ring .is-pale { color: rgba(255,255,255,.92); }
 .rhine-auth-orange { fill: var(--rhine-accent); }
-.rhine-auth-text { position: absolute; display: block; overflow: hidden; font-size: clamp(11px, .9vw, 18px); font-weight: 600; line-height: 1.15; letter-spacing: .13em; text-align: center; white-space: nowrap; opacity: 0; }
-.rhine-welcome { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; color: var(--rhine-ink); }
-.rhine-welcome > strong { font-size: clamp(28px, 2.8vw, 54px); line-height: .95; }
-.rhine-welcome > b { margin-top: 12px; padding: 8px 14px; background: var(--rhine-ink); color: var(--rhine-paper); font-size: clamp(22px, 2.3vw, 44px); line-height: .92; letter-spacing: .09em; }
-.rhine-welcome > svg { width: min(18vw, 300px); margin-top: 16px; }
-.rhine-welcome > i { display: block; width: 20px; height: 20px; margin-top: 54px; background: currentColor; transform: rotate(45deg); }
+.rhine-auth-text { position: absolute; display: block; overflow: hidden; font-size: clamp(11px, .9vw, 18px); font-weight: 600; line-height: 1.15; letter-spacing: .13em; text-align: center; white-space: nowrap; opacity: 0; will-change: clip-path, opacity; }
+.rhine-welcome { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; color: var(--rhine-ink); backface-visibility: hidden; will-change: opacity; }
+.rhine-welcome > strong { font-size: clamp(28px, 2.8vw, 54px); line-height: .95; will-change: clip-path, transform, opacity; }
+.rhine-welcome > b { margin-top: 12px; padding: 8px 14px; background: var(--rhine-ink); color: var(--rhine-paper); font-size: clamp(22px, 2.3vw, 44px); line-height: .92; letter-spacing: .09em; will-change: clip-path, transform, opacity; }
+.rhine-welcome > svg { width: min(18vw, 300px); margin-top: 16px; backface-visibility: hidden; will-change: transform, opacity; }
+.rhine-welcome > i { display: block; width: 20px; height: 20px; margin-top: 54px; background: currentColor; transform: rotate(45deg); backface-visibility: hidden; will-change: transform, opacity; }
 /* Shared fixed chrome and page scroller. */
 .rhine-main-navigation { position: fixed; z-index: 31; top: 41.5%; right: 3.1%; display: grid; gap: clamp(19px, 3.3vh, 36px); text-align: right; }
 .rhine-main-navigation button { position: relative; min-width: 150px; padding: 0; background: transparent; font-size: clamp(9px, .75vw, 15px); font-weight: 680; letter-spacing: -.015em; text-align: right; transition: color .22s ease, transform .22s ease; }
