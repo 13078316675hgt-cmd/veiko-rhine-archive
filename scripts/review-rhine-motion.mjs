@@ -156,8 +156,26 @@ if (reverseMember?.trim() !== 'KRISTEN WRIGHT') failures.push(`reverse member fo
 
 await page.getByRole('button', { name: 'DEPARTMENT', exact: true }).click()
 await page.waitForTimeout(1100)
+await page.mouse.move(960, 540)
+await page.waitForTimeout(460)
+await page.screenshot({ path: fileURLToPath(new URL('03a-department-idle.png', output)) })
 const departmentIdleRect = await page.locator('[data-department-preview]').evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, centerX: rect.x + rect.width / 2, centerY: rect.y + rect.height / 2 } })
+const departmentTrackerIdle = await styleOf('[data-department-tracker]', ['transform'])
 const departmentTitleSize = await page.locator('.rhine-department-tile strong').first().evaluate((node) => Number.parseFloat(getComputedStyle(node).fontSize))
+const departmentTileRotations = await page.locator('.rhine-department-tile').evaluateAll((nodes) => nodes.map((node) => {
+  const matrix = new DOMMatrixReadOnly(getComputedStyle(node).transform)
+  return Math.atan2(matrix.b, matrix.a) * 180 / Math.PI
+}))
+const departmentStructure = await page.locator('[data-department-stage]').evaluate((node) => ({
+  corners: node.querySelectorAll('.rhine-department-corners i').length,
+  endpoints: node.querySelectorAll('.rhine-department-lines > i').length,
+  pioneerFirst: node.querySelector('.rhine-department-signatures > span:first-child')?.classList.contains('is-pioneer'),
+  rhineSecond: node.querySelector('.rhine-department-signatures > span:nth-child(2)')?.classList.contains('is-rhine'),
+}))
+if (Math.abs(departmentIdleRect.width - departmentIdleRect.height) > 1) failures.push(`department idle console is not square: ${departmentIdleRect.width}x${departmentIdleRect.height}`)
+if (departmentTileRotations.some((rotation) => Math.abs(rotation) > .05)) failures.push(`department idle tiles remained twisted: ${departmentTileRotations.join(', ')}`)
+if (departmentStructure.corners !== 4 || departmentStructure.endpoints !== 4) failures.push(`department targeting frame is incomplete: ${JSON.stringify(departmentStructure)}`)
+if (!departmentStructure.pioneerFirst || !departmentStructure.rhineSecond) failures.push('department signatures are not Pioneer then Rhine')
 if (departmentTitleSize > 30) failures.push(`department title remained oversized at ${departmentTitleSize}px`)
 await page.locator('.rhine-department-tile').nth(6).hover()
 await page.waitForTimeout(40)
@@ -168,11 +186,13 @@ await page.screenshot({ path: fileURLToPath(new URL('03-department-preview-mid.p
 await page.waitForTimeout(420)
 const departmentEnd = await styleOf('[data-department-preview] img', ['transform', 'opacity'])
 const departmentSelectedRect = await page.locator('[data-department-preview]').evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, centerX: rect.x + rect.width / 2, centerY: rect.y + rect.height / 2 } })
+const departmentTrackerSelected = await page.locator('[data-department-tracker]').evaluate((node) => { const rect = node.getBoundingClientRect(); return { transform: getComputedStyle(node).transform, centerX: rect.x + rect.width / 2, centerY: rect.y + rect.height / 2 } })
 const departmentMediaRect = await page.locator('.rhine-department-media').evaluate((node) => { const rect = node.getBoundingClientRect(); return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, centerX: rect.x + rect.width / 2, centerY: rect.y + rect.height / 2 } })
 if (new Set([departmentStart.transform, departmentMiddle.transform, departmentEnd.transform]).size < 3) failures.push('department preview has no continuous scale states')
 if (departmentEnd.opacity !== '1') failures.push(`department preview final opacity is ${departmentEnd.opacity}`)
 if (Math.abs(departmentIdleRect.centerX - departmentSelectedRect.centerX) > .5 || Math.abs(departmentIdleRect.centerY - departmentSelectedRect.centerY) > .5) failures.push('department console shifted between idle and selected states')
-if (Math.abs(departmentIdleRect.centerX - departmentMediaRect.centerX) > .5 || Math.abs(departmentIdleRect.centerY - departmentMediaRect.centerY) > .5) failures.push('department media did not open from the idle console anchor')
+if (Math.abs(departmentTrackerSelected.centerX - departmentMediaRect.centerX) > .5 || Math.abs(departmentTrackerSelected.centerY - departmentMediaRect.centerY) > .5) failures.push('department media did not open from the tracked square anchor')
+if (departmentTrackerIdle.transform === departmentTrackerSelected.transform) failures.push('department targeting square has no restrained pointer follow')
 await page.mouse.move(1, 1)
 await page.waitForTimeout(80)
 if (await page.locator('.rhine-department-media').count()) failures.push('department media remained open after pointer left the tile')
@@ -272,7 +292,7 @@ console.log(JSON.stringify({
   states: {
     home: [homeStart, homeMiddle, homeEnd],
     member: { motion: [memberStart, memberMiddle, memberEnd], hologram: { beforePointer: holoBeforePointer, afterPointer: holoAfterPointer, afterEase: holoAfterEase } },
-    department: { motion: [departmentStart, departmentMiddle, departmentEnd], titleSize: departmentTitleSize, idleRect: departmentIdleRect, selectedRect: departmentSelectedRect, mediaRect: departmentMediaRect },
+    department: { motion: [departmentStart, departmentMiddle, departmentEnd], titleSize: departmentTitleSize, tileRotations: departmentTileRotations, structure: departmentStructure, tracker: { idle: departmentTrackerIdle, selected: departmentTrackerSelected }, idleRect: departmentIdleRect, selectedRect: departmentSelectedRect, mediaRect: departmentMediaRect },
     research: { ...researchEnd, breathingPeak: researchBreathingPeak, blackHole: researchBlackHoleProof, timeFlow: researchTimeFlow },
     scroll: { viewportHeight, early: scrollEarly, middle: scrollMiddle, end: scrollEnd },
   },

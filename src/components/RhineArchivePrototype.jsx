@@ -23,6 +23,13 @@ function MoonProjectLogo() {
   </svg>
 }
 
+function PioneerWaveLogo() {
+  return <svg className="rhine-pioneer-wave-logo" viewBox="0 0 150 58" aria-hidden="true">
+    <path className="is-gold" d="M5 31C25 13 38 10 54 25c12 12 23 13 38-1 13-12 29-13 53-5" />
+    <path className="is-white" d="M5 24c22 13 35 16 52 3 15-12 25-19 42-12 13 5 25 8 46 1" />
+  </svg>
+}
+
 function FixedBrand({ light = false }) {
   const hasMeta = RHINE_CLONE.brand.lineOne || RHINE_CLONE.brand.lineTwo
   return <div className={`rhine-fixed-brand ${light ? 'is-light' : ''}`}><strong>{RHINE_CLONE.brand.title}</strong>{hasMeta && <small>{RHINE_CLONE.brand.lineOne}{RHINE_CLONE.brand.lineTwo && <><br />{RHINE_CLONE.brand.lineTwo}</>}</small>}</div>
@@ -430,29 +437,57 @@ function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
 }
 
 const DEPARTMENT_LAYOUT = [
-  { left: '13%', top: '16%' }, { left: '13%', top: '40%' }, { left: '13%', top: '64%' },
-  { left: '26%', top: '28%' }, { left: '26%', top: '54%' },
-  { left: '65.5%', top: '28%' }, { left: '65.5%', top: '54%' },
-  { left: '79.5%', top: '16%' }, { left: '79.5%', top: '40%' }, { left: '79.5%', top: '64%' },
+  { left: '13%', top: '18.5%' }, { left: '13%', top: '40.5%' }, { left: '13%', top: '62.5%' },
+  { left: '26%', top: '29.5%' }, { left: '26%', top: '51.5%' },
+  { left: '65.5%', top: '29.5%' }, { left: '65.5%', top: '51.5%' },
+  { left: '79.5%', top: '18.5%' }, { left: '79.5%', top: '40.5%' }, { left: '79.5%', top: '62.5%' },
 ]
 
 function DepartmentMatrix({ base, selected, onSelect }) {
+  const trackerRef = useRef(null)
   const current = selected == null ? null : RHINE_DEPARTMENTS[selected]
-  return <div className={`rhine-department-stage ${current ? 'has-selection' : 'is-idle'}`} data-department-stage>
-    <div className="rhine-department-lines" aria-hidden="true">{Array.from({ length: 8 }, (_, index) => <i key={index} />)}</div>
+
+  const trackPointer = useCallback((event) => {
+    const tracker = trackerRef.current
+    if (!tracker || event.pointerType === 'touch') return
+    const bounds = event.currentTarget.getBoundingClientRect()
+    const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1))
+    const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1))
+    tracker.style.setProperty('--department-track-x', `${(x * 6).toFixed(2)}px`)
+    tracker.style.setProperty('--department-track-y', `${(y * 5).toFixed(2)}px`)
+  }, [])
+
+  const resetPointerTrack = useCallback(() => {
+    const tracker = trackerRef.current
+    if (!tracker) return
+    tracker.style.setProperty('--department-track-x', '0px')
+    tracker.style.setProperty('--department-track-y', '0px')
+  }, [])
+
+  return <div className={`rhine-department-stage ${current ? 'has-selection' : 'is-idle'}`} data-department-stage onPointerMove={trackPointer} onPointerLeave={resetPointerTrack}>
+    <div className="rhine-department-lines" aria-hidden="true">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M44 34 27 5M56 34 73 5M44 66 27 95M56 66 73 95" /></svg>
+      <i className="is-north-west" /><i className="is-north-east" /><i className="is-south-west" /><i className="is-south-east" />
+      <span>{Array.from({ length: 6 }, (_, index) => <b key={index} />)}</span>
+    </div>
     {current && <div className="rhine-department-heading"><strong>{current.title}</strong><span>{current.label}</span></div>}
     <div className="rhine-department-console" data-department-preview>
-      <div className="rhine-department-placeholder" aria-label="Select a department"><i /><InfinityLogo /></div>
-      {current && <div className="rhine-department-media" key={current.preview}>
-        <img src={rhineAsset(base, current.preview)} alt={`${current.label} interior`} loading="lazy" decoding="async" />
-        <i /><i /><i /><i />
-      </div>}
+      <div className="rhine-department-tracker" data-department-tracker ref={trackerRef}>
+        <div className="rhine-department-placeholder" aria-label="Select a department"><i /><InfinityLogo /></div>
+        <span className="rhine-department-corners" aria-hidden="true"><i /><i /><i /><i /></span>
+        {current && <div className="rhine-department-media" key={current.preview}>
+          <img src={rhineAsset(base, current.preview)} alt={`${current.label} interior`} loading="lazy" decoding="async" />
+        </div>}
+      </div>
     </div>
-    {RHINE_DEPARTMENTS.map((department, index) => <button className={`rhine-department-tile ${selected === index ? 'is-selected' : ''}`} style={{ ...DEPARTMENT_LAYOUT[index], '--tile-tilt': `${index < 5 ? (index % 2 ? -2 : 2) : (index % 2 ? 2 : -2)}deg`, '--tile-order': index, '--tile-delay': `${index * -.47}s` }} type="button" onPointerEnter={() => onSelect(index)} onPointerLeave={() => onSelect(null)} onFocus={() => onSelect(index)} onBlur={() => onSelect(null)} onClick={() => onSelect(index)} aria-pressed={selected === index} key={department.code}>
+    {RHINE_DEPARTMENTS.map((department, index) => <button className={`rhine-department-tile ${selected === index ? 'is-selected' : ''}`} style={{ ...DEPARTMENT_LAYOUT[index], '--tile-order': index, '--tile-delay': `${index * -.47}s` }} type="button" onPointerEnter={() => onSelect(index)} onPointerLeave={() => onSelect(null)} onFocus={() => onSelect(index)} onBlur={() => onSelect(null)} onClick={() => onSelect(index)} aria-pressed={selected === index} key={department.code}>
       <span className="rhine-department-orbit" aria-hidden="true"><i /><i /><i /></span><span className="rhine-department-trace" aria-hidden="true" />
       <DepartmentMark code={department.code} /><small>{department.label}</small>
     </button>)}
-    <div className="rhine-department-signatures" aria-hidden="true"><i /><InfinityLogo compact /></div>
+    <div className="rhine-department-signatures" aria-hidden="true">
+      <span className="is-pioneer"><PioneerWaveLogo /><small>PIONEER PROJECT</small></span>
+      <span className="is-rhine"><InfinityLogo compact /><small>RHINE LAB</small></span>
+    </div>
   </div>
 }
 
