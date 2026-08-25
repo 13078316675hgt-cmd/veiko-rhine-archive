@@ -653,9 +653,11 @@ export function RhineArchivePrototype() {
 
   useLayoutEffect(() => {
     const root = rootRef.current
-    if (!root || !entered || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    if (!root || !entered || departmentIndex == null || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    const preview = root.querySelector('[data-department-preview] img')
+    if (!preview) return undefined
     const context = gsap.context(() => {
-      gsap.fromTo('[data-department-preview] img', { autoAlpha: 0, scale: 1.035 }, { autoAlpha: 1, scale: 1, duration: .42, ease: 'power3.out' })
+      gsap.fromTo(preview, { autoAlpha: 0, scale: 1.035 }, { autoAlpha: 1, scale: 1, duration: .42, ease: 'power3.out' })
     }, root)
     return () => context.revert()
   }, [departmentIndex, entered])
