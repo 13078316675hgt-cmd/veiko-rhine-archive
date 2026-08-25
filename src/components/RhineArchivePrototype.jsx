@@ -138,9 +138,15 @@ function Entrance({ onComplete }) {
     const context = gsap.context(() => {
       root.dataset.entrancePhase = 'authorizing'
       gsap.set('[data-access-copy]', { clipPath: 'inset(0 100% 0 0)', autoAlpha: 0 })
-      gsap.set('[data-access-corner], [data-auth-node]', { scale: 0, transformOrigin: 'center center' })
+      gsap.set('[data-access-corner]', { scale: 0, transformOrigin: 'center center' })
       gsap.set('[data-access-seed]', { scaleX: 0, rotation: -18, autoAlpha: 0, transformOrigin: 'center center' })
-      gsap.set('[data-auth-ring]', { scale: 3.6, rotation: -18, autoAlpha: 0, transformOrigin: 'center center' })
+      gsap.set('[data-auth-matrix]', { scale: .9, autoAlpha: 0, transformOrigin: 'center center' })
+      gsap.set('[data-auth-line]', { strokeDashoffset: 1 })
+      gsap.set('[data-auth-node]', { scale: 0, transformOrigin: 'center center' })
+      gsap.set('[data-auth-tick]', { scaleY: 0, transformOrigin: 'center bottom' })
+      gsap.set('[data-auth-lock]', { scale: 0, rotation: -45, transformOrigin: 'center center' })
+      gsap.set('[data-auth-lock-core]', { scale: 0, transformOrigin: 'center center' })
+      gsap.set('[data-auth-scan]', { x: -210, scaleX: .42, autoAlpha: 0, transformOrigin: 'left center' })
       gsap.set('[data-auth-text]', { clipPath: 'inset(0 100% 0 0)', autoAlpha: 0 })
       gsap.set('[data-auth-kicker]', { y: 8, autoAlpha: 0 })
       gsap.set('[data-welcome] > strong, [data-welcome] > b, [data-welcome] > svg, [data-welcome-rail]', { autoAlpha: 0 })
@@ -160,16 +166,23 @@ function Entrance({ onComplete }) {
         .to('[data-access-seed]', { scaleX: .08, scaleY: 10, rotation: 45, autoAlpha: 0, duration: .34, ease: 'power4.in' }, 'verify+=1.84')
         .addLabel('authorized', 2.10)
         .call(() => { root.dataset.entrancePhase = 'permission-authorized' }, null, 'authorized')
-        .to('[data-auth-ring]', { scale: 1, rotation: 0, autoAlpha: 1, duration: 1.16, ease: 'power4.inOut' }, 'authorized')
-        .fromTo('[data-auth-orbit]', { strokeDashoffset: 1400 }, { strokeDashoffset: 0, duration: 1.12, stagger: .075, ease: 'power2.inOut' }, 'authorized+=.10')
-        .to('[data-auth-kicker]', { y: 0, autoAlpha: 1, duration: .42, ease: 'power2.out' }, 'authorized+=.44')
-        .to('[data-auth-text]', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .78, ease: 'steps(24)' }, 'authorized+=.62')
-        .to('[data-auth-node]', { scale: 1, duration: .3, stagger: .06, ease: 'back.out(2)' }, 'authorized+=.78')
-        .to('[data-auth-ring]', { scale: .985, rotation: 2.5, duration: .68, ease: 'sine.inOut' }, 'authorized+=1.52')
-        .to('[data-auth-node]', { scale: 1.14, duration: .2, stagger: .025, ease: 'power2.out' }, 'authorized+=1.68')
-        .to('[data-auth-node]', { scale: 1, duration: .24, stagger: .025, ease: 'power2.inOut' }, 'authorized+=1.92')
+        .to('[data-auth-matrix]', { scale: 1, autoAlpha: 1, duration: .28, ease: 'power2.out' }, 'authorized')
+        .to('[data-auth-bracket]', { strokeDashoffset: 0, duration: .52, stagger: .07, ease: 'power3.out' }, 'authorized+=.04')
+        .to('[data-auth-rail]', { strokeDashoffset: 0, duration: .72, stagger: .055, ease: 'power2.inOut' }, 'authorized+=.22')
+        .to('[data-auth-tick]', { scaleY: 1, duration: .24, stagger: .028, ease: 'power3.out' }, 'authorized+=.46')
+        .to('[data-auth-node]', { scale: 1, duration: .25, stagger: .04, ease: 'back.out(1.7)' }, 'authorized+=.54')
+        .to('[data-auth-scan]', { x: 510, scaleX: 1, autoAlpha: .74, duration: .9, ease: 'power2.inOut' }, 'authorized+=.52')
+        .to('[data-auth-lock]', { scale: 1, rotation: 0, duration: .5, ease: 'back.out(1.55)' }, 'authorized+=.72')
+        .to('[data-auth-lock-core]', { scale: 1, duration: .26, ease: 'power4.out' }, 'authorized+=1.02')
+        .to('[data-auth-kicker]', { y: 0, autoAlpha: 1, duration: .36, ease: 'power2.out' }, 'authorized+=.76')
+        .to('[data-auth-text]', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .52, ease: 'steps(24)' }, 'authorized+=.88')
+        .to('[data-auth-scan]', { autoAlpha: 0, duration: .18, ease: 'power2.out' }, 'authorized+=1.42')
+        .to('[data-auth-lock-core]', { scale: 1.34, duration: .2, ease: 'power3.out' }, 'authorized+=1.64')
+        .to('[data-auth-lock-core]', { scale: 1, duration: .3, ease: 'power3.inOut' }, 'authorized+=1.84')
         .to('[data-auth-text], [data-auth-kicker]', { autoAlpha: 0, duration: .3 }, 'authorized+=2.46')
-        .to('[data-auth-ring]', { scale: .16, rotation: 14, autoAlpha: .28, duration: .62, ease: 'power4.inOut' }, 'authorized+=2.52')
+        .to('[data-auth-line], [data-auth-node], [data-auth-tick]', { autoAlpha: 0, duration: .3, stagger: .012, ease: 'power2.in' }, 'authorized+=2.48')
+        .to('[data-auth-lock]', { scaleX: 4.8, scaleY: .12, duration: .5, ease: 'power4.inOut' }, 'authorized+=2.54')
+        .to('[data-auth-matrix]', { scale: .72, autoAlpha: 0, duration: .3, ease: 'power3.in' }, 'authorized+=2.86')
         .set('[data-access]', { autoAlpha: 0 }, 'authorized+=3.16')
         .set('[data-welcome]', { autoAlpha: 1 }, 'authorized+=3.10')
         .addLabel('welcome', 5.20)
@@ -219,13 +232,40 @@ function Entrance({ onComplete }) {
     <div className="rhine-access" data-access>
       <div className="rhine-access-typing"><span data-access-copy>SCANNING LUNAR ACCESS KEY</span><span className="rhine-access-corners" aria-hidden="true"><i data-access-corner /><i data-access-corner /><i data-access-corner /><i data-access-corner /></span></div>
       <i className="rhine-access-seed" data-access-seed />
-      <svg className="rhine-auth-ring" data-auth-ring viewBox="0 0 520 520" aria-hidden="true">
-        <circle cx="260" cy="260" r="210" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="1400" data-auth-orbit />
-        <circle className="is-pale" cx="260" cy="260" r="187" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="1400" data-auth-orbit />
-        <path d="M170 225a102 102 0 0 1 180 0M170 295a102 102 0 0 0 180 0" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="380" data-auth-orbit />
-        <path d="M154 226a40 40 0 1 0 0 68M366 226a40 40 0 1 1 0 68" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="280" data-auth-orbit />
-        <g fill="currentColor"><circle cx="260" cy="260" r="9" data-auth-node /><circle cx="260" cy="228" r="5" data-auth-node /><circle cx="260" cy="292" r="5" data-auth-node /><circle cx="228" cy="244" r="5" data-auth-node /><circle cx="292" cy="244" r="5" data-auth-node /><circle cx="228" cy="276" r="5" data-auth-node /><circle cx="292" cy="276" r="5" data-auth-node /></g>
-        <g className="rhine-auth-orange"><circle cx="260" cy="73" r="8" data-auth-node /><circle cx="260" cy="447" r="8" data-auth-node /></g>
+      <svg className="rhine-auth-matrix" data-auth-matrix viewBox="0 0 680 420" aria-hidden="true">
+        <g className="rhine-auth-frame">
+          <path d="M54 124V58H142" pathLength="1" data-auth-line data-auth-bracket />
+          <path d="M538 58H626V124" pathLength="1" data-auth-line data-auth-bracket />
+          <path d="M626 296V362H538" pathLength="1" data-auth-line data-auth-bracket />
+          <path d="M142 362H54V296" pathLength="1" data-auth-line data-auth-bracket />
+        </g>
+        <g className="rhine-auth-rails">
+          <path d="M54 210H270M410 210H626" pathLength="1" data-auth-line data-auth-rail />
+          <path d="M340 58V145M340 275V362" pathLength="1" data-auth-line data-auth-rail />
+          <path d="M120 128H236V92M560 292H444V328" pathLength="1" data-auth-line data-auth-rail />
+          <path d="M120 292H236V328M560 128H444V92" pathLength="1" data-auth-line data-auth-rail />
+          <path d="M278 148L244 182M402 148L436 182M278 272L244 238M402 272L436 238" pathLength="1" data-auth-line data-auth-rail />
+        </g>
+        <g className="rhine-auth-ticks">
+          <rect x="86" y="195" width="3" height="30" data-auth-tick /><rect x="102" y="200" width="3" height="20" data-auth-tick />
+          <rect x="118" y="195" width="3" height="30" data-auth-tick /><rect x="134" y="200" width="3" height="20" data-auth-tick />
+          <rect x="150" y="195" width="3" height="30" data-auth-tick /><rect x="166" y="200" width="3" height="20" data-auth-tick />
+          <rect x="514" y="195" width="3" height="30" data-auth-tick /><rect x="530" y="200" width="3" height="20" data-auth-tick />
+          <rect x="546" y="195" width="3" height="30" data-auth-tick /><rect x="562" y="200" width="3" height="20" data-auth-tick />
+          <rect x="578" y="195" width="3" height="30" data-auth-tick /><rect x="594" y="200" width="3" height="20" data-auth-tick />
+        </g>
+        <rect className="rhine-auth-scan" x="44" y="202" width="126" height="16" data-auth-scan />
+        <g className="rhine-auth-nodes">
+          <rect x="50" y="206" width="8" height="8" data-auth-node /><rect x="622" y="206" width="8" height="8" data-auth-node />
+          <rect x="336" y="54" width="8" height="8" data-auth-node /><rect x="336" y="358" width="8" height="8" data-auth-node />
+          <rect x="232" y="124" width="8" height="8" data-auth-node /><rect x="440" y="288" width="8" height="8" data-auth-node />
+          <rect x="440" y="124" width="8" height="8" data-auth-node /><rect x="232" y="288" width="8" height="8" data-auth-node />
+        </g>
+        <g className="rhine-auth-lock" data-auth-lock>
+          <path d="M340 166L384 210L340 254L296 210Z" />
+          <path className="rhine-auth-lock-cut" d="M340 184L366 210L340 236L314 210Z" />
+          <path className="rhine-auth-lock-core" d="M340 198L352 210L340 222L328 210Z" data-auth-lock-core />
+        </g>
       </svg>
       <small className="rhine-auth-kicker" data-auth-kicker>THE PLAN OF THE MONTH / LUNAR GATE 01</small>
       <strong className="rhine-auth-text" data-auth-text>LUNAR MISSION AUTHORIZED</strong>

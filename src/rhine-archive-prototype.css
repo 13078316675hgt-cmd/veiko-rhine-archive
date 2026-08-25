@@ -55,11 +55,22 @@
 .rhine-access-corners i { position: absolute; width: 8px; height: 8px; background: currentColor; }
 .rhine-access-corners i:nth-child(1) { top: 0; left: 0; }.rhine-access-corners i:nth-child(2) { top: 0; right: 0; }.rhine-access-corners i:nth-child(3) { right: 0; bottom: 0; }.rhine-access-corners i:nth-child(4) { bottom: 0; left: 0; }
 .rhine-access-seed { position: absolute; width: 10px; height: 1px; background: currentColor; transform-origin: center; }
-.rhine-auth-ring { position: absolute; width: min(34vw, 520px); color: var(--rhine-ink); opacity: 0; backface-visibility: hidden; will-change: transform, opacity; }
-.rhine-auth-ring .is-pale { color: rgba(255,255,255,.92); }
-.rhine-auth-orange { fill: var(--rhine-accent); }
-.rhine-auth-kicker { position: absolute; margin-top: -62px; color: rgba(8,9,8,.5); font-size: clamp(7px, .55vw, 11px); font-weight: 750; letter-spacing: .16em; white-space: nowrap; will-change: transform, opacity; }
-.rhine-auth-text { position: absolute; display: block; overflow: hidden; font-size: clamp(11px, .9vw, 18px); font-weight: 600; line-height: 1.15; letter-spacing: .13em; text-align: center; white-space: nowrap; opacity: 0; will-change: clip-path, opacity; }
+.rhine-auth-matrix { position: absolute; width: min(48vw, 720px); overflow: visible; color: var(--rhine-ink); opacity: 0; backface-visibility: hidden; will-change: transform, opacity; }
+.rhine-auth-matrix path { vector-effect: non-scaling-stroke; }
+.rhine-auth-frame, .rhine-auth-rails { fill: none; stroke: currentColor; stroke-linecap: square; stroke-linejoin: miter; }
+.rhine-auth-frame { stroke-width: 2.25; }
+.rhine-auth-rails { stroke-width: 1.3; }
+.rhine-auth-frame path, .rhine-auth-rails path { stroke-dasharray: 1; stroke-dashoffset: 1; will-change: stroke-dashoffset, opacity; }
+.rhine-auth-ticks { fill: rgba(8,9,8,.46); }
+.rhine-auth-ticks rect, .rhine-auth-nodes rect { transform-box: fill-box; will-change: transform, opacity; }
+.rhine-auth-nodes { fill: var(--rhine-ink); }
+.rhine-auth-nodes rect:nth-child(3), .rhine-auth-nodes rect:nth-child(4) { fill: var(--rhine-accent); }
+.rhine-auth-scan { fill: var(--rhine-accent); opacity: 0; mix-blend-mode: multiply; will-change: transform, opacity; }
+.rhine-auth-lock { fill: var(--rhine-ink); transform-box: fill-box; transform-origin: center; will-change: transform, opacity; }
+.rhine-auth-lock-cut { fill: var(--rhine-paper); }
+.rhine-auth-lock-core { fill: var(--rhine-accent); transform-box: fill-box; transform-origin: center; will-change: transform; }
+.rhine-auth-kicker { position: absolute; margin-top: 91px; color: rgba(8,9,8,.5); font-size: clamp(7px, .55vw, 11px); font-weight: 750; letter-spacing: .16em; white-space: nowrap; will-change: transform, opacity; }
+.rhine-auth-text { position: absolute; display: block; overflow: hidden; margin-top: 145px; font-size: clamp(11px, .9vw, 18px); font-weight: 600; line-height: 1.15; letter-spacing: .13em; text-align: center; white-space: nowrap; opacity: 0; will-change: clip-path, opacity; }
 .rhine-welcome { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; color: var(--rhine-ink); backface-visibility: hidden; will-change: opacity; }
 .rhine-welcome > strong { justify-self: start; overflow: hidden; font-family: Arial, sans-serif; font-size: clamp(28px, 2.5vw, 48px); font-weight: 800; line-height: 1; letter-spacing: .055em; will-change: clip-path, transform, opacity; }
 .rhine-welcome > b { display: flex; overflow: hidden; margin-top: 12px; color: var(--rhine-ink); font-family: Impact, "Arial Narrow", sans-serif; font-size: clamp(56px, 5.02vw, 96px); font-weight: 900; line-height: .94; letter-spacing: .012em; white-space: nowrap; will-change: clip-path, transform, opacity; }
