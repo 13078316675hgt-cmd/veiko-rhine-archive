@@ -140,45 +140,53 @@ function Entrance({ onComplete }) {
       gsap.set('[data-access-copy]', { clipPath: 'inset(0 100% 0 0)', autoAlpha: 0 })
       gsap.set('[data-access-corner], [data-auth-node]', { scale: 0, transformOrigin: 'center center' })
       gsap.set('[data-access-seed]', { scaleX: 0, rotation: -18, autoAlpha: 0, transformOrigin: 'center center' })
-      gsap.set('[data-auth-ring]', { scale: 4.8, rotation: -20, autoAlpha: 0, transformOrigin: 'center center' })
+      gsap.set('[data-auth-ring]', { scale: 3.6, rotation: -18, autoAlpha: 0, transformOrigin: 'center center' })
       gsap.set('[data-auth-text]', { clipPath: 'inset(0 100% 0 0)', autoAlpha: 0 })
-      gsap.set('[data-welcome] > strong, [data-welcome] > b, [data-welcome] > svg, [data-welcome-logo]', { autoAlpha: 0 })
+      gsap.set('[data-auth-kicker]', { y: 8, autoAlpha: 0 })
+      gsap.set('[data-welcome] > strong, [data-welcome] > b, [data-welcome] > svg, [data-welcome-rail]', { autoAlpha: 0 })
       gsap.set('[data-welcome] > strong, [data-welcome] > b', { clipPath: 'inset(0 100% 0 0)' })
-      gsap.set('[data-welcome-logo]', { scale: 0, rotation: 45, transformOrigin: 'center center' })
+      gsap.set('[data-welcome-name], [data-welcome-accent]', { yPercent: 108 })
+      gsap.set('[data-welcome-rail]', { scaleX: 0, transformOrigin: 'center center' })
       const authorize = gsap.timeline({ defaults: { ease: 'power3.inOut' } })
         .addLabel('verify', 0)
-        .to('[data-login]', { autoAlpha: 0, duration: .34, ease: 'power2.in' }, 'verify')
-        .to('[data-access]', { autoAlpha: 1, duration: .01 }, 'verify+=.34')
-        .to('[data-access-copy]', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .82, ease: 'steps(27)' }, 'verify+=.42')
-        .to('[data-access-corner]', { scale: 1, rotation: 0, duration: .3, stagger: .06, ease: 'back.out(2)' }, 'verify+=.52')
-        .to('[data-access-copy], [data-access-corner]', { autoAlpha: 0, duration: .24, ease: 'power2.in' }, 'verify+=1.58')
-        .to('[data-access-seed]', { scaleX: 1, autoAlpha: 1, duration: .28, ease: 'power3.out' }, 'verify+=1.68')
-        .to('[data-access-seed]', { scaleX: .12, scaleY: 8, rotation: 42, autoAlpha: 0, duration: .24, ease: 'power3.in' }, 'verify+=1.98')
-        .addLabel('authorized', 2.08)
+        .to('[data-login-form]', { x: -72, scaleX: .12, autoAlpha: 0, duration: .48, ease: 'power4.in' }, 'verify')
+        .to('[data-intro-logo]', { x: 72, scale: .7, autoAlpha: 0, duration: .48, ease: 'power4.in' }, 'verify')
+        .to('[data-login]', { autoAlpha: 0, duration: .12 }, 'verify+=.46')
+        .to('[data-access]', { autoAlpha: 1, duration: .01 }, 'verify+=.50')
+        .to('[data-access-copy]', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .82, ease: 'steps(25)' }, 'verify+=.58')
+        .to('[data-access-corner]', { scale: 1, rotation: 0, duration: .32, stagger: .07, ease: 'back.out(2)' }, 'verify+=.68')
+        .to('[data-access-seed]', { scaleX: 1, autoAlpha: 1, duration: .46, ease: 'power3.out' }, 'verify+=1.24')
+        .to('[data-access-copy], [data-access-corner]', { autoAlpha: 0, duration: .26, ease: 'power2.in' }, 'verify+=1.72')
+        .to('[data-access-seed]', { scaleX: .08, scaleY: 10, rotation: 45, autoAlpha: 0, duration: .34, ease: 'power4.in' }, 'verify+=1.84')
+        .addLabel('authorized', 2.10)
         .call(() => { root.dataset.entrancePhase = 'permission-authorized' }, null, 'authorized')
-        .to('[data-auth-ring]', { scale: 1, rotation: 0, autoAlpha: 1, duration: 1.12, ease: 'power4.inOut' }, 'authorized')
-        .fromTo('[data-auth-orbit]', { strokeDashoffset: 1400 }, { strokeDashoffset: 0, duration: 1.08, stagger: .08, ease: 'power2.inOut' }, 'authorized+=.08')
-        .to('[data-auth-text]', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .76, ease: 'steps(21)' }, 'authorized+=.42')
-        .to('[data-auth-node]', { scale: 1, duration: .28, stagger: .06, ease: 'back.out(2)' }, 'authorized+=.72')
-        .to('[data-auth-ring]', { scale: .985, rotation: 3, duration: .62, ease: 'sine.inOut' }, 'authorized+=1.42')
-        .to('[data-auth-node]', { scale: 1.12, duration: .18, stagger: .025, ease: 'power2.out' }, 'authorized+=1.54')
-        .to('[data-auth-node]', { scale: 1, duration: .22, stagger: .025, ease: 'power2.inOut' }, 'authorized+=1.78')
-        .to('[data-auth-text]', { autoAlpha: 0, duration: .28 }, 'authorized+=2.24')
-        .to('[data-auth-ring]', { scale: .94, rotation: 16, autoAlpha: 0, duration: .46 }, 'authorized+=2.32')
-        .set('[data-access]', { autoAlpha: 0 }, 'authorized+=2.80')
-        .set('[data-welcome]', { autoAlpha: 1 }, 'authorized+=2.80')
-        .addLabel('welcome', 4.88)
+        .to('[data-auth-ring]', { scale: 1, rotation: 0, autoAlpha: 1, duration: 1.16, ease: 'power4.inOut' }, 'authorized')
+        .fromTo('[data-auth-orbit]', { strokeDashoffset: 1400 }, { strokeDashoffset: 0, duration: 1.12, stagger: .075, ease: 'power2.inOut' }, 'authorized+=.10')
+        .to('[data-auth-kicker]', { y: 0, autoAlpha: 1, duration: .42, ease: 'power2.out' }, 'authorized+=.44')
+        .to('[data-auth-text]', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .78, ease: 'steps(24)' }, 'authorized+=.62')
+        .to('[data-auth-node]', { scale: 1, duration: .3, stagger: .06, ease: 'back.out(2)' }, 'authorized+=.78')
+        .to('[data-auth-ring]', { scale: .985, rotation: 2.5, duration: .68, ease: 'sine.inOut' }, 'authorized+=1.52')
+        .to('[data-auth-node]', { scale: 1.14, duration: .2, stagger: .025, ease: 'power2.out' }, 'authorized+=1.68')
+        .to('[data-auth-node]', { scale: 1, duration: .24, stagger: .025, ease: 'power2.inOut' }, 'authorized+=1.92')
+        .to('[data-auth-text], [data-auth-kicker]', { autoAlpha: 0, duration: .3 }, 'authorized+=2.46')
+        .to('[data-auth-ring]', { scale: .16, rotation: 14, autoAlpha: .28, duration: .62, ease: 'power4.inOut' }, 'authorized+=2.52')
+        .set('[data-access]', { autoAlpha: 0 }, 'authorized+=3.16')
+        .set('[data-welcome]', { autoAlpha: 1 }, 'authorized+=3.10')
+        .addLabel('welcome', 5.20)
         .call(() => { root.dataset.entrancePhase = 'welcome' }, null, 'welcome')
-        .to('[data-welcome] > strong', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .62, ease: 'power2.inOut' }, 'welcome')
-        .to('[data-welcome] > b', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .5, ease: 'power3.out' }, 'welcome+=.34')
-        .set('[data-welcome] > svg', { autoAlpha: 1 }, 'welcome+=.72')
-        .fromTo('[data-welcome] [data-logo-outline]', { strokeDasharray: 920, strokeDashoffset: 920, autoAlpha: 1 }, { strokeDashoffset: 0, duration: .86, ease: 'power2.inOut' }, 'welcome+=.82')
-        .fromTo('[data-welcome] [data-logo-glyphs]', { strokeDasharray: 160, strokeDashoffset: 160, autoAlpha: 1 }, { strokeDashoffset: 0, duration: .38, ease: 'power2.out' }, 'welcome+=1.30')
-        .to('[data-welcome] > strong, [data-welcome] > b', { autoAlpha: 0, y: -5, duration: .28 }, 'welcome+=2.28')
-        .to('[data-welcome] > svg', { scaleX: .12, scaleY: .12, autoAlpha: .24, duration: .4, ease: 'power4.in', transformOrigin: 'center center' }, 'welcome+=2.30')
-        .to('[data-welcome-logo]', { scale: 1, rotation: 45, autoAlpha: 1, duration: .28, ease: 'back.out(2)' }, 'welcome+=2.60')
-        .to('[data-welcome-logo]', { scale: .2, rotation: 90, autoAlpha: 0, duration: .3, ease: 'power3.in' }, 'welcome+=3.12')
-        .call(() => { root.dataset.entrancePhase = 'complete'; onComplete() }, null, 'welcome+=3.58')
+        .set('[data-welcome] > svg', { autoAlpha: 1, scale: .72, transformOrigin: 'center center' }, 'welcome')
+        .fromTo('[data-welcome] [data-logo-outline]', { strokeDasharray: 920, strokeDashoffset: 920, autoAlpha: 1 }, { strokeDashoffset: 0, duration: .92, ease: 'power2.inOut' }, 'welcome')
+        .fromTo('[data-welcome] [data-logo-glyphs]', { strokeDasharray: 160, strokeDashoffset: 160, autoAlpha: 1 }, { strokeDashoffset: 0, duration: .4, ease: 'power2.out' }, 'welcome+=.50')
+        .to('[data-welcome-rail]', { scaleX: 1, autoAlpha: 1, duration: .48, ease: 'power4.out' }, 'welcome+=.62')
+        .to('[data-welcome] > strong', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .56, ease: 'power2.inOut' }, 'welcome+=.76')
+        .to('[data-welcome] > b', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .01 }, 'welcome+=1.04')
+        .to('[data-welcome-name]', { yPercent: 0, duration: .54, ease: 'power4.out' }, 'welcome+=1.04')
+        .to('[data-welcome-accent]', { yPercent: 0, duration: .54, ease: 'power4.out' }, 'welcome+=1.20')
+        .to('[data-welcome] > svg', { y: 8, scale: .76, duration: .64, ease: 'sine.inOut' }, 'welcome+=1.46')
+        .to('[data-welcome-rail]', { scaleX: .72, duration: .64, ease: 'sine.inOut' }, 'welcome+=1.46')
+        .to('[data-welcome] > svg, [data-welcome-rail]', { autoAlpha: 0, y: 13, duration: .36, ease: 'power2.in' }, 'welcome+=2.82')
+        .call(() => { root.dataset.entrancePhase = 'title-lock' }, null, 'welcome+=3.18')
+        .call(() => { root.dataset.entrancePhase = 'complete'; onComplete() }, null, 'welcome+=3.82')
     }, root)
     return () => context.revert()
   }, [authorizing, onComplete])
@@ -209,7 +217,7 @@ function Entrance({ onComplete }) {
       </form>
     </div>
     <div className="rhine-access" data-access>
-      <div className="rhine-access-typing"><span data-access-copy>VERIFYING ACCESS PERMISSION</span><span className="rhine-access-corners" aria-hidden="true"><i data-access-corner /><i data-access-corner /><i data-access-corner /><i data-access-corner /></span></div>
+      <div className="rhine-access-typing"><span data-access-copy>SCANNING LUNAR ACCESS KEY</span><span className="rhine-access-corners" aria-hidden="true"><i data-access-corner /><i data-access-corner /><i data-access-corner /><i data-access-corner /></span></div>
       <i className="rhine-access-seed" data-access-seed />
       <svg className="rhine-auth-ring" data-auth-ring viewBox="0 0 520 520" aria-hidden="true">
         <circle cx="260" cy="260" r="210" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="1400" data-auth-orbit />
@@ -219,9 +227,15 @@ function Entrance({ onComplete }) {
         <g fill="currentColor"><circle cx="260" cy="260" r="9" data-auth-node /><circle cx="260" cy="228" r="5" data-auth-node /><circle cx="260" cy="292" r="5" data-auth-node /><circle cx="228" cy="244" r="5" data-auth-node /><circle cx="292" cy="244" r="5" data-auth-node /><circle cx="228" cy="276" r="5" data-auth-node /><circle cx="292" cy="276" r="5" data-auth-node /></g>
         <g className="rhine-auth-orange"><circle cx="260" cy="73" r="8" data-auth-node /><circle cx="260" cy="447" r="8" data-auth-node /></g>
       </svg>
-      <strong className="rhine-auth-text" data-auth-text>PERMISSION AUTHORIZED</strong>
+      <small className="rhine-auth-kicker" data-auth-kicker>THE PLAN OF THE MONTH / LUNAR GATE 01</small>
+      <strong className="rhine-auth-text" data-auth-text>LUNAR MISSION AUTHORIZED</strong>
     </div>
-    <div className="rhine-welcome" data-welcome><strong>WELCOME TO</strong><b>RHINE LAB.LLC.</b><InfinityLogo compact /><i data-welcome-logo /></div>
+    <div className="rhine-welcome" data-welcome>
+      <strong>WELCOME TO</strong>
+      <b><span data-welcome-name>{RHINE_CLONE.home.title}</span><em data-welcome-accent>{RHINE_CLONE.home.accent}</em></b>
+      <InfinityLogo compact />
+      <i className="rhine-welcome-rail" data-welcome-rail />
+    </div>
   </div>
 }
 
@@ -522,12 +536,15 @@ export function RhineArchivePrototype() {
     const scroller = root.querySelector('[data-rhine-scroll]')
     const context = gsap.context(() => {
       gsap.timeline({ defaults: { ease: 'power3.out' } })
-        .fromTo('[data-main-chrome]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .28, stagger: .04 })
-        .fromTo('.rhine-home-copy', { x: '38vw', y: '-2vh', scale: 1.28, transformOrigin: 'left center' }, { x: 0, y: 0, scale: 1, duration: .92, ease: 'power4.inOut' }, '<')
-        .fromTo('.rhine-home-copy > *', { autoAlpha: 0 }, { autoAlpha: 1, duration: .32, stagger: .055 }, '<.12')
-        .fromTo('.rhine-home-black', { scale: 0, autoAlpha: 0, transformOrigin: 'center' }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out' }, '<.28')
-        .fromTo('[data-home-orange] path, [data-home-white] path', { strokeDasharray: 1100, strokeDashoffset: 1100 }, { strokeDashoffset: 0, duration: 1.02, stagger: .055 }, '<.05')
-        .fromTo('[data-home-diamonds] rect, [data-home-nodes] circle', { scale: 0, transformOrigin: 'center' }, { scale: 1, duration: .3, stagger: .045, ease: 'back.out(2)' }, '<.45')
+        .addLabel('home-enter', 0)
+        .fromTo('[data-main-chrome]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .28, stagger: .04 }, 'home-enter')
+        .fromTo('.rhine-home-copy', { x: '31vw', y: '-2vh', scale: 1.28, transformOrigin: 'left center' }, { x: 0, y: 0, scale: 1, duration: .92, ease: 'power4.inOut' }, 'home-enter')
+        .fromTo('.rhine-home-copy h1', { autoAlpha: 1 }, { autoAlpha: 1, duration: .01 }, 'home-enter')
+        .fromTo('.rhine-home-copy > :not(h1)', { autoAlpha: 0 }, { autoAlpha: 1, duration: .32, stagger: .055 }, 'home-enter+=.42')
+        .fromTo('.rhine-home-system', { autoAlpha: 0 }, { autoAlpha: 1, duration: .26 }, 'home-enter+=.28')
+        .fromTo('.rhine-home-black', { scale: 0, autoAlpha: 0, transformOrigin: 'center' }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out' }, 'home-enter+=.36')
+        .fromTo('[data-home-orange] path, [data-home-white] path', { strokeDasharray: 1100, strokeDashoffset: 1100 }, { strokeDashoffset: 0, duration: 1.02, stagger: .055 }, 'home-enter+=.44')
+        .fromTo('[data-home-diamonds] rect, [data-home-nodes] circle', { scale: 0, transformOrigin: 'center' }, { scale: 1, duration: .3, stagger: .045, ease: 'back.out(2)' }, 'home-enter+=.82')
 
       gsap.fromTo('[data-member-stage]', { scale: .95, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out', scrollTrigger: { trigger: '#rhine-members', scroller, start: 'top 65%', toggleActions: 'play none none reverse' } })
       gsap.fromTo('[data-department-stage]', { scale: .97, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out', scrollTrigger: { trigger: '#rhine-departments', scroller, start: 'top 65%', toggleActions: 'play none none reverse' } })
