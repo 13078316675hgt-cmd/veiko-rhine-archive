@@ -28,6 +28,7 @@
 !/scripts/review-rhine-archive.mjs
 !/scripts/review-rhine-motion.mjs
 !/scripts/review-rhine-entrance.mjs
+!/scripts/review-rhine-entrance-performance.mjs
 !/scripts/review-rhine-performance.mjs
 !/scripts/publish-veiko.ps1
 

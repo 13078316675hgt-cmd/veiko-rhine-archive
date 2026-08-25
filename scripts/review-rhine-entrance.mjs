@@ -68,6 +68,7 @@ if (!await page.locator('.rhine-entrance').count()) failures.push('entrance exit
 if (!await page.locator('.rhine-welcome > b').isVisible()) failures.push('STEAL THE MOON title did not survive the final title lock')
 await shot('11-title-lock')
 if (await page.locator('.rhine-entry-transition').count()) failures.push('removed entrance transition video is still mounted')
+await page.locator('.rhine-entrance').waitFor({ state: 'detached', timeout: 9000 })
 await page.locator('.rhine-main-navigation').waitFor({ state: 'visible', timeout: 9000 })
 await page.waitForTimeout(60)
 const homeTitle = (await page.locator('.rhine-home-copy h1').textContent()).replace(/\s+/g, ' ').trim()
