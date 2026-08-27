@@ -468,10 +468,10 @@ function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
 }
 
 const DEPARTMENT_LAYOUT = [
-  { left: '13.1%', top: '17.2%', '--tile-angle': '3.4deg' }, { left: '13.1%', top: '41%', '--tile-angle': '.35deg' }, { left: '13.1%', top: '64%', '--tile-angle': '-2.4deg' },
-  { left: '26.5%', top: '29.1%', '--tile-angle': '2.9deg' }, { left: '26.5%', top: '56.2%', '--tile-angle': '-1.2deg' },
-  { left: '65.8%', top: '28.4%', '--tile-angle': '-2.9deg' }, { left: '66.1%', top: '52.8%', '--tile-angle': '1.2deg' },
-  { left: '80.1%', top: '17.2%', '--tile-angle': '-3.4deg' }, { left: '80.1%', top: '41%', '--tile-angle': '-.35deg' }, { left: '80.1%', top: '64%', '--tile-angle': '2.4deg' },
+  { left: '13.1%', top: '17.2%', '--tile-angle': '0deg' }, { left: '13.1%', top: '41%', '--tile-angle': '0deg' }, { left: '13.1%', top: '64%', '--tile-angle': '0deg' },
+  { left: '26.5%', top: '29.1%', '--tile-angle': '0deg' }, { left: '26.5%', top: '56.2%', '--tile-angle': '0deg' },
+  { left: '65.8%', top: '28.4%', '--tile-angle': '0deg' }, { left: '66.1%', top: '52.8%', '--tile-angle': '0deg' },
+  { left: '80.1%', top: '17.2%', '--tile-angle': '0deg' }, { left: '80.1%', top: '41%', '--tile-angle': '0deg' }, { left: '80.1%', top: '64%', '--tile-angle': '0deg' },
 ]
 
 function DepartmentMatrix({ base, selected, onSelect }) {
@@ -490,7 +490,7 @@ function DepartmentMatrix({ base, selected, onSelect }) {
     stage.style.setProperty('--department-line-y', `${(y * 12).toFixed(2)}px`)
     stage.style.setProperty('--department-tile-x', `${(x * 9).toFixed(2)}px`)
     stage.style.setProperty('--department-tile-y', `${(y * 6).toFixed(2)}px`)
-    stage.style.setProperty('--department-tile-r', `${(x * .42).toFixed(2)}deg`)
+    stage.style.setProperty('--department-tile-r', '0deg')
     stage.style.setProperty('--department-signature-x', `${(x * 14).toFixed(2)}px`)
     stage.style.setProperty('--department-signature-y', `${(y * 9).toFixed(2)}px`)
   }, [])
