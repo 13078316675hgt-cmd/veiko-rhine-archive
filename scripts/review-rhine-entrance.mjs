@@ -75,7 +75,7 @@ if (welcomeTitle !== 'STEAL THE MOON') failures.push('welcome title does not mat
 await shot('10-welcome-complete')
 await page.waitForFunction(() => document.querySelector('.rhine-entrance')?.dataset.entrancePhase === 'title-lock', null, { timeout: 5000 })
 if (!await page.locator('.rhine-entrance').count()) failures.push('entrance exited before the welcome hold and collapse completed')
-if (!await page.locator('.rhine-welcome > b').isVisible()) failures.push('STEAL THE MOON title did not survive the final title lock')
+if (await page.locator('.rhine-welcome > b').isVisible()) failures.push('STEAL THE MOON welcome title did not complete its fade before the homepage assembled')
 await shot('11-title-lock')
 if (await page.locator('.rhine-entry-transition').count()) failures.push('removed entrance transition video is still mounted')
 await page.locator('.rhine-entrance').waitFor({ state: 'detached', timeout: 9000 })

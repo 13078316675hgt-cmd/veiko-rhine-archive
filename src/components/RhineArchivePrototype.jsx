@@ -131,7 +131,12 @@ function Entrance({ onPrepare, onComplete }) {
         .to('[data-login-button]', { scaleX: 1, autoAlpha: 1, duration: .52, ease: 'power4.out' }, 7.02)
         .to('[data-login-register]', { y: 0, autoAlpha: 1, duration: .35, ease: 'power2.out' }, 7.18)
         .call(onPrepare, null, 7.72)
-        .call(() => { root.dataset.entrancePhase = 'login-ready'; setCanLogin(true) }, null, 7.76)
+        .call(() => {
+          setCanLogin(true)
+          const loginButton = root.querySelector('[data-login-button]')
+          if (loginButton) loginButton.disabled = false
+          root.dataset.entrancePhase = 'login-ready'
+        }, null, 7.76)
       intro.eventCallback('onComplete', () => gsap.set('[data-intro-logo], [data-login-form]', { clearProps: 'willChange' }))
     }, root)
     return () => context.revert()
@@ -206,10 +211,12 @@ function Entrance({ onPrepare, onComplete }) {
         .to('[data-welcome-accent]', { yPercent: 0, duration: .72, ease: 'power3.out' }, 'welcome+=1.08')
         .to('[data-welcome] > svg', { y: 7, scale: .84, duration: .8, ease: 'sine.inOut' }, 'welcome+=1.42')
         .to('[data-welcome-rail]', { scaleX: .76, duration: .8, ease: 'sine.inOut' }, 'welcome+=1.42')
-        .call(onPrepare, null, 'welcome+=2.48')
-        .to('[data-welcome] > svg, [data-welcome-rail]', { autoAlpha: 0, y: 12, duration: .42, ease: 'sine.in' }, 'welcome+=3.02')
-        .call(() => { root.dataset.entrancePhase = 'title-lock' }, null, 'welcome+=3.38')
-        .call(() => { root.dataset.entrancePhase = 'complete'; onComplete() }, null, 'welcome+=4.0')
+        .call(onPrepare, null, 'welcome+=2.42')
+        .to('[data-welcome] > strong, [data-welcome] > b', { y: -10, autoAlpha: 0, duration: .46, ease: 'power2.in' }, 'welcome+=2.72')
+        .to('[data-welcome] > svg, [data-welcome-rail]', { y: 10, autoAlpha: 0, duration: .42, ease: 'sine.in' }, 'welcome+=2.78')
+        .to('[data-welcome]', { autoAlpha: 0, duration: .26, ease: 'sine.inOut' }, 'welcome+=3.14')
+        .call(() => { root.dataset.entrancePhase = 'title-lock' }, null, 'welcome+=3.22')
+        .call(() => { root.dataset.entrancePhase = 'complete'; onComplete() }, null, 'welcome+=3.44')
     }, root)
     return () => context.revert()
   }, [authorizing, onComplete, onPrepare])
@@ -290,13 +297,13 @@ function Entrance({ onPrepare, onComplete }) {
 
 function HomeSystem() {
   return <div className="rhine-home-system" aria-hidden="true">
-    <svg viewBox="0 0 600 1000" preserveAspectRatio="xMidYMid meet">
+    <svg viewBox="0 -110 600 1220" preserveAspectRatio="xMidYMid meet">
       <defs>
-        <filter id="rhine-black-blur" x="-32%" y="-32%" width="164%" height="164%"><feGaussianBlur stdDeviation="22" /></filter>
+        <radialGradient id="rhine-black-glow" cx="50%" cy="50%" r="50%"><stop offset="0" stopColor="#000" /><stop offset=".72" stopColor="#000" /><stop offset="1" stopColor="#000" stopOpacity="0" /></radialGradient>
         <linearGradient id="rhine-tile-white" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#fff" /><stop offset=".58" stopColor="#f8f8f5" /><stop offset="1" stopColor="#a5a5a3" /></linearGradient>
         <linearGradient id="rhine-tile-dark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#4a4a49" /><stop offset="1" stopColor="#090a09" /></linearGradient>
       </defs>
-      <circle className="rhine-home-black" cx="300" cy="515" r="214" filter="url(#rhine-black-blur)" />
+      <circle className="rhine-home-black" cx="300" cy="515" r="244" fill="url(#rhine-black-glow)" />
       <g className="rhine-home-diamonds" data-home-diamonds>
         <rect className="is-white" x="109" y="445" width="75" height="75" transform="rotate(45 146.5 482.5)" />
         <rect className="is-white" x="163" y="499" width="75" height="75" transform="rotate(45 200.5 536.5)" />
@@ -309,11 +316,11 @@ function HomeSystem() {
         <rect className="is-white is-lower" x="255" y="669" width="67" height="67" transform="rotate(45 288.5 702.5)" />
       </g>
       <g className="rhine-home-white" data-home-white>
-        <path d="M242 92v270l-23 30v508" /><path d="M257 76v325l-19 22v482" /><path d="M274 88v352l-17 18v452" />
-        <path d="M468 108v797" />
+        <path d="M242-110V362l-23 30v718" /><path d="M257-110V401l-19 22v687" /><path d="M274-110V440l-17 18v652" />
+        <path d="M468-110v1220" />
       </g>
       <g className="rhine-home-orange" data-home-orange>
-        <path d="M300 0v1000" /><path d="M300 515 0 0" /><path d="M300 515c10-73 200-118 200-250V0" />
+        <path d="M300-110v1220" data-home-guide /><path d="M300 515 0 0" /><path d="M300 515c10-73 200-118 200-250V-110" />
       </g>
       <g className="rhine-home-nodes" data-home-nodes>
         <circle className="is-core" cx="300" cy="515" r="15" /><circle className="is-core-center" cx="300" cy="515" r="6" />
@@ -342,7 +349,8 @@ function HeadquartersGallery({ base, active }) {
     const videos = galleryRef.current?.querySelectorAll('video') ?? []
     videos.forEach((video) => {
       const isPrimary = Boolean(video.closest('.rhine-headquarters-primary'))
-      if (active && isPrimary) video.play().catch(() => {})
+      const isCurrentPrimary = isPrimary && Number(video.dataset.sceneIndex) === current
+      if (active && isCurrentPrimary) video.play().catch(() => {})
       else video.pause()
     })
   }, [active, current])
@@ -358,8 +366,8 @@ function HeadquartersGallery({ base, active }) {
   const primary = sceneAt(0)
 
   return <div className="rhine-headquarters-gallery" data-headquarters-gallery ref={galleryRef}>
-    <figure className="rhine-headquarters-primary" key={primary.video}>
-      <video src={rhineAsset(base, primary.video)} aria-label={primary.label} muted loop playsInline preload={active ? 'auto' : 'metadata'} />
+    <figure className="rhine-headquarters-primary">
+      {scenes.map((scene, index) => <video className={index === current ? 'is-active' : ''} data-scene-index={index} src={rhineAsset(base, scene.video)} aria-label={scene.label} aria-hidden={index !== current} muted loop playsInline preload={active ? 'auto' : 'metadata'} key={scene.video} />)}
       <figcaption><b>{primary.code}</b><span>{primary.label}<small>SECURE ENVIRONMENT / LIVE OPTICAL FEED</small></span></figcaption>
     </figure>
     <div className="rhine-headquarters-side">
@@ -454,10 +462,10 @@ function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
 }
 
 const DEPARTMENT_LAYOUT = [
-  { left: '13.4%', top: '17.2%', '--tile-angle': '3.4deg' }, { left: '13.4%', top: '41%', '--tile-angle': '.35deg' }, { left: '13.4%', top: '64%', '--tile-angle': '-2.4deg' },
-  { left: '26.8%', top: '29.1%', '--tile-angle': '2.9deg' }, { left: '26.8%', top: '56.2%', '--tile-angle': '-1.2deg' },
-  { left: '66.8%', top: '28.4%', '--tile-angle': '-2.9deg' }, { left: '67.2%', top: '52.8%', '--tile-angle': '1.2deg' },
-  { left: '80.7%', top: '17.2%', '--tile-angle': '-3.4deg' }, { left: '80.7%', top: '41%', '--tile-angle': '-.35deg' }, { left: '80.7%', top: '64%', '--tile-angle': '2.4deg' },
+  { left: '13.1%', top: '17.2%', '--tile-angle': '3.4deg' }, { left: '13.1%', top: '41%', '--tile-angle': '.35deg' }, { left: '13.1%', top: '64%', '--tile-angle': '-2.4deg' },
+  { left: '26.5%', top: '29.1%', '--tile-angle': '2.9deg' }, { left: '26.5%', top: '56.2%', '--tile-angle': '-1.2deg' },
+  { left: '65.8%', top: '28.4%', '--tile-angle': '-2.9deg' }, { left: '66.1%', top: '52.8%', '--tile-angle': '1.2deg' },
+  { left: '80.1%', top: '17.2%', '--tile-angle': '-3.4deg' }, { left: '80.1%', top: '41%', '--tile-angle': '-.35deg' }, { left: '80.1%', top: '64%', '--tile-angle': '2.4deg' },
 ]
 
 function DepartmentMatrix({ base, selected, onSelect }) {
@@ -506,7 +514,7 @@ function DepartmentMatrix({ base, selected, onSelect }) {
 
   return <div className={`rhine-department-stage ${current ? 'has-selection' : 'is-idle'}`} data-department-stage ref={stageRef} onPointerMove={trackPointer} onPointerLeave={resetPointerTrack}>
     <div className="rhine-department-lines" aria-hidden="true">
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M43.3 34 29 5M59.1 34 74.5 5M43.3 66 29 95M59.1 66 74.5 95" /></svg>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M42.9 33.2 28.7 4.2M58.7 33.2 72.9 4.2M42.9 66.8 28.7 95.8M58.7 66.8 72.9 95.8" /></svg>
       <i className="is-north-west" /><i className="is-north-east" /><i className="is-south-west" /><i className="is-south-east" />
       <span>{Array.from({ length: 6 }, (_, index) => <b key={index} />)}</span>
     </div>
@@ -651,8 +659,8 @@ export function RhineArchivePrototype() {
       scroller.style.scrollSnapType = 'none'
       scrollTween = gsap.to(scroller, {
         scrollTop: targetTop,
-        duration: 1,
-        ease: 'power2.inOut',
+        duration: 1.18,
+        ease: 'power3.inOut',
         overwrite: 'auto',
         onUpdate: () => ScrollTrigger.update(),
         onComplete: finishGlide,
@@ -674,14 +682,22 @@ export function RhineArchivePrototype() {
     const context = gsap.context(() => {
       gsap.timeline({ defaults: { ease: 'power3.out' } })
         .addLabel('home-enter', 0)
-        .fromTo('[data-main-chrome]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .28, stagger: .04 }, 'home-enter')
-        .fromTo('.rhine-home-copy', { x: '31vw', y: '-2vh', scale: 1.28, transformOrigin: 'left center' }, { x: 0, y: 0, scale: 1, duration: .92, ease: 'power4.inOut' }, 'home-enter')
-        .fromTo('.rhine-home-copy h1', { autoAlpha: 1 }, { autoAlpha: 1, duration: .01 }, 'home-enter')
-        .fromTo('.rhine-home-copy > :not(h1)', { autoAlpha: 0 }, { autoAlpha: 1, duration: .32, stagger: .055 }, 'home-enter+=.42')
-        .fromTo('.rhine-home-system', { autoAlpha: 0 }, { autoAlpha: 1, duration: .26 }, 'home-enter+=.28')
-        .fromTo('.rhine-home-black', { scale: 0, autoAlpha: 0, transformOrigin: 'center' }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out' }, 'home-enter+=.36')
-        .fromTo('[data-home-orange] path, [data-home-white] path', { strokeDasharray: 1100, strokeDashoffset: 1100 }, { strokeDashoffset: 0, duration: 1.02, stagger: .055 }, 'home-enter+=.44')
-        .fromTo('[data-home-diamonds] rect, [data-home-nodes] circle', { scale: 0, transformOrigin: 'center' }, { scale: 1, duration: .3, stagger: .045, ease: 'back.out(2)' }, 'home-enter+=.82')
+        .fromTo('[data-main-chrome]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .42, stagger: .045 }, 'home-enter')
+        .fromTo('.rhine-home-copy', { x: -34, autoAlpha: 0, transformOrigin: 'left center' }, { x: 0, autoAlpha: 1, duration: .74, ease: 'power3.out' }, 'home-enter+=.08')
+        .fromTo('.rhine-home-copy > :not(h1)', { x: -12, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .42, stagger: .07, ease: 'power2.out' }, 'home-enter+=.40')
+        .fromTo('.rhine-home-system', { y: 12, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: .54, ease: 'power3.out' }, 'home-enter+=.18')
+        .fromTo('.rhine-home-black', { scale: .82, autoAlpha: 0, transformOrigin: 'center' }, { scale: 1, autoAlpha: 1, duration: .82, ease: 'power3.out' }, 'home-enter+=.28')
+        .fromTo('[data-home-orange] path, [data-home-white] path', { strokeDasharray: 1180, strokeDashoffset: 1180 }, { strokeDashoffset: 0, duration: 1.18, stagger: .045, ease: 'power2.inOut' }, 'home-enter+=.34')
+        .fromTo('[data-home-diamonds] rect, [data-home-nodes] circle', { scale: .72, autoAlpha: 0, transformOrigin: 'center' }, { scale: 1, autoAlpha: 1, duration: .42, stagger: .035, ease: 'power3.out' }, 'home-enter+=.78')
+
+      gsap.timeline({
+        scrollTrigger: { trigger: '#rhine-home', scroller, start: 'top top', end: 'bottom top', scrub: .26 },
+        defaults: { ease: 'none' },
+      })
+        .to('.rhine-home-copy', { x: -40, autoAlpha: 0, duration: .52 }, 0)
+        .to('.rhine-home-black, [data-home-diamonds], [data-home-white], [data-home-orange] path:not([data-home-guide]), [data-home-nodes], .rhine-home-microcopy, .rhine-home-label', { autoAlpha: 0, duration: .55 }, 0)
+        .to('[data-home-guide]', { y: '122vh', autoAlpha: 1, duration: .78 }, 0)
+        .to('[data-home-guide]', { y: '150vh', autoAlpha: 0, duration: .22 }, .78)
 
       gsap.fromTo('[data-member-stage]', { scale: .95, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out', scrollTrigger: { trigger: '#rhine-members', scroller, start: 'top 65%', toggleActions: 'play none none reverse' } })
       gsap.fromTo('[data-department-stage]', { scale: .97, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out', scrollTrigger: { trigger: '#rhine-departments', scroller, start: 'top 65%', toggleActions: 'play none none reverse' } })
