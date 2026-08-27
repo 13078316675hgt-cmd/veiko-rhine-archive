@@ -30,9 +30,13 @@ function PioneerWaveLogo() {
   </svg>
 }
 
-function FixedBrand({ light = false }) {
-  const hasMeta = RHINE_CLONE.brand.lineOne || RHINE_CLONE.brand.lineTwo
-  return <div className={`rhine-fixed-brand ${light ? 'is-light' : ''}`}><strong>{RHINE_CLONE.brand.title}</strong>{hasMeta && <small>{RHINE_CLONE.brand.lineOne}{RHINE_CLONE.brand.lineTwo && <><br />{RHINE_CLONE.brand.lineTwo}</>}</small>}</div>
+function FixedBrand({ light = false, section = 'home' }) {
+  const departmentBrand = section === 'departments'
+  const title = departmentBrand ? 'RHINE LAB' : RHINE_CLONE.brand.title
+  const lineOne = departmentBrand ? 'SYNTHESIZE INFORMATION' : RHINE_CLONE.brand.lineOne
+  const lineTwo = departmentBrand ? 'ANALYSLS OS' : RHINE_CLONE.brand.lineTwo
+  const hasMeta = lineOne || lineTwo
+  return <div className={`rhine-fixed-brand ${light ? 'is-light' : ''}`}><strong>{title}</strong>{hasMeta && <small>{lineOne}{lineTwo && <><br />{lineTwo}</>}</small>}</div>
 }
 
 function FixedFooter({ light = false }) {
@@ -336,12 +340,12 @@ function HomeSystem() {
 
 function HeadquartersGallery({ base, active }) {
   const scenes = RHINE_CLONE.scenes.headquarters
-  const [current, setCurrent] = useState(0)
+  const [current, setCurrent] = useState(1)
   const galleryRef = useRef(null)
 
   useEffect(() => {
     if (!active) return undefined
-    const timer = window.setInterval(() => setCurrent((index) => (index + 1) % scenes.length), 7600)
+    const timer = window.setInterval(() => setCurrent((index) => (index + 1) % scenes.length), 14000)
     return () => window.clearInterval(timer)
   }, [active, scenes.length])
 
@@ -358,8 +362,10 @@ function HeadquartersGallery({ base, active }) {
   const setPreviewPlayback = useCallback((event, shouldPlay) => {
     const video = event.currentTarget.querySelector('video')
     if (!video) return
-    if (active && shouldPlay) video.play().catch(() => {})
-    else video.pause()
+    if (active && shouldPlay) {
+      if (video.readyState === 0) video.load()
+      video.play().catch(() => {})
+    } else video.pause()
   }, [active])
 
   const sceneAt = (offset) => scenes[(current + offset) % scenes.length]
@@ -374,7 +380,7 @@ function HeadquartersGallery({ base, active }) {
       {[1, 2].map((offset) => {
         const scene = sceneAt(offset)
         return <button type="button" onClick={() => setCurrent((current + offset) % scenes.length)} onPointerEnter={(event) => setPreviewPlayback(event, true)} onPointerLeave={(event) => setPreviewPlayback(event, false)} onFocus={(event) => setPreviewPlayback(event, true)} onBlur={(event) => setPreviewPlayback(event, false)} aria-label={`Open ${scene.label}`} key={scene.video}>
-          <video src={rhineAsset(base, scene.video)} aria-hidden="true" muted loop playsInline preload={active ? 'metadata' : 'none'} />
+          <video src={rhineAsset(base, scene.video)} poster={rhineAsset(base, scene.poster)} aria-hidden="true" muted loop playsInline preload="none" />
           <span><b>{scene.code}</b>{scene.label}</span>
         </button>
       })}
@@ -728,7 +734,7 @@ export function RhineArchivePrototype() {
   return <main className={`rhine-prototype rhine-active-${active}`} ref={rootRef} style={{ '--rhine-paper': RHINE_CLONE.colors.paper, '--rhine-ink': RHINE_CLONE.colors.ink, '--rhine-accent': RHINE_CLONE.colors.accent, '--rhine-pale': RHINE_CLONE.colors.pale, '--rhine-cyan': RHINE_CLONE.colors.cyan }}>
     {!entered && <Entrance onPrepare={prepareSite} onComplete={finishEntrance} />}
     {siteMounted && <>
-      <header data-main-chrome><FixedBrand light={active === 'research'} /></header>
+      <header data-main-chrome><FixedBrand light={active === 'research'} section={active} /></header>
       <nav className={`rhine-main-navigation ${active === 'research' ? 'is-light' : ''}`} data-main-chrome aria-label="Rhine Lab navigation">{RHINE_CLONE.sections.map((section) => <button type="button" className={active === section.id ? 'is-active' : ''} onClick={() => jumpTo(section.id)} aria-pressed={active === section.id} key={section.id}>{section.label}</button>)}</nav>
       <div data-main-chrome><FixedFooter light={active === 'research'} /></div>
       <div className="rhine-scroll" data-rhine-scroll>
