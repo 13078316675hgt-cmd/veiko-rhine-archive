@@ -173,7 +173,8 @@ const departmentStructure = await page.locator('[data-department-stage]').evalua
   rhineSecond: node.querySelector('.rhine-department-signatures > span:nth-child(2)')?.classList.contains('is-rhine'),
 }))
 if (Math.abs(departmentIdleRect.width - departmentIdleRect.height) > 1) failures.push(`department idle console is not square: ${departmentIdleRect.width}x${departmentIdleRect.height}`)
-if (departmentTileRotations.some((rotation) => Math.abs(rotation) > .05)) failures.push(`department idle tiles remained twisted: ${departmentTileRotations.join(', ')}`)
+const departmentFanSigns = [1, 1, -1, 1, -1, -1, 1, -1, -1, 1]
+if (departmentTileRotations.some((rotation, index) => Math.abs(rotation) < .2 || Math.sign(rotation) !== departmentFanSigns[index])) failures.push(`department tiles do not fan out from the center: ${departmentTileRotations.join(', ')}`)
 if (departmentStructure.corners !== 4 || departmentStructure.endpoints !== 4) failures.push(`department targeting frame is incomplete: ${JSON.stringify(departmentStructure)}`)
 if (!departmentStructure.pioneerFirst || !departmentStructure.rhineSecond) failures.push('department signatures are not Pioneer then Rhine')
 if (departmentTitleSize > 30) failures.push(`department title remained oversized at ${departmentTitleSize}px`)

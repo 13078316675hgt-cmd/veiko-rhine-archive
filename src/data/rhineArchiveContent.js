@@ -31,9 +31,9 @@ export const RHINE_CLONE = {
   },
   scenes: {
     headquarters: [
-      { image: 'rhine-reference/headquarters/lab-central.webp', code: 'A-01', label: 'CENTRAL BIOLOGICAL CORE' },
-      { image: 'rhine-reference/headquarters/lab-overlook.webp', code: 'A-02', label: 'REACTOR OBSERVATION DECK' },
-      { image: 'rhine-reference/headquarters/lab-corridor.webp', code: 'A-03', label: 'GENE ANALYSIS GALLERY' },
+      { video: 'assets/rhine-clone/headquarters/01.mp4', code: 'A-01', label: 'CENTRAL BIOLOGICAL CORE' },
+      { video: 'assets/rhine-clone/headquarters/02.mp4', code: 'A-02', label: 'REACTOR OBSERVATION DECK' },
+      { video: 'assets/rhine-clone/headquarters/03.mp4', code: 'A-03', label: 'GENE ANALYSIS GALLERY' },
     ],
     research: 'rhine-reference/black-hole-spectrum.png',
   },

@@ -173,7 +173,7 @@ function Entrance({ onPrepare, onComplete }) {
         .to('[data-access-corner]', { scale: 1, autoAlpha: 1, duration: .48, stagger: .045, ease: 'power3.out' }, 'verify+=.72')
         .to('[data-access-seed]', { scaleX: 1, autoAlpha: 1, duration: .62, ease: 'power3.inOut' }, 'verify+=1.04')
         .to('[data-access-copy], [data-access-corner]', { autoAlpha: 0, duration: .34, ease: 'sine.inOut' }, 'verify+=1.60')
-        .to('[data-access-seed]', { scaleX: 2.6, scaleY: 2.6, rotation: 45, autoAlpha: 0, duration: .48, ease: 'power3.inOut' }, 'verify+=1.66')
+        .to('[data-access-seed]', { autoAlpha: 0, duration: .42, ease: 'sine.inOut' }, 'verify+=1.66')
         .addLabel('authorized', 2.10)
         .call(() => { root.dataset.entrancePhase = 'permission-authorized' }, null, 'authorized')
         .to('[data-auth-matrix]', { scale: 1, autoAlpha: 1, duration: .54, ease: 'power3.out' }, 'authorized')
@@ -190,8 +190,8 @@ function Entrance({ onPrepare, onComplete }) {
         .to('[data-auth-scan]', { autoAlpha: 0, duration: .26, ease: 'sine.out' }, 'authorized+=1.38')
         .to('[data-auth-text], [data-auth-kicker]', { autoAlpha: 0, duration: .4, ease: 'sine.inOut' }, 'authorized+=2.52')
         .to('[data-auth-line], [data-auth-node], [data-auth-tick]', { autoAlpha: 0, duration: .44, ease: 'sine.inOut' }, 'authorized+=2.58')
-        .to('[data-auth-lock]', { scaleX: 4.6, scaleY: .12, duration: .68, ease: 'power3.inOut' }, 'authorized+=2.64')
-        .to('[data-auth-matrix]', { scale: .88, autoAlpha: 0, duration: .32, ease: 'power2.in' }, 'authorized+=3.06')
+        .to('[data-auth-lock]', { autoAlpha: 0, duration: .44, ease: 'sine.inOut' }, 'authorized+=2.64')
+        .to('[data-auth-matrix]', { autoAlpha: 0, duration: .44, ease: 'sine.inOut' }, 'authorized+=2.72')
         .set('[data-access]', { autoAlpha: 0 }, 'authorized+=3.38')
         .set('[data-welcome]', { autoAlpha: 1 }, 'authorized+=3.34')
         .addLabel('welcome', 5.48)
@@ -330,6 +330,7 @@ function HomeSystem() {
 function HeadquartersGallery({ base, active }) {
   const scenes = RHINE_CLONE.scenes.headquarters
   const [current, setCurrent] = useState(0)
+  const galleryRef = useRef(null)
 
   useEffect(() => {
     if (!active) return undefined
@@ -337,19 +338,35 @@ function HeadquartersGallery({ base, active }) {
     return () => window.clearInterval(timer)
   }, [active, scenes.length])
 
+  useEffect(() => {
+    const videos = galleryRef.current?.querySelectorAll('video') ?? []
+    videos.forEach((video) => {
+      const isPrimary = Boolean(video.closest('.rhine-headquarters-primary'))
+      if (active && isPrimary) video.play().catch(() => {})
+      else video.pause()
+    })
+  }, [active, current])
+
+  const setPreviewPlayback = useCallback((event, shouldPlay) => {
+    const video = event.currentTarget.querySelector('video')
+    if (!video) return
+    if (active && shouldPlay) video.play().catch(() => {})
+    else video.pause()
+  }, [active])
+
   const sceneAt = (offset) => scenes[(current + offset) % scenes.length]
   const primary = sceneAt(0)
 
-  return <div className="rhine-headquarters-gallery" data-headquarters-gallery>
-    <figure className="rhine-headquarters-primary" key={primary.image}>
-      <img src={rhineAsset(base, primary.image)} alt={primary.label} decoding="async" fetchPriority="high" />
+  return <div className="rhine-headquarters-gallery" data-headquarters-gallery ref={galleryRef}>
+    <figure className="rhine-headquarters-primary" key={primary.video}>
+      <video src={rhineAsset(base, primary.video)} aria-label={primary.label} muted loop playsInline preload={active ? 'auto' : 'metadata'} />
       <figcaption><b>{primary.code}</b><span>{primary.label}<small>SECURE ENVIRONMENT / LIVE OPTICAL FEED</small></span></figcaption>
     </figure>
     <div className="rhine-headquarters-side">
       {[1, 2].map((offset) => {
         const scene = sceneAt(offset)
-        return <button type="button" onClick={() => setCurrent((current + offset) % scenes.length)} aria-label={`Open ${scene.label}`} key={scene.image}>
-          <img src={rhineAsset(base, scene.image)} alt="" decoding="async" />
+        return <button type="button" onClick={() => setCurrent((current + offset) % scenes.length)} onPointerEnter={(event) => setPreviewPlayback(event, true)} onPointerLeave={(event) => setPreviewPlayback(event, false)} onFocus={(event) => setPreviewPlayback(event, true)} onBlur={(event) => setPreviewPlayback(event, false)} aria-label={`Open ${scene.label}`} key={scene.video}>
+          <video src={rhineAsset(base, scene.video)} aria-hidden="true" muted loop playsInline preload={active ? 'metadata' : 'none'} />
           <span><b>{scene.code}</b>{scene.label}</span>
         </button>
       })}
@@ -437,42 +454,65 @@ function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
 }
 
 const DEPARTMENT_LAYOUT = [
-  { left: '13%', top: '18.5%' }, { left: '13%', top: '40.5%' }, { left: '13%', top: '62.5%' },
-  { left: '26%', top: '29.5%' }, { left: '26%', top: '51.5%' },
-  { left: '65.5%', top: '29.5%' }, { left: '65.5%', top: '51.5%' },
-  { left: '79.5%', top: '18.5%' }, { left: '79.5%', top: '40.5%' }, { left: '79.5%', top: '62.5%' },
+  { left: '13.4%', top: '17.2%', '--tile-angle': '3.4deg' }, { left: '13.4%', top: '41%', '--tile-angle': '.35deg' }, { left: '13.4%', top: '64%', '--tile-angle': '-2.4deg' },
+  { left: '26.8%', top: '29.1%', '--tile-angle': '2.9deg' }, { left: '26.8%', top: '56.2%', '--tile-angle': '-1.2deg' },
+  { left: '66.8%', top: '28.4%', '--tile-angle': '-2.9deg' }, { left: '67.2%', top: '52.8%', '--tile-angle': '1.2deg' },
+  { left: '80.7%', top: '17.2%', '--tile-angle': '-3.4deg' }, { left: '80.7%', top: '41%', '--tile-angle': '-.35deg' }, { left: '80.7%', top: '64%', '--tile-angle': '2.4deg' },
 ]
 
 function DepartmentMatrix({ base, selected, onSelect }) {
-  const trackerRef = useRef(null)
+  const stageRef = useRef(null)
+  const pointerFrameRef = useRef(0)
+  const pointerRef = useRef({ x: 0, y: 0 })
   const current = selected == null ? null : RHINE_DEPARTMENTS[selected]
 
-  const trackPointer = useCallback((event) => {
-    const tracker = trackerRef.current
-    if (!tracker || event.pointerType === 'touch') return
-    const bounds = event.currentTarget.getBoundingClientRect()
-    const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1))
-    const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1))
-    tracker.style.setProperty('--department-track-x', `${(x * 6).toFixed(2)}px`)
-    tracker.style.setProperty('--department-track-y', `${(y * 5).toFixed(2)}px`)
+  const applyPointerTrack = useCallback((x, y) => {
+    const stage = stageRef.current
+    if (!stage) return
+    stage.style.setProperty('--department-track-x', `${(x * 28).toFixed(2)}px`)
+    stage.style.setProperty('--department-track-y', `${(y * 18).toFixed(2)}px`)
+    stage.style.setProperty('--department-track-r', `${(x * 1.15).toFixed(2)}deg`)
+    stage.style.setProperty('--department-line-x', `${(x * 18).toFixed(2)}px`)
+    stage.style.setProperty('--department-line-y', `${(y * 12).toFixed(2)}px`)
+    stage.style.setProperty('--department-tile-x', `${(x * 9).toFixed(2)}px`)
+    stage.style.setProperty('--department-tile-y', `${(y * 6).toFixed(2)}px`)
+    stage.style.setProperty('--department-tile-r', `${(x * .42).toFixed(2)}deg`)
+    stage.style.setProperty('--department-signature-x', `${(x * 14).toFixed(2)}px`)
+    stage.style.setProperty('--department-signature-y', `${(y * 9).toFixed(2)}px`)
   }, [])
+
+  const trackPointer = useCallback((event) => {
+    if (event.pointerType === 'touch') return
+    const bounds = event.currentTarget.getBoundingClientRect()
+    pointerRef.current.x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1))
+    pointerRef.current.y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1))
+    if (pointerFrameRef.current) return
+    pointerFrameRef.current = window.requestAnimationFrame(() => {
+      pointerFrameRef.current = 0
+      applyPointerTrack(pointerRef.current.x, pointerRef.current.y)
+    })
+  }, [applyPointerTrack])
 
   const resetPointerTrack = useCallback(() => {
-    const tracker = trackerRef.current
-    if (!tracker) return
-    tracker.style.setProperty('--department-track-x', '0px')
-    tracker.style.setProperty('--department-track-y', '0px')
+    pointerRef.current = { x: 0, y: 0 }
+    if (pointerFrameRef.current) window.cancelAnimationFrame(pointerFrameRef.current)
+    pointerFrameRef.current = 0
+    applyPointerTrack(0, 0)
+  }, [applyPointerTrack])
+
+  useEffect(() => () => {
+    if (pointerFrameRef.current) window.cancelAnimationFrame(pointerFrameRef.current)
   }, [])
 
-  return <div className={`rhine-department-stage ${current ? 'has-selection' : 'is-idle'}`} data-department-stage onPointerMove={trackPointer} onPointerLeave={resetPointerTrack}>
+  return <div className={`rhine-department-stage ${current ? 'has-selection' : 'is-idle'}`} data-department-stage ref={stageRef} onPointerMove={trackPointer} onPointerLeave={resetPointerTrack}>
     <div className="rhine-department-lines" aria-hidden="true">
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M44 34 27 5M56 34 73 5M44 66 27 95M56 66 73 95" /></svg>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M43.3 34 29 5M59.1 34 74.5 5M43.3 66 29 95M59.1 66 74.5 95" /></svg>
       <i className="is-north-west" /><i className="is-north-east" /><i className="is-south-west" /><i className="is-south-east" />
       <span>{Array.from({ length: 6 }, (_, index) => <b key={index} />)}</span>
     </div>
     {current && <div className="rhine-department-heading"><strong>{current.title}</strong><span>{current.label}</span></div>}
     <div className="rhine-department-console" data-department-preview>
-      <div className="rhine-department-tracker" data-department-tracker ref={trackerRef}>
+      <div className="rhine-department-tracker" data-department-tracker>
         <div className="rhine-department-placeholder" aria-label="Select a department"><i /><InfinityLogo /></div>
         <span className="rhine-department-corners" aria-hidden="true"><i /><i /><i /><i /></span>
         {current && <div className="rhine-department-media" key={current.preview}>
@@ -480,10 +520,12 @@ function DepartmentMatrix({ base, selected, onSelect }) {
         </div>}
       </div>
     </div>
-    {RHINE_DEPARTMENTS.map((department, index) => <button className={`rhine-department-tile ${selected === index ? 'is-selected' : ''}`} style={{ ...DEPARTMENT_LAYOUT[index], '--tile-order': index, '--tile-delay': `${index * -.47}s` }} type="button" onPointerEnter={() => onSelect(index)} onPointerLeave={() => onSelect(null)} onFocus={() => onSelect(index)} onBlur={() => onSelect(null)} onClick={() => onSelect(index)} aria-pressed={selected === index} key={department.code}>
-      <span className="rhine-department-orbit" aria-hidden="true"><i /><i /><i /></span><span className="rhine-department-trace" aria-hidden="true" />
-      <DepartmentMark code={department.code} /><small>{department.label}</small>
-    </button>)}
+    <div className="rhine-department-tiles">
+      {RHINE_DEPARTMENTS.map((department, index) => <button className={`rhine-department-tile ${selected === index ? 'is-selected' : ''}`} style={{ ...DEPARTMENT_LAYOUT[index], '--tile-order': index, '--tile-delay': `${index * -.47}s` }} type="button" onPointerEnter={() => onSelect(index)} onPointerLeave={() => onSelect(null)} onFocus={() => onSelect(index)} onBlur={() => onSelect(null)} onClick={() => onSelect(index)} aria-pressed={selected === index} key={department.code}>
+        <span className="rhine-department-orbit" aria-hidden="true"><i /><i /><i /></span><span className="rhine-department-trace" aria-hidden="true" />
+        <DepartmentMark code={department.code} /><small>{department.label}</small>
+      </button>)}
+    </div>
     <div className="rhine-department-signatures" aria-hidden="true">
       <span className="is-pioneer"><PioneerWaveLogo /><small>PIONEER PROJECT</small></span>
       <span className="is-rhine"><InfinityLogo compact /><small>RHINE LAB</small></span>
