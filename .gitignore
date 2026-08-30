@@ -22,6 +22,10 @@
 !/src/rhine-archive-prototype.css
 !/src/components/
 !/src/components/RhineArchivePrototype.jsx
+!/src/components/BlackHoleCanvas.jsx
+!/src/components/FractalTunnelCanvas.jsx
+!/src/components/ShadertoyBlackHoleCanvas.jsx
+!/src/components/ChromaticTunnelCanvas.jsx
 !/src/data/
 !/src/data/rhineArchiveContent.js
 !/scripts/

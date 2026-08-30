@@ -33,14 +33,14 @@ for (const [index, scene] of scenes.entries()) {
   if (alignment > 2) failures.push(`${scene} alignment delta: ${alignment}`)
   if (scene === 'HEADQUARTERS') {
     const gallery = page.locator('[data-headquarters-gallery]')
-    const primary = gallery.locator('.rhine-headquarters-primary video')
+    const primary = gallery.locator('.rhine-headquarters-primary > .rhine-headquarters-media')
     const sidePlates = gallery.locator('.rhine-headquarters-side button')
     if (await primary.count() !== 1 || await sidePlates.count() !== 2) failures.push('headquarters gallery does not expose one primary and two secondary plates')
-    const sourceBefore = await primary.getAttribute('src')
+    const codeBefore = await gallery.locator('.rhine-headquarters-primary figcaption > b').textContent()
     await sidePlates.first().click()
     await page.waitForTimeout(200)
-    const sourceAfter = await primary.getAttribute('src')
-    if (sourceBefore === sourceAfter) failures.push('headquarters gallery did not advance after selecting a plate')
+    const codeAfter = await gallery.locator('.rhine-headquarters-primary figcaption > b').textContent()
+    if (codeBefore === codeAfter) failures.push('headquarters gallery did not advance after selecting a plate')
     const playback = await gallery.locator('video').evaluateAll((videos) => videos.map((video) => ({ primary: Boolean(video.closest('.rhine-headquarters-primary')), paused: video.paused, muted: video.muted })))
     if (playback.some((video) => !video.muted) || playback.filter((video) => video.primary).some((video) => video.paused)) failures.push(`headquarters video playback policy is incorrect: ${JSON.stringify(playback)}`)
   }

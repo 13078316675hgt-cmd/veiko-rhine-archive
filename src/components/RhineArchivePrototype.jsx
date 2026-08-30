@@ -2,6 +2,9 @@ import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { RHINE_CLONE, RHINE_DEPARTMENTS, RHINE_MEMBERS, RHINE_RESEARCH, rhineAsset } from '../data/rhineArchiveContent'
+import { FractalTunnelCanvas } from './FractalTunnelCanvas'
+import { ShadertoyBlackHoleCanvas } from './ShadertoyBlackHoleCanvas'
+import { ChromaticTunnelCanvas } from './ChromaticTunnelCanvas'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -371,16 +374,53 @@ function HeadquartersGallery({ base, active }) {
   const sceneAt = (offset) => scenes[(current + offset) % scenes.length]
   const primary = sceneAt(0)
 
+  const sceneVisual = (scene, { isActive = true, preview = false, sceneIndex } = {}) => {
+    const key = scene.video || scene.visual || scene.code
+    if (scene.visual === 'fractal-tunnel') {
+      return <FractalTunnelCanvas
+        active={active && isActive}
+        className={preview ? '' : `rhine-headquarters-media ${isActive ? 'is-active' : ''}`}
+        fallback={rhineAsset(base, scene.poster)}
+        label={scene.label}
+        preview={preview}
+        key={`${key}-${preview ? 'preview' : 'primary'}`}
+      />
+    }
+    if (scene.visual === 'chromatic-tunnel') {
+      return <ChromaticTunnelCanvas
+        active={active && isActive}
+        className={preview ? '' : `rhine-headquarters-media ${isActive ? 'is-active' : ''}`}
+        fallback={rhineAsset(base, scene.poster)}
+        label={scene.label}
+        quality={preview ? 'low' : 'auto'}
+        key={`${key}-${preview ? 'preview' : 'primary'}`}
+      />
+    }
+    return <video
+      className={preview ? '' : `rhine-headquarters-media ${isActive ? 'is-active' : ''}`}
+      data-scene-index={sceneIndex}
+      src={rhineAsset(base, scene.video)}
+      poster={preview ? rhineAsset(base, scene.poster) : undefined}
+      aria-label={preview ? undefined : scene.label}
+      aria-hidden={preview || !isActive}
+      muted
+      loop
+      playsInline
+      preload={preview ? 'none' : active ? 'auto' : 'metadata'}
+      key={`${key}-${preview ? 'preview' : 'primary'}`}
+    />
+  }
+
   return <div className="rhine-headquarters-gallery" data-headquarters-gallery ref={galleryRef}>
     <figure className="rhine-headquarters-primary">
-      {scenes.map((scene, index) => <video className={index === current ? 'is-active' : ''} data-scene-index={index} src={rhineAsset(base, scene.video)} aria-label={scene.label} aria-hidden={index !== current} muted loop playsInline preload={active ? 'auto' : 'metadata'} key={scene.video} />)}
+      {sceneVisual(primary, { isActive: true, sceneIndex: current })}
       <figcaption><b>{primary.code}</b><span>{primary.label}<small>SECURE ENVIRONMENT / LIVE OPTICAL FEED</small></span></figcaption>
     </figure>
     <div className="rhine-headquarters-side">
       {[1, 2].map((offset) => {
         const scene = sceneAt(offset)
-        return <button type="button" onClick={() => setCurrent((current + offset) % scenes.length)} onPointerEnter={(event) => setPreviewPlayback(event, true)} onPointerLeave={(event) => setPreviewPlayback(event, false)} onFocus={(event) => setPreviewPlayback(event, true)} onBlur={(event) => setPreviewPlayback(event, false)} aria-label={`Open ${scene.label}`} key={scene.video}>
-          <video src={rhineAsset(base, scene.video)} poster={rhineAsset(base, scene.poster)} aria-hidden="true" muted loop playsInline preload="none" />
+        return <button type="button" onClick={() => setCurrent((current + offset) % scenes.length)} onPointerEnter={(event) => setPreviewPlayback(event, true)} onPointerLeave={(event) => setPreviewPlayback(event, false)} onFocus={(event) => setPreviewPlayback(event, true)} onBlur={(event) => setPreviewPlayback(event, false)} aria-label={`Open ${scene.label}`} key={scene.video || scene.visual || scene.code}>
+          {sceneVisual(scene, { isActive: true, preview: true })}
           <span><b>{scene.code}</b>{scene.label}</span>
         </button>
       })}
@@ -547,13 +587,10 @@ function DepartmentMatrix({ base, selected, onSelect }) {
   </div>
 }
 
-function BlackHoleSystem({ base }) {
+function BlackHoleSystem({ active, base }) {
   const source = rhineAsset(base, RHINE_CLONE.scenes.research)
   return <figure className="rhine-blackhole-visual" aria-label="Chromatic black hole with slowly moving accretion light">
-    <div className="rhine-blackhole-field">
-      <img className="rhine-blackhole-base" src={source} alt="" />
-      <i className="rhine-blackhole-lensing" aria-hidden="true" />
-    </div>
+    <ShadertoyBlackHoleCanvas active={active} className="rhine-blackhole-field" fallback={source} />
     <figcaption><span>GRAVITATIONAL LENSING</span><b>BH / SPECTRUM-01</b></figcaption>
   </figure>
 }
@@ -569,7 +606,7 @@ const RHINE_TIME_CODES = [
   'T±00:00:01',
 ]
 
-function ResearchScene({ base, onContinue }) {
+function ResearchScene({ active, base, onContinue }) {
   const timeDots = (layer) => Array.from({ length: 121 }, (_, index) => {
     const x = index % 11
     const y = Math.floor(index / 11)
@@ -577,7 +614,7 @@ function ResearchScene({ base, onContinue }) {
     return <i className={visible ? 'is-visible' : ''} style={{ '--grain-index': index }} key={`${layer}-${index}`} />
   })
   return <div className="rhine-research-scene">
-    <BlackHoleSystem base={base} />
+    <BlackHoleSystem active={active} base={base} />
     <div className="rhine-space-stars is-far" aria-hidden="true" /><div className="rhine-space-stars is-near" aria-hidden="true" />
     <div className="rhine-research-shade" />
     <div className="rhine-pioneer-mark" data-research-ui><span>{RHINE_RESEARCH.title}<small>{RHINE_RESEARCH.english}</small></span><MoonProjectLogo /></div>
@@ -745,7 +782,7 @@ export function RhineArchivePrototype() {
         <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersGallery base={base} active={active === 'headquarters'} /></section>
         <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} moving={memberMove} onMoveEnd={finishMemberMove} /></section>
         <section id="rhine-departments" className="rhine-view rhine-departments" data-rhine-view="departments"><DepartmentMatrix base={base} selected={departmentIndex} onSelect={setDepartmentIndex} /></section>
-        <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene base={base} onContinue={() => jumpTo('home')} /></section>
+        <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene active={active === 'research'} base={base} onContinue={() => jumpTo('home')} /></section>
       </div>
     </>}
   </main>
