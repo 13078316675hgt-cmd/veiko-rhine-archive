@@ -5,7 +5,7 @@ import phasesSource from '../vendor/ml3bwf/ml3BWf.frag.glsl?raw'
  * Exact fragment source: “Phases” by XorDev.
  * Source: https://www.shadertoy.com/view/ml3BWf
  * The original lunar geometry stays unchanged. The output wrapper adds
- * a monochrome halftone screen at 65% strength, with no extra raymarch pass.
+ * a monochrome halftone screen at 40% strength, with no extra raymarch pass.
  */
 
 const QUALITY_PRESETS = Object.freeze({
@@ -52,7 +52,7 @@ void main() {
   float luminance = clamp(dot(color.rgb, vec3(.2126, .7152, .0722)), 0., 1.);
   float tone = pow(luminance, .86);
   float dots = halftoneDot(gl_FragCoord.xy, .785398, tone * .91);
-  float monochrome = mix(luminance, dots * .94 + tone * .075, .65);
+  float monochrome = mix(luminance, dots * .94 + tone * .075, .40);
   veikoFragColor = vec4(vec3(monochrome), 1.);
 }
 `
@@ -265,7 +265,7 @@ export const PhasesCanvas = memo(function PhasesCanvas({
     data-shadertoy-id="ml3BWf"
     data-shadertoy-source="original-with-monochrome-halftone"
     data-lunar-treatment="monochrome-halftone"
-    data-halftone-strength="0.65"
+    data-halftone-strength="0.40"
   >
     <canvas ref={canvasRef} role="img" aria-label={`${label} — ${tier} quality`} />
   </div>
