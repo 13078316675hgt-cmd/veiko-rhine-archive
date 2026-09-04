@@ -3,19 +3,17 @@ import '../headquarters-memory.css'
 
 const sequences = [
   { code: '01', title: 'CONTINUUM', subtitle: '连续体', category: 'STRUCTURAL MEMORY', detail: '将离散片段连接成连续的形态。沿着结构，追溯每一次变化。', type: 'SEGMENT / FORM' },
-  { code: '02', title: 'CONTACT', subtitle: '接触', category: 'SENSORY MEMORY', detail: '在接近与触碰之间，保存尚未消失的感知。', type: 'GESTURE / TRACE' },
+  { code: '02', title: 'RESONANCE', subtitle: '共振', category: 'RESONANT MEMORY', detail: '沿闭合的轨迹，寻找结构之间的共鸣。', type: 'ORBIT / RESONANCE' },
   { code: '03', title: 'FRAGMENTS', subtitle: '碎片', category: 'SPATIAL MEMORY', detail: '拆解、游离、重新排列。每个碎片都是另一种可能的起点。', type: 'PARTICLE / SPACE' },
 ]
 
-function MemoryStructure({ active, sequence }) {
+function MemoryStructure({ sequence }) {
   const ref = useRef(null)
   useEffect(() => {
     const canvas = ref.current
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    const motion = matchMedia('(prefers-reduced-motion: reduce)')
-    let width = 1, height = 1, frame = 0, time = 0, previous = 0
-    let px = 0, py = 0
+    let width = 1, height = 1
     const draw = () => {
       ctx.clearRect(0, 0, width, height)
       const mobile = width < 700
@@ -23,11 +21,11 @@ function MemoryStructure({ active, sequence }) {
         const rings = []
         for (let i = 0; i < 92; i++) {
           const u = i / 91
-          const wave = u * Math.PI * 2.15 + time * .045
-          const x = width * (-.17 + u * 1.38) + px * 12
-          const y = height * (.57 + Math.sin(wave + .4) * (mobile ? .08 : .13)) + py * 9
+          const wave = u * Math.PI * 2.15
+          const x = width * (-.17 + u * 1.38)
+          const y = height * (.57 + Math.sin(wave + .4) * (mobile ? .08 : .13))
           const r = Math.min(width * .125, height * .25) * (.79 + .24 * Math.cos(wave))
-          const twist = u * 3.4 + time * .025
+          const twist = u * 3.4
           const vertices = []
           for (let j = 0; j < 8; j++) {
             const a = j / 8 * Math.PI * 2 + twist
@@ -49,14 +47,44 @@ function MemoryStructure({ active, sequence }) {
           path(vertices); ctx.strokeStyle = red ? 'rgba(225,157,149,.55)' : 'rgba(255,255,255,.83)'; ctx.lineWidth = 1.3; ctx.stroke()
           path(inner); ctx.strokeStyle = red ? 'rgba(88,10,15,.75)' : 'rgba(75,77,75,.27)'; ctx.lineWidth = .65; ctx.stroke()
         }
+      } else if (sequence === 1) {
+        const radius = Math.min(width * .24, height * .26)
+        const point = (u, v) => {
+          const tube = radius * (.26 + .08 * Math.cos(u * 3))
+          const a = (radius + tube * Math.cos(v)) * Math.cos(u)
+          const b = (radius + tube * Math.cos(v)) * Math.sin(u)
+          const c = tube * Math.sin(v)
+          const y = b * .64 - c * .77
+          const z = b * .77 + c * .64
+          const x = a * .94 + z * .34
+          const depth = -a * .34 + z * .94
+          const perspective = 1100 / (1100 + depth)
+          return [width * .53 + x * perspective, height * .55 + y * perspective, depth]
+        }
+        const faces = []
+        for (let ring = 0; ring < 84; ring++) {
+          for (let side = 0; side < 16; side++) {
+            const u = ring / 84 * Math.PI * 2
+            const v = side / 16 * Math.PI * 2
+            const points = [point(u,v),point(u+.057,v),point(u+.057,v+Math.PI/8),point(u,v+Math.PI/8)]
+            faces.push({ points, depth: points.reduce((sum,p) => sum + p[2],0)/4, red: ring > 8 && ring < 28, light: .5 + .5 * Math.sin(v + .8) })
+          }
+        }
+        faces.sort((a,b) => b.depth-a.depth)
+        for (const face of faces) {
+          ctx.beginPath(); face.points.forEach(([x,y],i) => i ? ctx.lineTo(x,y) : ctx.moveTo(x,y)); ctx.closePath()
+          const shade = Math.round(63 + face.light * 177)
+          ctx.fillStyle = face.red ? `rgb(${Math.round(64+face.light*101)},${Math.round(12+face.light*17)},${Math.round(18+face.light*19)})` : `rgb(${shade},${shade+1},${shade})`
+          ctx.fill(); ctx.strokeStyle = face.red ? 'rgba(231,178,164,.36)' : 'rgba(248,249,245,.58)'; ctx.lineWidth = .65; ctx.stroke()
+        }
       } else if (sequence === 2) {
         const unit = Math.min(width, height * 1.5)
         for (let i = 0; i < 78; i++) {
           const n = Math.sin(i * 127.1 + 6) * 43758.5453
           const f = n - Math.floor(n)
           const u = i / 78
-          const x = width * (.12 + .72 * u) + Math.cos(i * 4.3 + time * .08) * unit * .16 + px * (f*20)
-          const y = height * (.65 - u * .23) + Math.sin(i * 8.1 + time * .08) * height * .18 + py * 12
+          const x = width * (.12 + .72 * u) + Math.cos(i * 4.3) * unit * .16
+          const y = height * (.65 - u * .23) + Math.sin(i * 8.1) * height * .18
           const size = unit * (.018 + f * f * .1)
           const red = i % 7 < 3
           ctx.save(); ctx.translate(x,y); ctx.rotate(-.7 + Math.sin(i) * .16)
@@ -77,32 +105,21 @@ function MemoryStructure({ active, sequence }) {
       }
       canvas.dataset.ready = 'true'
     }
-    const tick = (now) => {
-      frame = 0
-      if (!previous || now - previous >= 32) { time += previous ? Math.min((now-previous)/1000,.1) : 0; previous = now; draw() }
-      if (active && !document.hidden && !motion.matches && sequence !== 1) frame = requestAnimationFrame(tick)
-    }
-    const resume = () => {
-      cancelAnimationFrame(frame); frame = 0; previous = 0; draw()
-      if (active && !document.hidden && !motion.matches && sequence !== 1) frame = requestAnimationFrame(tick)
-    }
     const resize = () => {
-      const rect = canvas.getBoundingClientRect(); width = rect.width; height = rect.height
+      // Layout size stays stable while the page's transition scales its parent.
+      width = canvas.clientWidth; height = canvas.clientHeight
       const dpr = Math.min(devicePixelRatio || 1, 2)
       canvas.width = Math.round(width*dpr); canvas.height = Math.round(height*dpr)
       ctx.setTransform(dpr,0,0,dpr,0,0); draw()
     }
-    const pointer = (event) => { if (!active || motion.matches) return; const rect = canvas.getBoundingClientRect(); px = (event.clientX-rect.left)/width-.5; py = (event.clientY-rect.top)/height-.5 }
     const observer = new ResizeObserver(resize); observer.observe(canvas)
-    canvas.parentElement.addEventListener('pointermove',pointer)
-    document.addEventListener('visibilitychange',resume); motion.addEventListener('change',resume)
-    resize(); resume()
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); canvas.parentElement?.removeEventListener('pointermove',pointer); document.removeEventListener('visibilitychange',resume); motion.removeEventListener('change',resume) }
-  }, [active,sequence])
+    resize()
+    return () => observer.disconnect()
+  }, [sequence])
   return <canvas ref={ref} className="memory-structure" aria-hidden="true" />
 }
 
-export function HeadquartersMemoryArchive({ base, active }) {
+export function HeadquartersMemoryArchive({ active }) {
   const [selected, setSelected] = useState(0)
   const scene = sequences[selected]
   const tabs = useRef([])
@@ -114,16 +131,14 @@ export function HeadquartersMemoryArchive({ base, active }) {
     if (event.key === 'End') next = 2
     if (next !== undefined) { event.preventDefault(); setSelected(next); tabs.current[next]?.focus() }
   }
-  return <div className={`memory-archive memory-sequence-${selected+1}`} data-headquarters-gallery data-memory-sequence={scene.code}>
+  return <div className={`memory-archive memory-sequence-${selected+1} ${active ? 'is-active' : ''}`} data-headquarters-gallery data-memory-sequence={scene.code}>
     <div className="memory-stage" data-memory-stage>
-      {selected === 1 && <img className="memory-contact" src={`${base}assets/rhine-clone/headquarters/contact-sculpture.png`} alt="灰白手部雕塑彼此靠近，边缘分解为轻薄的片段" />}
-      <MemoryStructure active={active} sequence={selected} />
+      <MemoryStructure sequence={selected} />
       <svg className="memory-registration" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
         <path className="memory-diagonal" d="M-90 825 1330 170M160 920 1520 350" />
         <path d="M410 487 566 374M902 525 1060 653M310 640 140 711" />
         <g className="memory-targets"><rect x="395" y="472" width="30" height="30"/><rect x="871" y="494" width="62" height="62"/><rect x="290" y="620" width="40" height="40"/></g>
         <path className="memory-crosses" d="M561 370h10m-5-5v10M1055 653h10m-5-5v10M135 711h10m-5-5v10" />
-        {selected === 1 && <path className="memory-signal" d="M565 465h20l8-9 8 18 12-40 9 66 10-45 12 15 12-5h12l8-17 10 37 12-58 12 75 12-41 12 7h23" />}
       </svg>
     </div>
     <header className="memory-heading" data-memory-heading>

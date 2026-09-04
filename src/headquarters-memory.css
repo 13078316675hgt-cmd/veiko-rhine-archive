@@ -5,10 +5,12 @@
 .memory-stage, .memory-structure, .memory-registration { position: absolute; inset: 0; width: 100%; height: 100%; }
 .memory-stage { overflow: hidden; mask-image: linear-gradient(to bottom, #000 0%, #000 53%, rgba(0,0,0,.8) 62%, rgba(0,0,0,.13) 76%, transparent 87%); }
 .memory-stage::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to left, rgba(220,222,219,.94), transparent 18%); pointer-events: none; }
-.memory-contact { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
 .memory-registration { pointer-events: none; fill: none; stroke: #555e56; stroke-width: .6; opacity: .64; }
 .memory-registration .memory-diagonal { stroke: #920f1b; opacity: .35; }
 .memory-registration .memory-targets { stroke-width: 1.2; }
+.memory-archive.is-active .memory-targets { animation: memory-target-signal 3s ease-in-out infinite alternate; }
+@keyframes memory-target-signal { from { opacity: .4; } to { opacity: .85; } }
+@media (prefers-reduced-motion: reduce) { .memory-archive.is-active .memory-targets { animation: none; } }
 .memory-registration .memory-crosses, .memory-registration .memory-signal { stroke: #920f1b; stroke-width: 1.7; }
 .memory-heading { position: absolute; top: 19%; left: 6%; right: 21%; }
 .memory-heading p { display: flex; gap: 12px; align-items: center; margin: 0 0 14px; font: 11px 'Courier New', monospace; letter-spacing: .12em; }
@@ -60,7 +62,6 @@
   .memory-tabs button { gap: 8px; }
   .memory-tabs em { display: none; }
   .memory-bottom-mark { bottom: 7%; left: 6%; right: 6%; }
-  .memory-contact { object-position: 51% center; }
 }
 @media (max-width: 430px) {
   .memory-edition { font-size: 7px; }
