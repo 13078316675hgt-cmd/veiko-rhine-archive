@@ -3,7 +3,7 @@
 
 export const RHINE_CLONE = {
   colors: {
-    paper: '#dedfd6',
+    paper: '#ededea',
     ink: '#171d1a',
     accent: '#718500',
     pale: '#f1f2e9',

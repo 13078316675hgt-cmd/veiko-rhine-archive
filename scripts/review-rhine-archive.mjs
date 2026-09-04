@@ -34,16 +34,16 @@ for (const [index, scene] of scenes.entries()) {
   if (scene === 'HEADQUARTERS') {
     const gallery = page.locator('[data-headquarters-gallery]')
     const tabs = gallery.getByRole('tab')
-    if (await tabs.count() !== 3) failures.push('headquarters must expose three memory sequences')
-    for (let sequenceIndex = 0; sequenceIndex < 3; sequenceIndex++) {
+    if (await tabs.count() !== 2) failures.push('headquarters must expose two memory sequences')
+    for (let sequenceIndex = 0; sequenceIndex < 2; sequenceIndex++) {
       await tabs.nth(sequenceIndex).click()
       await page.waitForTimeout(180)
       if (await tabs.nth(sequenceIndex).getAttribute('aria-selected') !== 'true') failures.push('memory selection did not change')
       if (await gallery.getAttribute('data-memory-sequence') !== String(sequenceIndex + 1).padStart(2, '0')) failures.push('memory scene did not follow selection')
       if (await gallery.locator('canvas').getAttribute('data-ready') !== 'true') failures.push('memory canvas did not render')
-      if (sequenceIndex === 1 && !await gallery.getByRole('tabpanel').innerText().then(text => text.includes('RESONANCE'))) failures.push('replacement resonance scene did not appear')
+      if (sequenceIndex === 1 && !await gallery.getByRole('tabpanel').innerText().then(text => text.includes('FRAGMENTS'))) failures.push('fragments scene was not renumbered to 02')
     }
-    await tabs.nth(2).press('ArrowRight')
+    await tabs.nth(1).press('ArrowRight')
     if (await tabs.nth(0).getAttribute('aria-selected') !== 'true') failures.push('memory keyboard navigation did not wrap')
   }
   await page.screenshot({ path: fileURLToPath(new URL(`${String(index + 1).padStart(2, '0')}-${scene.toLowerCase()}.png`, output)) })
