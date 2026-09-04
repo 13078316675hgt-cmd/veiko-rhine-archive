@@ -131,7 +131,7 @@ export const PhasesCanvas = memo(function PhasesCanvas({
 
     let program
     let frame = 0
-    let lastFrame = 0
+    let nextFrame = 0
     let visible = true
     let disposed = false
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -180,9 +180,15 @@ export const PhasesCanvas = memo(function PhasesCanvas({
     const loop = (now) => {
       frame = 0
       if (disposed || document.hidden || !visible || !runtimeRef.current?.active) return
-      if (now - lastFrame >= preset.frameInterval) {
-        lastFrame = now
+      if (nextFrame <= 0 || now >= nextFrame - .25) {
         draw(now)
+        // Advance the deadline, not the previous rAF timestamp. Otherwise a
+        // 45fps target drifts down to 36fps on a 144Hz display.
+        if (nextFrame <= 0) nextFrame = now + preset.frameInterval
+        else {
+          nextFrame += preset.frameInterval
+          if (nextFrame <= now) nextFrame += (Math.floor((now-nextFrame)/preset.frameInterval)+1)*preset.frameInterval
+        }
       }
       frame = window.requestAnimationFrame(loop)
     }
@@ -199,6 +205,7 @@ export const PhasesCanvas = memo(function PhasesCanvas({
     const stop = () => {
       window.cancelAnimationFrame(frame)
       frame = 0
+      nextFrame = 0
     }
 
     runtimeRef.current = { active, draw, epoch: performance.now(), start, stop }

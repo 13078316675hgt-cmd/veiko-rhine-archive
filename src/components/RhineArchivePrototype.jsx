@@ -121,6 +121,8 @@ function Entrance({ onPrepare, onComplete }) {
         .fromTo('[data-warning-title]', { clipPath: 'inset(0 100% 0 0)', x: 10, autoAlpha: 0 }, { clipPath: 'inset(0 0% 0 0)', x: 0, autoAlpha: 1, duration: .6, ease: 'power3.out' }, 'warning+=.10')
         .fromTo('[data-warning-symbol]', { scale: .72, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .36, ease: 'power2.out' }, 'warning+=.56')
         .fromTo('[data-warning-row]', { x: 12, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .3, stagger: .28, ease: 'power2.out' }, 'warning+=.82')
+        // Mount the archive during the warning's still hold, before input opens.
+        .call(onPrepare, null, 1.82)
         .to('[data-warning]', { autoAlpha: 0, duration: .28, ease: 'power2.in' }, 2.55)
         .fromTo('[data-entrance-flash]', { scaleX: 0, scaleY: 1, autoAlpha: 0 }, { scaleX: 1, autoAlpha: 1, duration: .2, transformOrigin: 'center center', ease: 'power4.out' }, 2.72)
         .to('[data-entrance-flash]', { scaleX: 5.8, autoAlpha: 0, duration: .28, ease: 'power3.in' }, 2.92)
@@ -144,7 +146,6 @@ function Entrance({ onPrepare, onComplete }) {
         .to('[data-login-input]', { scaleX: 1, duration: .52, stagger: .22, ease: 'power3.inOut' }, 6.52)
         .to('[data-login-error]', { y: 0, autoAlpha: 1, duration: .28 }, 6.96)
         .to('[data-login-button]', { scaleX: 1, autoAlpha: 1, duration: .52, ease: 'power4.out' }, 7.02)
-        .call(onPrepare, null, 7.72)
         .call(() => {
           setCanLogin(true)
           const loginButton = root.querySelector('[data-login-button]')
@@ -166,8 +167,9 @@ function Entrance({ onPrepare, onComplete }) {
     }
     const context = gsap.context(() => {
       root.dataset.entrancePhase = 'authorizing'
-      gsap.set('[data-login-phases]', { autoAlpha: 1, clipPath: 'circle(0% at 50% 50%)' })
-      gsap.set('[data-login-phases] .rhine-phases-canvas', { scale: .18, autoAlpha: 1, transformOrigin: 'center center' })
+      gsap.set('[data-login-phases]', { autoAlpha: 1 })
+      gsap.set('[data-lunar-reveal]', { scale: 0, transformOrigin: 'center center' })
+      gsap.set('[data-login-phases] .rhine-phases-canvas', { scale: .18, autoAlpha: 0, transformOrigin: 'center center' })
       gsap.set('[data-lunar-shock]', { scale: .12, autoAlpha: 0 })
       gsap.set('[data-lunar-flash]', { autoAlpha: 0 })
       gsap.set('[data-phases-meta]', { y: 10, autoAlpha: 0 })
@@ -175,27 +177,27 @@ function Entrance({ onPrepare, onComplete }) {
       gsap.set('[data-phases-rule]', { scaleX: 0, autoAlpha: 0, transformOrigin: 'left center' })
       const authorize = gsap.timeline({ defaults: { ease: 'power3.inOut' } })
         .addLabel('depart', 0)
-        .to('[data-login-form]', { x: 100, scale: 1.22, autoAlpha: 0, duration: .22, ease: 'power3.in' }, 'depart')
-        .to('[data-intro-logo]', { x: -100, scale: 1.5, autoAlpha: 0, duration: .22, ease: 'power3.in' }, 'depart')
-        .to('[data-entrance-brand], [data-entrance-footer]', { autoAlpha: 0, duration: .16 }, 'depart')
-        .to('[data-login-phases]', { clipPath: 'circle(75% at 50% 50%)', duration: .34, ease: 'power3.in' }, 'depart')
-        .to('[data-login]', { autoAlpha: 0, duration: .08 }, 'depart+=.18')
+        .to('[data-login-form]', { x: 100, scale: 1.22, autoAlpha: 0, duration: .38, ease: 'power2.inOut' }, 'depart')
+        .to('[data-intro-logo]', { x: -100, scale: 1.5, autoAlpha: 0, duration: .38, ease: 'power2.inOut' }, 'depart')
+        .to('[data-entrance-brand], [data-entrance-footer]', { autoAlpha: 0, duration: .26 }, 'depart')
+        .to('[data-lunar-reveal]', { scale: 1, duration: .90, ease: 'power3.out' }, 'depart')
+        .to('[data-login-phases] .rhine-phases-canvas', { autoAlpha: 1, duration: .18, ease: 'power2.out' }, 'depart+=.12')
+        .to('[data-login]', { autoAlpha: 0, duration: .12 }, 'depart+=.34')
         .call(() => { root.dataset.entrancePhase = 'lunar-phases' }, null, 'depart+=.08')
-        .to('[data-login-phases] .rhine-phases-canvas', { scale: AUTHORIZATION_CANVAS_SCALE, duration: .46, ease: 'power3.in' }, 'depart')
-        .to('[data-login-phases] .rhine-phases-canvas', { scale: 1, duration: .28, ease: 'power3.out' }, 'depart+=.46')
-        .set('[data-lunar-shock]', { autoAlpha: .8 }, 'depart+=.24')
-        .to('[data-lunar-shock]', { scale: 3.8, autoAlpha: 0, duration: .62, ease: 'power3.out' }, 'depart+=.24')
-        .to('[data-lunar-flash]', { autoAlpha: .28, duration: .055, ease: 'none' }, 'depart+=.43')
-        .to('[data-lunar-flash]', { autoAlpha: 0, duration: .2, ease: 'power2.out' }, 'depart+=.485')
-        .to('[data-phases-rule]', { scaleX: 1, autoAlpha: 1, duration: .3, ease: 'power3.out' }, 'depart+=.60')
-        .to('[data-phases-meta]', { y: 0, autoAlpha: 1, duration: .26, ease: 'power2.out' }, 'depart+=.68')
-        .to('[data-phases-title]', { clipPath: 'inset(0 0% 0 0)', y: 0, autoAlpha: 1, duration: .38, ease: 'power3.out' }, 'depart+=.76')
-        .call(() => { root.dataset.entrancePhase = 'permission-authorized' }, null, 'depart+=1.16')
-        .call(onPrepare, null, 'depart+=1.65')
-        .to('[data-phases-meta], [data-phases-title], [data-phases-rule]', { y: -18, autoAlpha: 0, duration: .25, stagger: .025, ease: 'power2.in' }, 'depart+=2.02')
-        .to('[data-login-phases] .rhine-phases-canvas', { scale: 2.8, duration: .56, ease: 'power4.in' }, 'depart+=2.12')
-        .to('[data-login-phases]', { autoAlpha: 0, duration: .28, ease: 'power2.in' }, 'depart+=2.50')
-        .call(() => { root.dataset.entrancePhase = 'complete'; onComplete() }, null, 'depart+=2.80')
+        .to('[data-login-phases] .rhine-phases-canvas', { scale: AUTHORIZATION_CANVAS_SCALE, duration: .94, ease: 'power2.inOut' }, 'depart')
+        .to('[data-login-phases] .rhine-phases-canvas', { scale: 1, duration: .46, ease: 'power2.out' }, 'depart+=.94')
+        .set('[data-lunar-shock]', { autoAlpha: .8 }, 'depart+=.50')
+        .to('[data-lunar-shock]', { scale: 3.8, autoAlpha: 0, duration: .90, ease: 'power3.out' }, 'depart+=.50')
+        .to('[data-lunar-flash]', { autoAlpha: .28, duration: .12, ease: 'none' }, 'depart+=.88')
+        .to('[data-lunar-flash]', { autoAlpha: 0, duration: .34, ease: 'power2.out' }, 'depart+=1.00')
+        .to('[data-phases-rule]', { scaleX: 1, autoAlpha: 1, duration: .42, ease: 'power3.out' }, 'depart+=1.08')
+        .to('[data-phases-meta]', { y: 0, autoAlpha: 1, duration: .40, ease: 'power2.out' }, 'depart+=1.22')
+        .to('[data-phases-title]', { clipPath: 'inset(0 0% 0 0)', y: 0, autoAlpha: 1, duration: .56, ease: 'power3.out' }, 'depart+=1.34')
+        .call(() => { root.dataset.entrancePhase = 'permission-authorized' }, null, 'depart+=1.94')
+        .to('[data-phases-meta], [data-phases-title], [data-phases-rule]', { y: -18, autoAlpha: 0, duration: .42, stagger: .025, ease: 'power2.in' }, 'depart+=3.18')
+        .to('[data-login-phases] .rhine-phases-canvas', { scale: 2.8, duration: .92, ease: 'power2.inOut' }, 'depart+=3.42')
+        .to('[data-login-phases]', { autoAlpha: 0, duration: .48, ease: 'power2.in' }, 'depart+=4.08')
+        .call(() => { root.dataset.entrancePhase = 'complete'; onComplete() }, null, 'depart+=4.60')
     }, root)
     return () => context.revert()
   }, [authorizing, onComplete, onPrepare])
@@ -226,6 +228,7 @@ function Entrance({ onPrepare, onComplete }) {
       </form>
     </div>
     <div className="rhine-login-phases" data-login-phases>
+      <i className="rhine-lunar-reveal" data-lunar-reveal aria-hidden="true" />
       <PhasesCanvas active={authorizing} resolutionScale={AUTHORIZATION_CANVAS_SCALE} />
       <i className="rhine-lunar-shock" data-lunar-shock aria-hidden="true" />
       <i className="rhine-lunar-flash" data-lunar-flash aria-hidden="true" />
@@ -632,12 +635,20 @@ export function RhineArchivePrototype() {
   const [siteMounted, setSiteMounted] = useState(bypass)
   const [active, setActive] = useState(initialView)
   const [gliding, setGliding] = useState(false)
+  const [canPrepareResearch, setCanPrepareResearch] = useState(false)
   const [memberIndex, setMemberIndex] = useState(1)
   const [memberMove, setMemberMove] = useState(null)
   const [departmentIndex, setDepartmentIndex] = useState(null)
   const base = basePath()
   const prepareSite = useCallback(() => setSiteMounted(true), [])
   const finishEntrance = useCallback(() => setEntered(true), [])
+  useEffect(() => {
+    if (!entered) return undefined
+    // Give the moon and homepage entrance exclusive GPU time. The existing
+    // black-hole pipeline still prewarms before an ordinary visit to Research.
+    const timer = window.setTimeout(() => setCanPrepareResearch(true), 2200)
+    return () => window.clearTimeout(timer)
+  }, [entered])
   const finishMemberMove = useCallback((target) => {
     setMemberIndex(target)
     setMemberMove((current) => current?.target === target ? null : current)
@@ -864,10 +875,10 @@ export function RhineArchivePrototype() {
           <div className="rhine-home-copy"><h1><span>{RHINE_CLONE.home.eyebrow}</span>{RHINE_CLONE.home.title}<b>{RHINE_CLONE.home.accent}</b></h1><p>{RHINE_CLONE.home.copy}</p><strong><i />{RHINE_CLONE.home.partner}</strong></div>
           <HomeSystem />
         </section>
-        <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersMemoryArchive base={base} active={active === 'headquarters' && !gliding} /><SectionTransitionCue code="02" label="MEMBER ARCHIVE" target="members" /></section>
+        <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersMemoryArchive base={base} active={entered && active === 'headquarters' && !gliding} /><SectionTransitionCue code="02" label="MEMBER ARCHIVE" target="members" /></section>
         <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} moving={memberMove} onMoveEnd={finishMemberMove} /><SectionTransitionCue code="03" label="DEPARTMENT MATRIX" target="departments" /></section>
         <section id="rhine-departments" className="rhine-view rhine-departments" data-rhine-view="departments"><DepartmentMatrix base={base} selected={departmentIndex} onSelect={setDepartmentIndex} /><SectionTransitionCue code="04" label="RESEARCH / EVENT HORIZON" target="research" tone="dark" /></section>
-        <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene active={active === 'research' && !gliding} prepareBlackHole={!entered || (!gliding && (active === 'members' || active === 'departments'))} onContinue={returnHome} /></section>
+        <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene active={entered && active === 'research' && !gliding} prepareBlackHole={entered && !gliding && (canPrepareResearch || active === 'members' || active === 'departments')} onContinue={returnHome} /></section>
       </div>
     </>}
   </main>
