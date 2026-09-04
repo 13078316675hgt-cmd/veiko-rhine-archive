@@ -3,13 +3,16 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { RHINE_CLONE, RHINE_DEPARTMENTS, RHINE_MEMBERS, RHINE_RESEARCH, rhineAsset } from '../data/rhineArchiveContent'
 import { FractalTunnelCanvas } from './FractalTunnelCanvas'
-import { ShadertoyBlackHoleCanvas } from './ShadertoyBlackHoleCanvas'
 import { ChromaticTunnelCanvas } from './ChromaticTunnelCanvas'
+import { PhasesCanvas } from './PhasesCanvas'
+import { WeaveCanvas } from './WeaveCanvas'
+import { WxdfzjBlackHoleCanvas } from './WxdfzjBlackHoleCanvas'
 
 gsap.registerPlugin(ScrollTrigger)
 
 const basePath = () => import.meta.env.BASE_URL
 const RHINE_LOGIN = Object.freeze({ username: 'Marlsa', password: '9029' })
+const AUTHORIZATION_CANVAS_SCALE = 1.085
 
 function InfinityLogo({ compact = false }) {
   return <svg className={compact ? 'is-compact' : ''} viewBox="0 0 310 160" aria-hidden="true">
@@ -44,6 +47,12 @@ function FixedBrand({ light = false, section = 'home' }) {
 
 function FixedFooter({ light = false }) {
   return <div className={`rhine-fixed-footer ${light ? 'is-light' : ''}`}><span>{RHINE_CLONE.brand.footer}</span><i /></div>
+}
+
+function SectionTransitionCue({ code, label, target, tone = 'paper' }) {
+  return <div className={`rhine-section-transition-cue is-${tone}`} data-transition-cue={target} aria-hidden="true">
+    <span>{code}</span><b>{label}</b><i /><small>SCROLL TRANSFER</small>
+  </div>
 }
 
 function Entrance({ onPrepare, onComplete }) {
@@ -86,7 +95,7 @@ function Entrance({ onPrepare, onComplete }) {
       }
 
       root.querySelectorAll('[data-intro-logo] [data-logo-outline], [data-intro-logo] [data-logo-glyphs], [data-welcome] [data-logo-outline], [data-welcome] [data-logo-glyphs]').forEach(primeStroke)
-      gsap.set('[data-login], [data-entrance-brand], [data-entrance-footer], [data-access], [data-welcome], [data-paper-wash]', { autoAlpha: 0 })
+      gsap.set('[data-login], [data-entrance-brand], [data-entrance-footer], [data-access], [data-welcome], [data-login-phases], [data-paper-wash]', { autoAlpha: 0 })
       gsap.set('[data-intro-logo]', { x: introLogoOffset, scale: .86, autoAlpha: 0, transformOrigin: '50% 50%' })
       gsap.set('[data-logo-loader-copy]', { clipPath: 'inset(0 100% 0 0)', autoAlpha: 0 })
       gsap.set('[data-logo-dot]', { scale: 0, autoAlpha: 0, transformOrigin: '50% 50%' })
@@ -159,71 +168,29 @@ function Entrance({ onPrepare, onComplete }) {
     }
     const context = gsap.context(() => {
       root.dataset.entrancePhase = 'authorizing'
-      gsap.set('[data-access-copy]', { clipPath: 'inset(0 50% 0 50%)', y: 4, autoAlpha: 0 })
-      gsap.set('[data-access-corner]', { scale: .45, autoAlpha: 0, transformOrigin: 'center center' })
-      gsap.set('[data-access-seed]', { scaleX: 0, rotation: 0, autoAlpha: 0, transformOrigin: 'center center' })
-      gsap.set('[data-auth-matrix]', { scale: .965, autoAlpha: 0, transformOrigin: 'center center' })
-      gsap.set('[data-auth-line]', { strokeDashoffset: 1 })
-      gsap.set('[data-auth-node]', { scale: .6, autoAlpha: 0, transformOrigin: 'center center' })
-      gsap.set('[data-auth-tick]', { scaleY: .25, autoAlpha: 0, transformOrigin: 'center bottom' })
-      gsap.set('[data-auth-lock]', { scale: .72, rotation: -10, autoAlpha: 0, transformOrigin: 'center center' })
-      gsap.set('[data-auth-lock-core]', { scale: .6, autoAlpha: 0, transformOrigin: 'center center' })
-      gsap.set('[data-auth-scan]', { x: -210, scaleX: .68, autoAlpha: 0, transformOrigin: 'left center' })
-      gsap.set('[data-auth-text]', { clipPath: 'inset(0 0 100% 0)', y: 5, autoAlpha: 0 })
-      gsap.set('[data-auth-kicker]', { y: 6, autoAlpha: 0 })
-      gsap.set('[data-welcome] > strong, [data-welcome] > b, [data-welcome] > svg, [data-welcome-rail]', { autoAlpha: 0 })
-      gsap.set('[data-welcome] > strong, [data-welcome] > b', { clipPath: 'inset(0 100% 0 0)' })
-      gsap.set('[data-welcome-name], [data-welcome-accent]', { yPercent: 64 })
-      gsap.set('[data-welcome-rail]', { scaleX: 0, transformOrigin: 'center center' })
+      gsap.set('[data-login-phases]', { autoAlpha: 0 })
+      gsap.set('[data-login-phases] .rhine-phases-canvas', { scale: AUTHORIZATION_CANVAS_SCALE, autoAlpha: 0, transformOrigin: 'center center' })
+      gsap.set('[data-phases-meta]', { y: 10, autoAlpha: 0 })
+      gsap.set('[data-phases-title]', { clipPath: 'inset(0 100% 0 0)', y: 7, autoAlpha: 0 })
+      gsap.set('[data-phases-rule]', { scaleX: 0, autoAlpha: 0, transformOrigin: 'left center' })
       const authorize = gsap.timeline({ defaults: { ease: 'power3.inOut' } })
-        .addLabel('verify', 0)
-        .to('[data-login-form]', { x: -48, scale: .94, autoAlpha: 0, duration: .58, ease: 'power3.inOut' }, 'verify')
-        .to('[data-intro-logo]', { x: 48, scale: .88, autoAlpha: 0, duration: .58, ease: 'power3.inOut' }, 'verify')
-        .to('[data-login]', { autoAlpha: 0, duration: .16, ease: 'sine.inOut' }, 'verify+=.50')
-        .to('[data-access]', { autoAlpha: 1, duration: .01 }, 'verify+=.52')
-        .to('[data-access-copy]', { clipPath: 'inset(0 0% 0 0)', y: 0, autoAlpha: 1, duration: .7, ease: 'power3.out' }, 'verify+=.58')
-        .to('[data-access-corner]', { scale: 1, autoAlpha: 1, duration: .48, stagger: .045, ease: 'power3.out' }, 'verify+=.72')
-        .to('[data-access-seed]', { scaleX: 1, autoAlpha: 1, duration: .62, ease: 'power3.inOut' }, 'verify+=1.04')
-        .to('[data-access-copy], [data-access-corner]', { autoAlpha: 0, duration: .34, ease: 'sine.inOut' }, 'verify+=1.60')
-        .to('[data-access-seed]', { autoAlpha: 0, duration: .42, ease: 'sine.inOut' }, 'verify+=1.66')
-        .addLabel('authorized', 2.10)
-        .call(() => { root.dataset.entrancePhase = 'permission-authorized' }, null, 'authorized')
-        .to('[data-auth-matrix]', { scale: 1, autoAlpha: 1, duration: .54, ease: 'power3.out' }, 'authorized')
-        .to('[data-auth-bracket]', { strokeDashoffset: 0, duration: .68, stagger: .04, ease: 'power2.out' }, 'authorized+=.06')
-        .to('[data-auth-rail]', { strokeDashoffset: 0, duration: .78, stagger: .04, ease: 'power2.inOut' }, 'authorized+=.18')
-        .to('[data-auth-tick]', { scaleY: 1, autoAlpha: .62, duration: .36, stagger: .024, ease: 'power2.out' }, 'authorized+=.42')
-        .to('[data-auth-node]', { scale: 1, autoAlpha: 1, duration: .42, stagger: .035, ease: 'power3.out' }, 'authorized+=.52')
-        .to('[data-auth-scan]', { x: 510, scaleX: 1, autoAlpha: .68, duration: 1.05, ease: 'none' }, 'authorized+=.46')
-        .to('[data-auth-lock]', { keyframes: [{ scale: 1.035, rotation: 1.5, autoAlpha: 1, duration: .52, ease: 'power3.out' }, { scale: 1, rotation: 0, duration: .28, ease: 'sine.inOut' }], ease: 'none' }, 'authorized+=.66')
-        .to('[data-auth-lock-core]', { scale: 1.12, autoAlpha: 1, duration: .38, ease: 'power3.out' }, 'authorized+=.98')
-        .to('[data-auth-lock-core]', { scale: 1, duration: .28, ease: 'sine.inOut' }, 'authorized+=1.36')
-        .to('[data-auth-kicker]', { y: 0, autoAlpha: 1, duration: .42, ease: 'power2.out' }, 'authorized+=.72')
-        .to('[data-auth-text]', { clipPath: 'inset(0 0 0% 0)', y: 0, autoAlpha: 1, duration: .54, ease: 'power3.inOut' }, 'authorized+=.86')
-        .to('[data-auth-scan]', { autoAlpha: 0, duration: .26, ease: 'sine.out' }, 'authorized+=1.38')
-        .to('[data-auth-text], [data-auth-kicker]', { autoAlpha: 0, duration: .4, ease: 'sine.inOut' }, 'authorized+=2.52')
-        .to('[data-auth-line], [data-auth-node], [data-auth-tick]', { autoAlpha: 0, duration: .44, ease: 'sine.inOut' }, 'authorized+=2.58')
-        .to('[data-auth-lock]', { autoAlpha: 0, duration: .44, ease: 'sine.inOut' }, 'authorized+=2.64')
-        .to('[data-auth-matrix]', { autoAlpha: 0, duration: .44, ease: 'sine.inOut' }, 'authorized+=2.72')
-        .set('[data-access]', { autoAlpha: 0 }, 'authorized+=3.38')
-        .set('[data-welcome]', { autoAlpha: 1 }, 'authorized+=3.34')
-        .addLabel('welcome', 5.48)
-        .call(() => { root.dataset.entrancePhase = 'welcome' }, null, 'welcome')
-        .set('[data-welcome] > svg', { autoAlpha: 1, scale: .8, transformOrigin: 'center center' }, 'welcome')
-        .fromTo('[data-welcome] [data-logo-outline]', { strokeDasharray: 920, strokeDashoffset: 920, autoAlpha: 1 }, { strokeDashoffset: 0, duration: 1.04, ease: 'power2.inOut' }, 'welcome')
-        .fromTo('[data-welcome] [data-logo-glyphs]', { strokeDasharray: 160, strokeDashoffset: 160, autoAlpha: 1 }, { strokeDashoffset: 0, duration: .48, ease: 'power2.out' }, 'welcome+=.44')
-        .to('[data-welcome-rail]', { scaleX: 1, autoAlpha: 1, duration: .62, ease: 'power3.out' }, 'welcome+=.58')
-        .to('[data-welcome] > strong', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .64, ease: 'power3.inOut' }, 'welcome+=.70')
-        .to('[data-welcome] > b', { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: .01 }, 'welcome+=.96')
-        .to('[data-welcome-name]', { yPercent: 0, duration: .72, ease: 'power3.out' }, 'welcome+=.96')
-        .to('[data-welcome-accent]', { yPercent: 0, duration: .72, ease: 'power3.out' }, 'welcome+=1.08')
-        .to('[data-welcome] > svg', { y: 7, scale: .84, duration: .8, ease: 'sine.inOut' }, 'welcome+=1.42')
-        .to('[data-welcome-rail]', { scaleX: .76, duration: .8, ease: 'sine.inOut' }, 'welcome+=1.42')
-        .call(onPrepare, null, 'welcome+=2.42')
-        .to('[data-welcome] > strong, [data-welcome] > b', { y: -10, autoAlpha: 0, duration: .46, ease: 'power2.in' }, 'welcome+=2.72')
-        .to('[data-welcome] > svg, [data-welcome-rail]', { y: 10, autoAlpha: 0, duration: .42, ease: 'sine.in' }, 'welcome+=2.78')
-        .to('[data-welcome]', { autoAlpha: 0, duration: .26, ease: 'sine.inOut' }, 'welcome+=3.14')
-        .call(() => { root.dataset.entrancePhase = 'title-lock' }, null, 'welcome+=3.22')
-        .call(() => { root.dataset.entrancePhase = 'complete'; onComplete() }, null, 'welcome+=3.44')
+        .addLabel('depart', 0)
+        .to('[data-login-form]', { x: -52, scale: .94, autoAlpha: 0, duration: .56, ease: 'power3.inOut' }, 'depart')
+        .to('[data-intro-logo]', { x: 52, scale: .88, autoAlpha: 0, duration: .56, ease: 'power3.inOut' }, 'depart')
+        .to('[data-entrance-brand], [data-entrance-footer]', { autoAlpha: 0, duration: .34, ease: 'sine.inOut' }, 'depart+=.24')
+        .to('[data-login]', { autoAlpha: 0, duration: .12, ease: 'sine.inOut' }, 'depart+=.48')
+        .set('[data-login-phases]', { autoAlpha: 1 }, 'depart+=.48')
+        .call(() => { root.dataset.entrancePhase = 'lunar-phases' }, null, 'depart+=.50')
+        .to('[data-login-phases] .rhine-phases-canvas', { scale: 1, autoAlpha: 1, duration: 1.08, ease: 'power3.out' }, 'depart+=.50')
+        .to('[data-phases-rule]', { scaleX: 1, autoAlpha: 1, duration: .56, ease: 'power3.out' }, 'depart+=1.08')
+        .to('[data-phases-meta]', { y: 0, autoAlpha: 1, duration: .42, ease: 'power2.out' }, 'depart+=1.18')
+        .to('[data-phases-title]', { clipPath: 'inset(0 0% 0 0)', y: 0, autoAlpha: 1, duration: .68, ease: 'power3.inOut' }, 'depart+=1.28')
+        .call(() => { root.dataset.entrancePhase = 'permission-authorized' }, null, 'depart+=1.72')
+        .call(onPrepare, null, 'depart+=2.30')
+        .to('[data-phases-meta], [data-phases-title], [data-phases-rule]', { y: -12, autoAlpha: 0, duration: .42, stagger: .04, ease: 'power2.in' }, 'depart+=2.72')
+        .to('[data-login-phases] .rhine-phases-canvas', { scale: 1.055, autoAlpha: 0, duration: .82, ease: 'power3.in' }, 'depart+=2.82')
+        .to('[data-login-phases]', { autoAlpha: 0, duration: .14, ease: 'sine.inOut' }, 'depart+=3.58')
+        .call(() => { root.dataset.entrancePhase = 'complete'; onComplete() }, null, 'depart+=3.74')
     }, root)
     return () => context.revert()
   }, [authorizing, onComplete, onPrepare])
@@ -251,6 +218,14 @@ function Entrance({ onPrepare, onComplete }) {
         <button data-login-button type="submit" disabled={!canLogin || authorizing}>LOGIN</button>
         <a data-login-register href="#rhine-register" onClick={(event) => event.preventDefault()}>REGISTER</a>
       </form>
+    </div>
+    <div className="rhine-login-phases" data-login-phases>
+      <PhasesCanvas active={authorizing} resolutionScale={AUTHORIZATION_CANVAS_SCALE} />
+      <div className="rhine-phases-copy">
+        <small data-phases-meta>LUNAR ACCESS / PHASE SEQUENCE 01</small>
+        <strong data-phases-title>LUNAR MISSION AUTHORIZED</strong>
+        <i data-phases-rule />
+      </div>
     </div>
     <div className="rhine-access" data-access>
       <div className="rhine-access-typing"><span data-access-copy>SCANNING LUNAR ACCESS KEY</span><span className="rhine-access-corners" aria-hidden="true"><i data-access-corner /><i data-access-corner /><i data-access-corner /><i data-access-corner /></span></div>
@@ -344,6 +319,7 @@ function HomeSystem() {
 function HeadquartersGallery({ base, active }) {
   const scenes = RHINE_CLONE.scenes.headquarters
   const [current, setCurrent] = useState(1)
+  const [activePreview, setActivePreview] = useState(null)
   const galleryRef = useRef(null)
 
   useEffect(() => {
@@ -396,6 +372,17 @@ function HeadquartersGallery({ base, active }) {
         key={`${key}-${preview ? 'preview' : 'primary'}`}
       />
     }
+    if (scene.visual === 'weave') {
+      return <WeaveCanvas
+        active={active && isActive}
+        className={preview ? '' : `rhine-headquarters-media ${isActive ? 'is-active' : ''}`}
+        fallback={rhineAsset(base, scene.poster)}
+        label={scene.label}
+        preview={preview}
+        quality={preview ? 'low' : 'auto'}
+        key={`${key}-${preview ? 'preview' : 'primary'}`}
+      />
+    }
     return <video
       className={preview ? '' : `rhine-headquarters-media ${isActive ? 'is-active' : ''}`}
       data-scene-index={sceneIndex}
@@ -419,8 +406,17 @@ function HeadquartersGallery({ base, active }) {
     <div className="rhine-headquarters-side">
       {[1, 2].map((offset) => {
         const scene = sceneAt(offset)
-        return <button type="button" onClick={() => setCurrent((current + offset) % scenes.length)} onPointerEnter={(event) => setPreviewPlayback(event, true)} onPointerLeave={(event) => setPreviewPlayback(event, false)} onFocus={(event) => setPreviewPlayback(event, true)} onBlur={(event) => setPreviewPlayback(event, false)} aria-label={`Open ${scene.label}`} key={scene.video || scene.visual || scene.code}>
-          {sceneVisual(scene, { isActive: true, preview: true })}
+        const previewKey = scene.video || scene.visual || scene.code
+        const activatePreview = (event) => {
+          setActivePreview(previewKey)
+          setPreviewPlayback(event, true)
+        }
+        const deactivatePreview = (event) => {
+          setActivePreview((currentPreview) => currentPreview === previewKey ? null : currentPreview)
+          setPreviewPlayback(event, false)
+        }
+        return <button type="button" onClick={() => setCurrent((current + offset) % scenes.length)} onPointerEnter={activatePreview} onPointerLeave={deactivatePreview} onFocus={activatePreview} onBlur={deactivatePreview} aria-label={`Open ${scene.label}`} key={previewKey}>
+          {sceneVisual(scene, { isActive: activePreview === previewKey, preview: true })}
           <span><b>{scene.code}</b>{scene.label}</span>
         </button>
       })}
@@ -458,15 +454,53 @@ function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
   const move = (direction) => onSelect((selected + direction + length) % length)
 
   useEffect(() => {
-    const images = RHINE_MEMBERS.map((member) => {
-      const image = new Image()
-      image.decoding = 'async'
-      image.src = rhineAsset(base, member.image)
-      image.decode?.().catch(() => {})
-      return image
-    })
-    preloadRef.current = images
-    return () => { preloadRef.current = [] }
+    let disposed = false
+    let idleHandle = 0
+    let timeoutHandle = 0
+    let cursor = 0
+    const images = []
+    const orderedMembers = RHINE_MEMBERS
+      .map((member, index) => {
+        const directDistance = Math.abs(index - selected)
+        return { member, distance: Math.min(directDistance, length - directDistance) }
+      })
+      .sort((a, b) => a.distance - b.distance)
+
+    const schedule = () => {
+      if (disposed || cursor >= orderedMembers.length) return
+      if (typeof window.requestIdleCallback === 'function') {
+        idleHandle = window.requestIdleCallback(runBatch, { timeout: 2400 })
+      } else {
+        timeoutHandle = window.setTimeout(() => runBatch(null), 320)
+      }
+    }
+
+    const runBatch = (deadline) => {
+      idleHandle = 0
+      timeoutHandle = 0
+      let processed = 0
+      while (cursor < orderedMembers.length && processed < 2) {
+        if (processed > 0 && deadline && !deadline.didTimeout && deadline.timeRemaining() < 6) break
+        const { member } = orderedMembers[cursor]
+        const image = new Image()
+        image.decoding = 'async'
+        image.src = rhineAsset(base, member.image)
+        image.decode?.().catch(() => {})
+        images.push(image)
+        cursor += 1
+        processed += 1
+      }
+      preloadRef.current = images
+      schedule()
+    }
+
+    schedule()
+    return () => {
+      disposed = true
+      if (idleHandle && typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idleHandle)
+      if (timeoutHandle) window.clearTimeout(timeoutHandle)
+      preloadRef.current = []
+    }
   }, [base])
 
   useEffect(() => {
@@ -587,11 +621,9 @@ function DepartmentMatrix({ base, selected, onSelect }) {
   </div>
 }
 
-function BlackHoleSystem({ active, base }) {
-  const source = rhineAsset(base, RHINE_CLONE.scenes.research)
-  return <figure className="rhine-blackhole-visual" aria-label="Chromatic black hole with slowly moving accretion light">
-    <ShadertoyBlackHoleCanvas active={active} className="rhine-blackhole-field" fallback={source} />
-    <figcaption><span>GRAVITATIONAL LENSING</span><b>BH / SPECTRUM-01</b></figcaption>
+function BlackHoleSystem({ active, prepare }) {
+  return <figure className="rhine-blackhole-visual" aria-label="Original Kerr-Newman black hole rendering">
+    <WxdfzjBlackHoleCanvas className="rhine-blackhole-field" active={active} prepare={prepare} />
   </figure>
 }
 
@@ -600,25 +632,29 @@ const RHINE_TIME_CODES = [
   'T+00:00:37',
   'T+00:01:13',
   'T−00:00:21',
-  'T+88:61:13',
-  'T−03:72:44',
+  'T+08:41:13',
+  'T−03:12:44',
   'T+14:03:27',
   'T±00:00:01',
 ]
 
-function ResearchScene({ active, base, onContinue }) {
-  const timeDots = (layer) => Array.from({ length: 121 }, (_, index) => {
-    const x = index % 11
-    const y = Math.floor(index / 11)
-    const visible = ((x - 5) ** 2) + ((y - 5) ** 2) <= 25
-    return <i className={visible ? 'is-visible' : ''} style={{ '--grain-index': index }} key={`${layer}-${index}`} />
-  })
+const createTimeDots = (layer) => Array.from({ length: 121 }, (_, index) => {
+  const x = index % 11
+  const y = Math.floor(index / 11)
+  const visible = ((x - 5) ** 2) + ((y - 5) ** 2) <= 25
+  return <i className={visible ? 'is-visible' : ''} style={{ '--grain-index': index }} key={`${layer}-${index}`} />
+})
+
+const RHINE_TIME_DOTS = {
+  source: createTimeDots('source'),
+  target: createTimeDots('target'),
+}
+
+function ResearchScene({ active, prepareBlackHole, onContinue }) {
   return <div className="rhine-research-scene">
-    <BlackHoleSystem active={active} base={base} />
-    <div className="rhine-space-stars is-far" aria-hidden="true" /><div className="rhine-space-stars is-near" aria-hidden="true" />
-    <div className="rhine-research-shade" />
+    <BlackHoleSystem active={active} prepare={prepareBlackHole} />
     <div className="rhine-pioneer-mark" data-research-ui><span>{RHINE_RESEARCH.title}<small>{RHINE_RESEARCH.english}</small></span><MoonProjectLogo /></div>
-    <div className="rhine-progress-system" data-research-ui><div className="rhine-time-meter" aria-label="Particle time transfer progress"><svg className="rhine-time-dial" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="53" /><path d="M60 2v8M60 110v8M2 60h8M110 60h8M18.3 18.3l5.7 5.7M96 96l5.7 5.7M101.7 18.3L96 24M24 96l-5.7 5.7" /><path className="is-sweep" d="M60 7a53 53 0 0 1 45.9 26.5" /></svg><span className="rhine-time-mass is-source" aria-hidden="true">{timeDots('source')}</span><span className="rhine-time-mass is-target" aria-hidden="true">{timeDots('target')}</span><span className="rhine-time-transfer" aria-hidden="true">{Array.from({ length: 4 }, (_, index) => <i style={{ '--transfer-index': index }} key={index} />)}</span><i className="rhine-time-core" aria-hidden="true" /></div><strong className="rhine-timecode" aria-label="Temporal anomaly clock">{RHINE_TIME_CODES.map((value, index) => <span data-time-frame={value} style={{ '--time-delay': `${index * .8}s` }} aria-hidden="true" key={value}><i>{value}</i></span>)}</strong></div>
+    <div className="rhine-progress-system" data-research-ui><div className="rhine-time-meter" aria-label="Particle time transfer progress"><svg className="rhine-time-dial" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="53" /><path d="M60 2v8M60 110v8M2 60h8M110 60h8M18.3 18.3l5.7 5.7M96 96l5.7 5.7M101.7 18.3L96 24M24 96l-5.7 5.7" /><path className="is-sweep" d="M60 7a53 53 0 0 1 45.9 26.5" /></svg><span className="rhine-time-mass is-source" aria-hidden="true">{RHINE_TIME_DOTS.source}</span><span className="rhine-time-mass is-target" aria-hidden="true">{RHINE_TIME_DOTS.target}</span><span className="rhine-time-transfer" aria-hidden="true">{Array.from({ length: 4 }, (_, index) => <i style={{ '--transfer-index': index }} key={index} />)}</span><i className="rhine-time-core" aria-hidden="true" /></div><strong className="rhine-timecode" aria-label="Temporal anomaly clock">{RHINE_TIME_CODES.map((value, index) => <span data-time-frame={value} style={{ '--time-delay': `${index * .8}s` }} aria-hidden="true" key={value}><i>{value}</i></span>)}</strong></div>
     <div className="rhine-research-copy" data-research-ui><p>{RHINE_RESEARCH.copy.map((line) => <span key={line}>{line}</span>)}</p><button type="button" onClick={onContinue}>{RHINE_RESEARCH.button}<i /></button></div>
     <div className="rhine-research-readout" data-research-ui><b>R / 01 — 037</b><span>{RHINE_RESEARCH.readout.slice(1).map((line) => <small key={line}>{line}</small>)}</span><i /></div>
   </div>
@@ -626,10 +662,14 @@ function ResearchScene({ active, base, onContinue }) {
 
 export function RhineArchivePrototype() {
   const bypass = new URLSearchParams(window.location.search).get('rhineBypass') === '1'
+  const initialHashView = window.location.hash.replace(/^#rhine-/, '')
+  const initialView = RHINE_CLONE.sections.some((section) => section.id === initialHashView) ? initialHashView : 'home'
   const rootRef = useRef(null)
   const [entered, setEntered] = useState(bypass)
+  const homeIntroRef = useRef(null)
   const [siteMounted, setSiteMounted] = useState(bypass)
-  const [active, setActive] = useState('home')
+  const [active, setActive] = useState(initialView)
+  const [gliding, setGliding] = useState(false)
   const [memberIndex, setMemberIndex] = useState(1)
   const [memberMove, setMemberMove] = useState(null)
   const [departmentIndex, setDepartmentIndex] = useState(null)
@@ -652,6 +692,34 @@ export function RhineArchivePrototype() {
     const x = slots[String(limitedSlot)] ?? (limitedSlot * 21.3)
     setMemberMove({ target: nextIndex, direction: slot > 0 ? 'left' : 'right', shift: -x, steps: Math.abs(limitedSlot) })
   }, [memberMove, memberIndex])
+
+  useLayoutEffect(() => {
+    if (!entered || !siteMounted) return undefined
+    const root = rootRef.current
+    const scroller = root?.querySelector('[data-rhine-scroll]')
+    if (!scroller) return undefined
+    let frame = 0
+
+    const syncHashView = () => {
+      const hashView = window.location.hash.replace(/^#rhine-/, '')
+      if (!RHINE_CLONE.sections.some((section) => section.id === hashView)) return
+      const target = root.querySelector(`#rhine-${hashView}`)
+      if (!target) return
+      window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(() => {
+        scroller.scrollTop = target.offsetTop
+        setActive(hashView)
+        ScrollTrigger.update()
+      })
+    }
+
+    syncHashView()
+    window.addEventListener('hashchange', syncHashView)
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('hashchange', syncHashView)
+    }
+  }, [entered, siteMounted])
 
   useEffect(() => {
     if (!entered) return undefined
@@ -680,6 +748,7 @@ export function RhineArchivePrototype() {
       scroller.style.scrollBehavior = previousScrollBehavior
       scroller.style.scrollSnapType = previousScrollSnapType
       scrollTween = null
+      setGliding(false)
     }
 
     const onWheel = (event) => {
@@ -697,6 +766,7 @@ export function RhineArchivePrototype() {
 
       previousScrollBehavior = scroller.style.scrollBehavior
       previousScrollSnapType = scroller.style.scrollSnapType
+      setGliding(true)
       scroller.classList.add('is-gliding')
       scroller.style.scrollBehavior = 'auto'
       scroller.style.scrollSnapType = 'none'
@@ -705,8 +775,10 @@ export function RhineArchivePrototype() {
         duration: 1.18,
         ease: 'power3.inOut',
         overwrite: 'auto',
-        onUpdate: () => ScrollTrigger.update(),
-        onComplete: finishGlide,
+        onComplete: () => {
+          ScrollTrigger.update()
+          finishGlide()
+        },
       })
     }
 
@@ -720,10 +792,12 @@ export function RhineArchivePrototype() {
 
   useLayoutEffect(() => {
     const root = rootRef.current
-    if (!root || !entered || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    if (!root || !siteMounted || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
     const scroller = root.querySelector('[data-rhine-scroll]')
     const context = gsap.context(() => {
-      gsap.timeline({ defaults: { ease: 'power3.out' } })
+      // Prepare geometry before authorization ends; preserve the original
+      // homepage start time by keeping its entrance timeline paused.
+      homeIntroRef.current = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
         .addLabel('home-enter', 0)
         .fromTo('[data-main-chrome]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .42, stagger: .045 }, 'home-enter')
         .fromTo('.rhine-home-copy', { x: -34, autoAlpha: 0, transformOrigin: 'left center' }, { x: 0, autoAlpha: 1, duration: .74, ease: 'power3.out' }, 'home-enter+=.08')
@@ -742,15 +816,63 @@ export function RhineArchivePrototype() {
         .to('[data-home-guide]', { y: '122vh', autoAlpha: 1, duration: .78 }, 0)
         .to('[data-home-guide]', { y: '150vh', autoAlpha: 0, duration: .22 }, .78)
 
-      gsap.fromTo('[data-member-stage]', { scale: .95, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out', scrollTrigger: { trigger: '#rhine-members', scroller, start: 'top 65%', toggleActions: 'play none none reverse' } })
-      gsap.fromTo('[data-department-stage]', { scale: .97, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .72, ease: 'power4.out', scrollTrigger: { trigger: '#rhine-departments', scroller, start: 'top 65%', toggleActions: 'play none none reverse' } })
-      gsap.fromTo('[data-department-preview]', { autoAlpha: 0 }, { autoAlpha: 1, duration: .42, ease: 'power3.out', scrollTrigger: { trigger: '#rhine-departments', scroller, start: 'top 65%', toggleActions: 'play none none reverse' } })
-      gsap.fromTo('[data-research-ui]', { x: -28, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .7, stagger: .1, ease: 'power4.out', scrollTrigger: { trigger: '#rhine-research', scroller, start: 'top 66%', toggleActions: 'play none none reverse' } })
       gsap.fromTo('#rhine-headquarters [data-headquarters-gallery]', { y: '3.5vh', scale: .975, autoAlpha: .55 }, { y: 0, scale: 1, autoAlpha: 1, ease: 'none', scrollTrigger: { trigger: '#rhine-headquarters', scroller, start: 'top bottom', end: 'top 8%', scrub: .85 } })
+
+      gsap.timeline({
+        scrollTrigger: { trigger: '#rhine-headquarters', scroller, start: 'top top', end: 'bottom top', scrub: .38 },
+        defaults: { ease: 'none' },
+      })
+        .to('.rhine-headquarters-primary', { x: '-9vw', y: '-4vh', rotation: -.65, scale: .94, autoAlpha: 0, duration: .7 }, 0)
+        .to('.rhine-headquarters-side button', { x: (index) => `${6 + index * 2.5}vw`, y: (index) => index ? '-6vh' : '5vh', rotation: (index) => index ? 1.4 : -1.1, scale: .94, autoAlpha: 0, duration: .64, stagger: .055 }, .035)
+        .to('.rhine-headquarters-index', { x: -24, y: -18, autoAlpha: 0, duration: .38 }, 0)
+        .to('.rhine-headquarters-status', { x: 28, y: 20, autoAlpha: 0, duration: .4 }, .06)
+        .to('#rhine-headquarters [data-headquarters-gallery]', { y: '-3vh', scale: .975, clipPath: 'inset(0 0 14% 0)', duration: .78 }, 0)
+        .fromTo('[data-transition-cue="members"]', { y: 20, autoAlpha: 0 }, { y: -8, autoAlpha: 1, duration: .34 }, .08)
+        .to('[data-transition-cue="members"]', { y: -66, autoAlpha: 0, duration: .4 }, .5)
+        .fromTo('[data-member-stage]', { x: '2vw', y: '12vh', rotation: .4, scale: .91, autoAlpha: 0, clipPath: 'inset(13% 7% 13% 7%)' }, { x: 0, y: 0, rotation: 0, scale: 1, autoAlpha: 1, clipPath: 'inset(0% 0% 0% 0%)', duration: .62 }, .36)
+        .fromTo('.rhine-member-track', { autoAlpha: .08 }, { autoAlpha: 1, duration: .46 }, .46)
+        .fromTo('.rhine-carousel-control', { x: (index) => index ? 34 : -34, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: .38, stagger: .045 }, .54)
+
+      gsap.timeline({
+        scrollTrigger: { trigger: '#rhine-members', scroller, start: 'top top', end: 'bottom top', scrub: .4 },
+        defaults: { ease: 'none' },
+      })
+        .to('.rhine-member-track', { autoAlpha: 0, duration: .56 }, .08)
+        .to('.rhine-member-stage-holo, .rhine-member-stage-scan, .rhine-member-stage-glint', { autoAlpha: 0, duration: .46, stagger: .045 }, 0)
+        .to('.rhine-carousel-control.is-left', { x: '-7vw', y: '3vh', autoAlpha: 0, duration: .5 }, .03)
+        .to('.rhine-carousel-control.is-right', { x: '7vw', y: '-3vh', autoAlpha: 0, duration: .5 }, .03)
+        .to('[data-member-stage]', { x: '-8vw', y: '-4vh', rotation: -.45, scale: .92, autoAlpha: 0, clipPath: 'inset(2% 15% 2% 0)', duration: .8 }, 0)
+        .fromTo('[data-transition-cue="departments"]', { x: 24, y: 16, autoAlpha: 0 }, { x: 0, y: -8, autoAlpha: 1, duration: .34 }, .08)
+        .to('[data-transition-cue="departments"]', { x: -28, y: -64, autoAlpha: 0, duration: .4 }, .5)
+        .fromTo('[data-department-stage]', { x: '7vw', y: '4vh', rotation: .5, scale: .91, autoAlpha: 0, clipPath: 'inset(10% 8% 10% 8%)' }, { x: 0, y: 0, rotation: 0, scale: 1, autoAlpha: 1, clipPath: 'inset(0% 0% 0% 0%)', duration: .64 }, .36)
+        .fromTo('.rhine-department-lines, .rhine-department-console, .rhine-department-tiles, .rhine-department-signatures', { autoAlpha: 0 }, { autoAlpha: 1, duration: .42, stagger: .045 }, .44)
+        .fromTo('[data-department-preview]', { scale: .88 }, { scale: 1, duration: .46 }, .48)
+
+      gsap.timeline({
+        scrollTrigger: { trigger: '#rhine-departments', scroller, start: 'top top', end: 'bottom top', scrub: .42 },
+        defaults: { ease: 'none' },
+      })
+        .to('.rhine-department-lines', { autoAlpha: 0, duration: .38 }, 0)
+        .to('.rhine-department-tiles', { autoAlpha: 0, duration: .48 }, .06)
+        .to('.rhine-department-heading, .rhine-department-console', { autoAlpha: 0, duration: .44, stagger: .06 }, .08)
+        .to('.rhine-department-signatures', { autoAlpha: 0, duration: .38 }, .16)
+        .to('[data-department-stage]', { x: '2vw', y: '-6vh', rotation: .55, scale: .84, autoAlpha: 0, clipPath: 'inset(11% 11% 11% 11%)', duration: .8 }, 0)
+        .fromTo('[data-transition-cue="research"]', { y: 18, autoAlpha: 0 }, { y: -9, autoAlpha: 1, duration: .34 }, .08)
+        .to('[data-transition-cue="research"]', { y: -70, autoAlpha: 0, duration: .42 }, .48)
+        .fromTo('.rhine-research-scene', { y: '7vh', scale: .88, autoAlpha: .16, clipPath: 'inset(14% 7% 14% 7%)' }, { y: 0, scale: 1, autoAlpha: 1, clipPath: 'inset(0% 0% 0% 0%)', duration: .66 }, .32)
+        .fromTo('.rhine-blackhole-field', { x: '7vw', scale: .88, autoAlpha: .24 }, { x: 0, scale: 1, autoAlpha: 1, duration: .56 }, .38)
+        .fromTo('[data-research-ui]', { x: (index) => index % 2 ? 34 : -34, y: (index) => index > 1 ? 18 : -12, autoAlpha: 0 }, { x: 0, y: 0, autoAlpha: 1, duration: .48, stagger: .045 }, .46)
       ScrollTrigger.refresh()
     }, root)
-    return () => context.revert()
-  }, [entered])
+    return () => {
+      homeIntroRef.current = null
+      context.revert()
+    }
+  }, [siteMounted])
+
+  useLayoutEffect(() => {
+    if (entered && siteMounted) homeIntroRef.current?.play(0)
+  }, [entered, siteMounted])
 
   useLayoutEffect(() => {
     const root = rootRef.current
@@ -768,7 +890,7 @@ export function RhineArchivePrototype() {
     rootRef.current?.querySelector(`#rhine-${id}`)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
   }
 
-  return <main className={`rhine-prototype rhine-active-${active}`} ref={rootRef} style={{ '--rhine-paper': RHINE_CLONE.colors.paper, '--rhine-ink': RHINE_CLONE.colors.ink, '--rhine-accent': RHINE_CLONE.colors.accent, '--rhine-pale': RHINE_CLONE.colors.pale, '--rhine-cyan': RHINE_CLONE.colors.cyan }}>
+  return <main className={`rhine-prototype rhine-active-${active}${gliding ? ' rhine-is-gliding' : ''}`} ref={rootRef} style={{ '--rhine-paper': RHINE_CLONE.colors.paper, '--rhine-ink': RHINE_CLONE.colors.ink, '--rhine-accent': RHINE_CLONE.colors.accent, '--rhine-pale': RHINE_CLONE.colors.pale, '--rhine-cyan': RHINE_CLONE.colors.cyan }}>
     {!entered && <Entrance onPrepare={prepareSite} onComplete={finishEntrance} />}
     {siteMounted && <>
       <header data-main-chrome><FixedBrand light={active === 'research'} section={active} /></header>
@@ -779,10 +901,10 @@ export function RhineArchivePrototype() {
           <div className="rhine-home-copy"><h1><span>{RHINE_CLONE.home.eyebrow}</span>{RHINE_CLONE.home.title}<b>{RHINE_CLONE.home.accent}</b></h1><p>{RHINE_CLONE.home.copy}</p><strong><i />{RHINE_CLONE.home.partner}</strong></div>
           <HomeSystem />
         </section>
-        <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersGallery base={base} active={active === 'headquarters'} /></section>
-        <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} moving={memberMove} onMoveEnd={finishMemberMove} /></section>
-        <section id="rhine-departments" className="rhine-view rhine-departments" data-rhine-view="departments"><DepartmentMatrix base={base} selected={departmentIndex} onSelect={setDepartmentIndex} /></section>
-        <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene active={active === 'research'} base={base} onContinue={() => jumpTo('home')} /></section>
+        <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersGallery base={base} active={active === 'headquarters' && !gliding} /><SectionTransitionCue code="02" label="MEMBER ARCHIVE" target="members" /></section>
+        <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} moving={memberMove} onMoveEnd={finishMemberMove} /><SectionTransitionCue code="03" label="DEPARTMENT MATRIX" target="departments" /></section>
+        <section id="rhine-departments" className="rhine-view rhine-departments" data-rhine-view="departments"><DepartmentMatrix base={base} selected={departmentIndex} onSelect={setDepartmentIndex} /><SectionTransitionCue code="04" label="RESEARCH / EVENT HORIZON" target="research" tone="dark" /></section>
+        <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene active={active === 'research' && !gliding} prepareBlackHole={!entered || (!gliding && (active === 'members' || active === 'departments'))} onContinue={() => jumpTo('home')} /></section>
       </div>
     </>}
   </main>

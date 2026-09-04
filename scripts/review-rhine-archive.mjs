@@ -3,10 +3,10 @@ import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 
 const baseUrl = process.env.RHINE_REVIEW_URL || 'http://127.0.0.1:5173/?rhineBypass=1#rhine-archive'
-const output = new URL('../review/rhine-archive/', import.meta.url)
+const output = new URL(process.env.RHINE_REVIEW_OUTPUT || '../review/rhine-archive/', import.meta.url)
 await mkdir(output, { recursive: true })
 
-const browser = await chromium.launch({ headless: true })
+const browser = await chromium.launch({ headless: true, channel: process.env.RHINE_BROWSER_CHANNEL || undefined })
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 })
 const failures = []
 
@@ -43,6 +43,22 @@ for (const [index, scene] of scenes.entries()) {
     if (codeBefore === codeAfter) failures.push('headquarters gallery did not advance after selecting a plate')
     const playback = await gallery.locator('video').evaluateAll((videos) => videos.map((video) => ({ primary: Boolean(video.closest('.rhine-headquarters-primary')), paused: video.paused, muted: video.muted })))
     if (playback.some((video) => !video.muted) || playback.filter((video) => video.primary).some((video) => video.paused)) failures.push(`headquarters video playback policy is incorrect: ${JSON.stringify(playback)}`)
+    if (playback.length === 0) {
+      const shaderIds = new Set()
+      for (let sceneIndex = 0; sceneIndex < 3; sceneIndex += 1) {
+        await primary.locator('canvas').waitFor({ state: 'visible' })
+        const shader = await primary.evaluate((node) => {
+          const canvas = node.querySelector('canvas')
+          const gl = canvas.getContext(node.dataset.shadertoyId === 'WtjyzR' ? 'webgl' : 'webgl2')
+          return { id: node.dataset.shadertoyId, fallback: node.classList.contains('has-fallback'), width: canvas.width, height: canvas.height, error: gl?.getError() }
+        })
+        shaderIds.add(shader.id)
+        if (shader.fallback || !shader.width || !shader.height || shader.error !== 0) failures.push(`headquarters shader failed: ${JSON.stringify(shader)}`)
+        await sidePlates.first().click()
+        await page.waitForTimeout(300)
+      }
+      if (shaderIds.size !== 3 || !['WtjyzR', '3cScWy', 'W3SSRm'].every((id) => shaderIds.has(id))) failures.push(`headquarters shader selection is incomplete: ${[...shaderIds]}`)
+    }
   }
   await page.screenshot({ path: fileURLToPath(new URL(`${String(index + 1).padStart(2, '0')}-${scene.toLowerCase()}.png`, output)) })
 }

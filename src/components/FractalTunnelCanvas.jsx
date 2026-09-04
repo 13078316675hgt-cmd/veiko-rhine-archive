@@ -1,17 +1,17 @@
 import { memo, useEffect, useRef, useState } from 'react'
+import wtjyzrSource from '../vendor/wtjyzr/WtjyzR.frag.glsl?raw'
 
 /*
- * A-02 visual adapted from “Path to the colorful infinity” by Benoit Marini.
+ * Exact A-02 fragment source: “Path to the colorful infinity” by Benoit Marini.
  * Source: https://www.shadertoy.com/view/WtjyzR
  * License: CC BY-NC-SA 3.0 — https://creativecommons.org/licenses/by-nc-sa/3.0/
- * Changes: native WebGL runtime, responsive quality tiers, lifecycle controls,
- * fallback handling, VEIKO framing, and black/white/orange brand color grading.
+ * This component only provides the fullscreen WebGL surface and Shadertoy uniforms.
  */
 
 const QUALITY_PRESETS = Object.freeze({
-  low: { layerCount: 9, layerNorm: 8, iterations: 14, maxDpr: .72, frameInterval: 1000 / 30 },
-  medium: { layerCount: 13, layerNorm: 12, iterations: 19, maxDpr: 1, frameInterval: 1000 / 45 },
-  high: { layerCount: 17, layerNorm: 16, iterations: 23, maxDpr: 1.35, frameInterval: 1000 / 60 },
+  low: { maxDpr: .72, frameInterval: 1000 / 30 },
+  medium: { maxDpr: 1, frameInterval: 1000 / 45 },
+  high: { maxDpr: 1.35, frameInterval: 1000 / 60 },
 })
 
 const VERTEX_SHADER = `
@@ -22,56 +22,26 @@ void main() {
 }
 `
 
-const fragmentShader = ({ layerCount, layerNorm, iterations }) => `
+// Shadertoy accepts the original post-increment loop condition. WebGL 1's
+// validator does not, so express the same body iterations (1 through ITER)
+// with a conventional loop while retaining the archived source unchanged.
+const WEBGL_COMPAT_SOURCE = wtjyzrSource.replace(
+  'for (int i=0 ; i++ < ITER;)',
+  'for (int i=1; i <= ITER; i++)',
+)
+
+const FRAGMENT_SHADER = `
 precision highp float;
 
-uniform vec2 iResolution;
+uniform vec3 iResolution;
 uniform float iTime;
 
-#define LAYER_COUNT ${layerCount}
-#define LAYER_NORM ${layerNorm}.0
-#define ITER ${iterations}
-
-vec4 tunnelField(vec3 p) {
-  float t = iTime + 78.0;
-  vec4 o = vec4(p.xyz, 3.0 * sin(t * 0.1));
-  vec4 dec = vec4(1.0, 0.9, 0.1, 0.15) + vec4(0.06 * cos(t * 0.1), 0.0, 0.0, 0.14 * cos(t * 0.23));
-
-  for (int iteration = 0; iteration < ITER; iteration++) {
-    o.xzyw = abs(o / max(dot(o, o), 0.00001) - dec);
-  }
-
-  return o;
-}
+${WEBGL_COMPAT_SOURCE}
 
 void main() {
-  vec2 uv = (gl_FragCoord.xy - iResolution.xy * 0.5) / iResolution.y;
-  vec3 color = vec3(0.0);
-  float t = iTime * 0.3;
-
-  for (int layer = 0; layer < LAYER_COUNT; layer++) {
-    float i = float(layer) / LAYER_NORM;
-    float depth = fract(i + t);
-    float scale = mix(5.0, 0.5, depth);
-    float fade = depth * (1.0 - smoothstep(0.9, 1.0, depth));
-    color += tunnelField(vec3(uv * scale, i * 4.0)).xyz * fade;
-  }
-
-  color /= LAYER_NORM;
-  color *= vec3(2.0, 1.0, 2.0);
-  color = pow(max(color, 0.0), vec3(0.5));
-
-  float energy = dot(color, vec3(0.46, 0.37, 0.17));
-  float compressed = energy / (1.0 + energy);
-  float density = pow(smoothstep(0.20, 0.72, compressed), 1.72);
-  float whiteHeat = smoothstep(0.58, 0.96, density);
-  vec3 signalPink = vec3(1.0, 0.08, 0.38) * density * 1.12;
-  vec3 laboratoryWhite = vec3(0.95, 0.91, 1.0) * density * 1.08;
-  color = mix(signalPink, laboratoryWhite, whiteHeat);
-  color += vec3(1.0, 0.24, 0.62) * pow(density, 3.2) * 0.18;
-  color *= 1.0 - smoothstep(0.08, 1.28, length(uv));
-  color = color / (1.0 + color * 0.24);
-  gl_FragColor = vec4(pow(max(color, 0.0), vec3(0.92)), 1.0);
+  vec4 color;
+  mainImage(color, gl_FragCoord.xy);
+  gl_FragColor = color;
 }
 `
 
@@ -98,9 +68,9 @@ function compileShader(gl, type, source) {
   throw new Error(message)
 }
 
-function createProgram(gl, preset) {
+function createProgram(gl) {
   const vertex = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER)
-  const fragment = compileShader(gl, gl.FRAGMENT_SHADER, fragmentShader(preset))
+  const fragment = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER)
   const program = gl.createProgram()
   gl.attachShader(program, vertex)
   gl.attachShader(program, fragment)
@@ -159,7 +129,7 @@ export const FractalTunnelCanvas = memo(function FractalTunnelCanvas({
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     try {
-      program = createProgram(gl, preset)
+      program = createProgram(gl)
       buffer = gl.createBuffer()
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW)
@@ -168,7 +138,7 @@ export const FractalTunnelCanvas = memo(function FractalTunnelCanvas({
       gl.enableVertexAttribArray(position)
       gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0)
     } catch (error) {
-      console.warn('Rhine fractal tunnel unavailable:', error)
+      console.warn('VEIKO WtjyzR tunnel unavailable:', error)
       setFailed(true)
       return () => {
         if (program) gl.deleteProgram(program)
@@ -192,10 +162,9 @@ export const FractalTunnelCanvas = memo(function FractalTunnelCanvas({
     }
 
     const draw = (now = performance.now()) => {
-      resize()
       gl.useProgram(program)
-      gl.uniform2f(resolution, canvas.width, canvas.height)
-      gl.uniform1f(time, 18 + (now - startedAt) / 1000)
+      gl.uniform3f(resolution, canvas.width, canvas.height, 1)
+      gl.uniform1f(time, (now - startedAt) / 1000)
       gl.drawArrays(gl.TRIANGLES, 0, 3)
     }
 
@@ -226,7 +195,7 @@ export const FractalTunnelCanvas = memo(function FractalTunnelCanvas({
     runtimeRef.current = { active, draw, start, stop }
     const resizeObserver = new ResizeObserver(() => {
       resize()
-      if (!active || reducedMotion) draw(reducedMotion ? startedAt + 7200 : performance.now())
+      if (!runtimeRef.current?.active || reducedMotion) draw(reducedMotion ? startedAt + 7200 : performance.now())
     })
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting
@@ -240,6 +209,7 @@ export const FractalTunnelCanvas = memo(function FractalTunnelCanvas({
       setFailed(true)
     }
 
+    resize()
     resizeObserver.observe(canvas)
     intersectionObserver.observe(canvas)
     document.addEventListener('visibilitychange', onVisibility)
@@ -258,7 +228,7 @@ export const FractalTunnelCanvas = memo(function FractalTunnelCanvas({
       gl.deleteProgram(program)
       if (runtimeRef.current?.draw === draw) runtimeRef.current = null
     }
-  }, [active, tier])
+  }, [tier])
 
   useEffect(() => {
     const runtime = runtimeRef.current
@@ -272,6 +242,7 @@ export const FractalTunnelCanvas = memo(function FractalTunnelCanvas({
     className={`rhine-fractal-tunnel ${failed ? 'has-fallback' : ''} ${className}`.trim()}
     data-fractal-quality={tier}
     data-shadertoy-id="WtjyzR"
+    data-shadertoy-source="original"
     style={fallback ? { '--fractal-fallback': `url("${fallback}")` } : undefined}
   >
     <canvas ref={canvasRef} role="img" aria-label={`${label} — ${tier} quality`} />
@@ -282,7 +253,7 @@ export const FractalTunnelCanvas = memo(function FractalTunnelCanvas({
           href="https://www.shadertoy.com/view/WtjyzR"
           target="_blank"
           rel="noreferrer"
-          title="Path to the colorful infinity — Benoit Marini — CC BY-NC-SA 3.0 — adapted for VEIKO"
+          title="Path to the colorful infinity — Benoit Marini — CC BY-NC-SA 3.0 — original shader running in VEIKO"
         >WTJYZR / BENOIT M. / {tier.toUpperCase()}</a>}
   </div>
 })

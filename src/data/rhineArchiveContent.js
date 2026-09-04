@@ -3,11 +3,11 @@
 
 export const RHINE_CLONE = {
   colors: {
-    paper: '#e7e5e1',
-    ink: '#080908',
-    accent: '#f58200',
-    pale: '#f4f1e8',
-    cyan: '#22aabc',
+    paper: '#dedfd6',
+    ink: '#171d1a',
+    accent: '#718500',
+    pale: '#f1f2e9',
+    cyan: '#61b9b9',
   },
   brand: {
     title: 'THE PLAN OF THE MONTH',
@@ -31,7 +31,7 @@ export const RHINE_CLONE = {
   },
   scenes: {
     headquarters: [
-      { video: 'assets/rhine-clone/headquarters/01.mp4', poster: 'assets/rhine-clone/headquarters/posters/01.webp', code: 'A-01', label: 'CENTRAL BIOLOGICAL CORE' },
+      { visual: 'weave', poster: 'assets/rhine-clone/headquarters/posters/01.webp', code: 'A-01', label: 'CENTRAL BIOLOGICAL CORE' },
       { visual: 'fractal-tunnel', poster: 'assets/rhine-clone/headquarters/posters/02.webp', code: 'A-02', label: 'REACTOR OBSERVATION DECK' },
     { visual: 'chromatic-tunnel', poster: 'assets/rhine-clone/headquarters/posters/03.webp', code: 'A-03', label: 'GENE ANALYSIS GALLERY' },
     ],
@@ -65,8 +65,8 @@ export const RHINE_DEPARTMENTS = [
 ]
 
 export const RHINE_RESEARCH = {
-  title: '月之计划',
-  english: 'THE PLAN OF THE MONTH',
+  title: '星引力',
+  english: 'STELLAR GRAVITY',
   progress: 'T−00:00:00',
   copy: ['我们的事业将触及星海。', '探索未知，直至抵达天穹之外。'],
   button: 'CONTINUE',

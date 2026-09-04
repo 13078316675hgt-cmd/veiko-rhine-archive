@@ -3,10 +3,10 @@ import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 
 const baseUrl = process.env.RHINE_REVIEW_URL || 'http://127.0.0.1:5173/?rhineBypass=1#rhine-archive'
-const output = new URL('../review/rhine-archive/motion/', import.meta.url)
+const output = new URL(process.env.RHINE_REVIEW_OUTPUT || '../review/rhine-archive/motion/', import.meta.url)
 await mkdir(output, { recursive: true })
 
-const browser = await chromium.launch({ headless: true })
+const browser = await chromium.launch({ headless: true, channel: process.env.RHINE_BROWSER_CHANNEL || undefined })
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 })
 const failures = []
 page.on('console', (message) => { if (message.type() === 'error') failures.push(`console: ${message.text()}`) })
@@ -203,33 +203,24 @@ await page.screenshot({ path: fileURLToPath(new URL('04-research-entry-mid.png',
 await page.waitForTimeout(900)
 const researchEnd = await styleOf('.rhine-progress-system', ['transform', 'opacity'])
 if (researchEnd.opacity !== '1') failures.push(`research UI final opacity is ${researchEnd.opacity}`)
-const researchBreathingPeak = await page.locator('.rhine-blackhole-field').evaluate((node) => {
-  const animation = node.getAnimations({ subtree: true }).find((item) => item.animationName === 'rhine-blackhole-breathe')
-  animation.pause()
-  animation.currentTime = Number(animation.effect.getTiming().duration) * .52
-  return Number(getComputedStyle(node, '::before').opacity)
-})
+await page.waitForFunction(() => document.querySelector('.rhine-blackhole-field')?.dataset.blackHoleStatus === 'ready', null, { timeout: 60000 })
 const researchBlackHoleProof = await page.locator('.rhine-blackhole-field').evaluate((node) => {
-  const base = node.querySelector('.rhine-blackhole-base')
-  const lens = node.querySelector('.rhine-blackhole-lensing')
-  const baseTransform = getComputedStyle(base).transform
+  const canvas = node.querySelector('canvas')
+  const gl = canvas.getContext('webgl2')
   return {
-    baseTransform,
-    baseClipPath: getComputedStyle(base).clipPath,
-    slicedCopies: node.querySelectorAll('.rhine-blackhole-flow').length,
-    innerArc: getComputedStyle(lens, '::before').content,
-    outerArc: getComputedStyle(lens, '::after').content,
-    innerArcOpacity: Number(getComputedStyle(lens, '::before').opacity),
-    outerArcOpacity: Number(getComputedStyle(lens, '::after').opacity),
+    model: node.dataset.blackHoleModel,
+    status: node.dataset.blackHoleStatus,
+    width: canvas.width,
+    height: canvas.height,
+    format: canvas.dataset.bufferFormat,
+    frame: Number(canvas.dataset.frame),
+    error: gl.getError(),
   }
 })
-if (researchBreathingPeak < .75 || researchBreathingPeak > .9) failures.push(`research breathing peak is ${researchBreathingPeak}`)
-if (researchBlackHoleProof.innerArc === 'none') failures.push('research event-horizon arc is missing')
-if (researchBlackHoleProof.outerArc !== 'none') failures.push('research outer lens ring was not removed')
-if (researchBlackHoleProof.slicedCopies !== 0 || researchBlackHoleProof.baseClipPath !== 'none') failures.push('research black hole is still split into clipped image layers')
-if (researchBlackHoleProof.innerArcOpacity < .5) failures.push('research event-horizon arc is too faint')
+await page.waitForFunction((previous) => Number(document.querySelector('.rhine-blackhole-field canvas')?.dataset.frame) > previous, researchBlackHoleProof.frame, { timeout: 10000 })
+if (researchBlackHoleProof.model !== 'shadertoy-wxdfzj-original' || researchBlackHoleProof.format !== 'rgba32f' || researchBlackHoleProof.width < 64 || researchBlackHoleProof.height < 36 || researchBlackHoleProof.error !== 0) failures.push(`research WebGL pipeline is invalid: ${JSON.stringify(researchBlackHoleProof)}`)
 const researchTitle = (await page.locator('.rhine-pioneer-mark span').innerText()).replace(/\s+/g, ' ').trim()
-if (!researchTitle.startsWith('月之计划')) failures.push(`research title is ${researchTitle}`)
+if (!researchTitle.startsWith('星引力') || !researchTitle.includes('STELLAR GRAVITY')) failures.push(`research title is ${researchTitle}`)
 if (await page.locator('.rhine-moon-project-logo').count() !== 1) failures.push('moon project logo is missing')
 const researchTimeCodes = await page.locator('.rhine-timecode > span').evaluateAll((nodes) => nodes.map((node) => node.dataset.timeFrame))
 if (researchTimeCodes.length !== 8 || new Set(researchTimeCodes).size !== 8 || !researchTimeCodes.includes('T−00:00:00')) failures.push('temporal glitch sequence is incomplete')
@@ -293,7 +284,7 @@ console.log(JSON.stringify({
     home: [homeStart, homeMiddle, homeEnd],
     member: { motion: [memberStart, memberMiddle, memberEnd], hologram: { beforePointer: holoBeforePointer, afterPointer: holoAfterPointer, afterEase: holoAfterEase } },
     department: { motion: [departmentStart, departmentMiddle, departmentEnd], titleSize: departmentTitleSize, tileRotations: departmentTileRotations, structure: departmentStructure, tracker: { idle: departmentTrackerIdle, selected: departmentTrackerSelected }, idleRect: departmentIdleRect, selectedRect: departmentSelectedRect, mediaRect: departmentMediaRect },
-    research: { ...researchEnd, breathingPeak: researchBreathingPeak, blackHole: researchBlackHoleProof, timeFlow: researchTimeFlow },
+    research: { ...researchEnd, blackHole: researchBlackHoleProof, timeFlow: researchTimeFlow },
     scroll: { viewportHeight, early: scrollEarly, middle: scrollMiddle, end: scrollEnd },
   },
   screenshots: 8,

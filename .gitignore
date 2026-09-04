@@ -17,6 +17,8 @@
 !/public/assets/
 !/public/assets/rhine-clone/
 !/public/assets/rhine-clone/**
+!/public/assets/npgs-kerr-newman/
+!/public/assets/npgs-kerr-newman/**
 !/src/
 !/src/rhine-main.jsx
 !/src/rhine-archive-prototype.css
@@ -26,14 +28,36 @@
 !/src/components/FractalTunnelCanvas.jsx
 !/src/components/ShadertoyBlackHoleCanvas.jsx
 !/src/components/ChromaticTunnelCanvas.jsx
+!/src/components/NpgsKerrNewmanCanvas.jsx
+!/src/components/WxdfzjBlackHoleCanvas.jsx
 !/src/data/
 !/src/data/rhineArchiveContent.js
+!/src/vendor/
+!/src/vendor/shadertoy-wxdfzj/
+!/src/vendor/shadertoy-wxdfzj/buffer-a.glsl
+!/src/vendor/shadertoy-wxdfzj/buffer-b.glsl
+!/src/vendor/shadertoy-wxdfzj/buffer-c.glsl
+!/src/vendor/shadertoy-wxdfzj/buffer-d.glsl
+!/src/vendor/shadertoy-wxdfzj/image.glsl
+!/src/vendor/npgs/
+!/src/vendor/npgs/**
+!/src/vendor/wtjyzr/
+!/src/vendor/wtjyzr/**
+!/src/vendor/3cscwy/
+!/src/vendor/3cscwy/**
+!/src/vendor/ml3bwf/
+!/src/vendor/ml3bwf/**
+!/src/components/PhasesCanvas.jsx
+!/src/vendor/w3ssrm/
+!/src/vendor/w3ssrm/**
+!/src/components/WeaveCanvas.jsx
 !/scripts/
 !/scripts/review-rhine-archive.mjs
 !/scripts/review-rhine-motion.mjs
 !/scripts/review-rhine-entrance.mjs
 !/scripts/review-rhine-entrance-performance.mjs
 !/scripts/review-rhine-performance.mjs
+!/scripts/review-rhine-webgl.mjs
 !/scripts/publish-veiko.ps1
 
 # Generated output and local dependencies are never published.
