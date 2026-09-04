@@ -2,10 +2,10 @@ import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { RHINE_CLONE, RHINE_DEPARTMENTS, RHINE_MEMBERS, RHINE_RESEARCH, rhineAsset } from '../data/rhineArchiveContent'
-import { FractalTunnelCanvas } from './FractalTunnelCanvas'
-import { ChromaticTunnelCanvas } from './ChromaticTunnelCanvas'
+import { HeadquartersMemoryArchive } from './HeadquartersMemoryArchive'
+
 import { PhasesCanvas } from './PhasesCanvas'
-import { WeaveCanvas } from './WeaveCanvas'
+
 import { WxdfzjBlackHoleCanvas } from './WxdfzjBlackHoleCanvas'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -309,116 +309,6 @@ function HomeSystem() {
       <g className="rhine-home-microcopy"><text x="287" y="541">M</text><text x="220" y="890">A</text><text x="238" y="890">B</text><text x="256" y="890">C</text></g>
       <text className="rhine-home-label" x="330" y="532">Tomorrow.</text>
     </svg>
-  </div>
-}
-
-function HeadquartersGallery({ base, active }) {
-  const scenes = RHINE_CLONE.scenes.headquarters
-  const [current, setCurrent] = useState(1)
-  const [activePreview, setActivePreview] = useState(null)
-  const galleryRef = useRef(null)
-
-  useEffect(() => {
-    if (!active) return undefined
-    const timer = window.setInterval(() => setCurrent((index) => (index + 1) % scenes.length), 14000)
-    return () => window.clearInterval(timer)
-  }, [active, scenes.length])
-
-  useEffect(() => {
-    const videos = galleryRef.current?.querySelectorAll('video') ?? []
-    videos.forEach((video) => {
-      const isPrimary = Boolean(video.closest('.rhine-headquarters-primary'))
-      const isCurrentPrimary = isPrimary && Number(video.dataset.sceneIndex) === current
-      if (active && isCurrentPrimary) video.play().catch(() => {})
-      else video.pause()
-    })
-  }, [active, current])
-
-  const setPreviewPlayback = useCallback((event, shouldPlay) => {
-    const video = event.currentTarget.querySelector('video')
-    if (!video) return
-    if (active && shouldPlay) {
-      if (video.readyState === 0) video.load()
-      video.play().catch(() => {})
-    } else video.pause()
-  }, [active])
-
-  const sceneAt = (offset) => scenes[(current + offset) % scenes.length]
-  const primary = sceneAt(0)
-
-  const sceneVisual = (scene, { isActive = true, preview = false, sceneIndex } = {}) => {
-    const key = scene.video || scene.visual || scene.code
-    if (scene.visual === 'fractal-tunnel') {
-      return <FractalTunnelCanvas
-        active={active && isActive}
-        className={preview ? '' : `rhine-headquarters-media ${isActive ? 'is-active' : ''}`}
-        fallback={rhineAsset(base, scene.poster)}
-        label={scene.label}
-        preview={preview}
-        key={`${key}-${preview ? 'preview' : 'primary'}`}
-      />
-    }
-    if (scene.visual === 'chromatic-tunnel') {
-      return <ChromaticTunnelCanvas
-        active={active && isActive}
-        className={preview ? '' : `rhine-headquarters-media ${isActive ? 'is-active' : ''}`}
-        fallback={rhineAsset(base, scene.poster)}
-        label={scene.label}
-        quality={preview ? 'low' : 'auto'}
-        key={`${key}-${preview ? 'preview' : 'primary'}`}
-      />
-    }
-    if (scene.visual === 'weave') {
-      return <WeaveCanvas
-        active={active && isActive}
-        className={preview ? '' : `rhine-headquarters-media ${isActive ? 'is-active' : ''}`}
-        fallback={rhineAsset(base, scene.poster)}
-        label={scene.label}
-        preview={preview}
-        quality={preview ? 'low' : 'auto'}
-        key={`${key}-${preview ? 'preview' : 'primary'}`}
-      />
-    }
-    return <video
-      className={preview ? '' : `rhine-headquarters-media ${isActive ? 'is-active' : ''}`}
-      data-scene-index={sceneIndex}
-      src={rhineAsset(base, scene.video)}
-      poster={preview ? rhineAsset(base, scene.poster) : undefined}
-      aria-label={preview ? undefined : scene.label}
-      aria-hidden={preview || !isActive}
-      muted
-      loop
-      playsInline
-      preload={preview ? 'none' : active ? 'auto' : 'metadata'}
-      key={`${key}-${preview ? 'preview' : 'primary'}`}
-    />
-  }
-
-  return <div className="rhine-headquarters-gallery" data-headquarters-gallery ref={galleryRef}>
-    <figure className="rhine-headquarters-primary">
-      {sceneVisual(primary, { isActive: true, sceneIndex: current })}
-      <figcaption><b>{primary.code}</b><span>{primary.label}<small>SECURE ENVIRONMENT / LIVE OPTICAL FEED</small></span></figcaption>
-    </figure>
-    <div className="rhine-headquarters-side">
-      {[1, 2].map((offset) => {
-        const scene = sceneAt(offset)
-        const previewKey = scene.video || scene.visual || scene.code
-        const activatePreview = (event) => {
-          setActivePreview(previewKey)
-          setPreviewPlayback(event, true)
-        }
-        const deactivatePreview = (event) => {
-          setActivePreview((currentPreview) => currentPreview === previewKey ? null : currentPreview)
-          setPreviewPlayback(event, false)
-        }
-        return <button type="button" onClick={() => setCurrent((current + offset) % scenes.length)} onPointerEnter={activatePreview} onPointerLeave={deactivatePreview} onFocus={activatePreview} onBlur={deactivatePreview} aria-label={`Open ${scene.label}`} key={previewKey}>
-          {sceneVisual(scene, { isActive: activePreview === previewKey, preview: true })}
-          <span><b>{scene.code}</b>{scene.label}</span>
-        </button>
-      })}
-    </div>
-    <div className="rhine-headquarters-index" aria-hidden="true"><span>HEADQUARTERS</span><b>BIOSAFETY LEVEL 4</b><i /></div>
-    <div className="rhine-headquarters-status" aria-hidden="true"><span>{scenes.map((_, index) => <i className={index === current ? 'is-active' : ''} key={index} />)}</span><InfinityLogo compact /><b>ALL SYSTEMS NOMINAL</b></div>
   </div>
 }
 
@@ -818,10 +708,10 @@ export function RhineArchivePrototype() {
         scrollTrigger: { trigger: '#rhine-headquarters', scroller, start: 'top top', end: 'bottom top', scrub: .38 },
         defaults: { ease: 'none' },
       })
-        .to('.rhine-headquarters-primary', { x: '-9vw', y: '-4vh', rotation: -.65, scale: .94, autoAlpha: 0, duration: .7 }, 0)
-        .to('.rhine-headquarters-side button', { x: (index) => `${6 + index * 2.5}vw`, y: (index) => index ? '-6vh' : '5vh', rotation: (index) => index ? 1.4 : -1.1, scale: .94, autoAlpha: 0, duration: .64, stagger: .055 }, .035)
-        .to('.rhine-headquarters-index', { x: -24, y: -18, autoAlpha: 0, duration: .38 }, 0)
-        .to('.rhine-headquarters-status', { x: 28, y: 20, autoAlpha: 0, duration: .4 }, .06)
+        .to('[data-memory-stage]', { x: '-9vw', y: '-4vh', rotation: -.65, scale: .94, autoAlpha: 0, duration: .7 }, 0)
+        .to('[data-memory-nav] button', { x: (index) => `${6 + index * 2.5}vw`, y: (index) => index ? '-6vh' : '5vh', rotation: (index) => index ? 1.4 : -1.1, scale: .94, autoAlpha: 0, duration: .64, stagger: .055 }, .035)
+        .to('[data-memory-heading]', { x: -24, y: -18, autoAlpha: 0, duration: .38 }, 0)
+        .to('[data-memory-caption]', { x: 28, y: 20, autoAlpha: 0, duration: .4 }, .06)
         .to('#rhine-headquarters [data-headquarters-gallery]', { y: '-3vh', scale: .975, clipPath: 'inset(0 0 14% 0)', duration: .78 }, 0)
         .fromTo('[data-transition-cue="members"]', { y: 20, autoAlpha: 0 }, { y: -8, autoAlpha: 1, duration: .34 }, .08)
         .to('[data-transition-cue="members"]', { y: -66, autoAlpha: 0, duration: .4 }, .5)
@@ -897,7 +787,7 @@ export function RhineArchivePrototype() {
           <div className="rhine-home-copy"><h1><span>{RHINE_CLONE.home.eyebrow}</span>{RHINE_CLONE.home.title}<b>{RHINE_CLONE.home.accent}</b></h1><p>{RHINE_CLONE.home.copy}</p><strong><i />{RHINE_CLONE.home.partner}</strong></div>
           <HomeSystem />
         </section>
-        <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersGallery base={base} active={active === 'headquarters' && !gliding} /><SectionTransitionCue code="02" label="MEMBER ARCHIVE" target="members" /></section>
+        <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersMemoryArchive base={base} active={active === 'headquarters' && !gliding} /><SectionTransitionCue code="02" label="MEMBER ARCHIVE" target="members" /></section>
         <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} moving={memberMove} onMoveEnd={finishMemberMove} /><SectionTransitionCue code="03" label="DEPARTMENT MATRIX" target="departments" /></section>
         <section id="rhine-departments" className="rhine-view rhine-departments" data-rhine-view="departments"><DepartmentMatrix base={base} selected={departmentIndex} onSelect={setDepartmentIndex} /><SectionTransitionCue code="04" label="RESEARCH / EVENT HORIZON" target="research" tone="dark" /></section>
         <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene active={active === 'research' && !gliding} prepareBlackHole={!entered || (!gliding && (active === 'members' || active === 'departments'))} onContinue={() => jumpTo('home')} /></section>

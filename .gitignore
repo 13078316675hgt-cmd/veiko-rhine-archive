@@ -74,3 +74,6 @@
 /public/assets/rhine-clone/scenes/wallpaper-02.jpg
 /public/rhine-reference/*.mp4
 /public/rhine-reference/headquarters/*.png
+
+!/src/components/HeadquartersMemoryArchive.jsx
+!/src/headquarters-memory.css
