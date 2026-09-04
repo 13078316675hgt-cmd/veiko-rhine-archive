@@ -29,8 +29,7 @@ if (process.env.RHINE_PROFILE_GL) await page.addInitScript(() => {
 
 await page.goto(baseUrl, { waitUntil: 'networkidle' })
 await page.waitForFunction(() => document.querySelector('.rhine-entrance')?.dataset.entrancePhase === 'login-ready', null, { timeout: 12000 })
-await page.locator('input[name="rhine-username"]').fill('Marlsa')
-await page.locator('input[name="rhine-password"]').fill('9029')
+await page.locator('input[name="rhine-access-code"]').fill('9029')
 
 await page.evaluate(() => {
   const samples = []

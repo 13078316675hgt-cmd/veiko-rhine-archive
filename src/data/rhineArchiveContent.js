@@ -27,7 +27,7 @@ export const RHINE_CLONE = {
     title: 'STEAL THE ',
     accent: 'MOON',
     copy: 'Rhine Lab is a Columbian company dedicated to life science, chemical manufacturing, and biological applications. It is a key technology group supported by Columbia, with a wide range of projects and many publicly announced achievements that have become the focus of attention in the industry.',
-    partner: 'fserant',
+    partner: 'VEIKO',
   },
   scenes: {
     headquarters: [

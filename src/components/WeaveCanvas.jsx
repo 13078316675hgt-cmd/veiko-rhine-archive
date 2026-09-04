@@ -232,11 +232,11 @@ export const WeaveCanvas = memo(function WeaveCanvas({
     <canvas ref={canvasRef} role="img" aria-label={`${label} — ${tier} quality`} />
     {!preview && <a
       className="rhine-weave-credit"
-      href="https://www.shadertoy.com/view/W3SSRm"
+      href={`${import.meta.env.BASE_URL}third-party-notices.html#weave`}
       target="_blank"
       rel="noreferrer"
-      title="The Weave — chronos — original shader running in VEIKO"
-    >W3SSRM / CHRONOS / {tier.toUpperCase()}</a>}
+      title="资源说明"
+    >A-01 LIVE / {tier.toUpperCase()}</a>}
   </div>
 })
 

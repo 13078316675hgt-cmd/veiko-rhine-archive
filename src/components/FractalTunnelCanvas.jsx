@@ -250,11 +250,11 @@ export const FractalTunnelCanvas = memo(function FractalTunnelCanvas({
       ? <span aria-hidden="true">A-02 LIVE / {tier.toUpperCase()}</span>
       : <a
           className="rhine-fractal-credit"
-          href="https://www.shadertoy.com/view/WtjyzR"
+          href={`${import.meta.env.BASE_URL}third-party-notices.html#fractal`}
           target="_blank"
           rel="noreferrer"
-          title="Path to the colorful infinity — Benoit Marini — CC BY-NC-SA 3.0 — original shader running in VEIKO"
-        >WTJYZR / BENOIT M. / {tier.toUpperCase()}</a>}
+          title="资源说明"
+        >A-02 LIVE / {tier.toUpperCase()}</a>}
   </div>
 })
 

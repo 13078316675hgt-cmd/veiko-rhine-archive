@@ -11,7 +11,7 @@ import { WxdfzjBlackHoleCanvas } from './WxdfzjBlackHoleCanvas'
 gsap.registerPlugin(ScrollTrigger)
 
 const basePath = () => import.meta.env.BASE_URL
-const RHINE_LOGIN = Object.freeze({ username: 'Marlsa', password: '9029' })
+const RHINE_ACCESS_CODE = '9029'
 const AUTHORIZATION_CANVAS_SCALE = 1.085
 
 function InfinityLogo({ compact = false }) {
@@ -67,12 +67,11 @@ function Entrance({ onPrepare, onComplete }) {
 
     const form = event.currentTarget
     const data = new FormData(form)
-    const username = String(data.get('rhine-username') || '').trim()
-    const password = String(data.get('rhine-password') || '')
-    const authorized = username === RHINE_LOGIN.username && password === RHINE_LOGIN.password
+    const accessCode = String(data.get('rhine-access-code') || '').trim()
+    const authorized = accessCode === RHINE_ACCESS_CODE
 
     if (!authorized) {
-      setLoginError('INCORRECT USERNAME OR PASSWORD')
+      setLoginError('访问码不正确，请重试')
       form.querySelector('input')?.focus()
       return
     }
@@ -103,12 +102,12 @@ function Entrance({ onPrepare, onComplete }) {
       gsap.set('[data-login-title]', { clipPath: 'inset(0 100% 0 0)', autoAlpha: 0 })
       gsap.set('[data-login-label]', { x: 14, autoAlpha: 0 })
       gsap.set('[data-login-input]', { scaleX: 0, transformOrigin: 'left center' })
-      gsap.set('[data-login-error], [data-login-register]', { y: 7, autoAlpha: 0 })
+      gsap.set('[data-login-error]', { y: 7, autoAlpha: 0 })
       gsap.set('[data-login-button]', { scaleX: 0, autoAlpha: 0, transformOrigin: 'left center' })
       if (reduced) {
         gsap.set(root, { background: RHINE_CLONE.colors.paper })
         gsap.set('[data-warning]', { autoAlpha: 0 })
-        gsap.set('[data-login], [data-intro-logo], [data-logo-loader-copy], [data-login-form], [data-login-title], [data-login-label], [data-login-input], [data-login-error], [data-login-button], [data-login-register], [data-entrance-brand], [data-entrance-footer]', { x: 0, y: 0, scale: 1, clipPath: 'inset(0 0% 0 0)', autoAlpha: 1 })
+        gsap.set('[data-login], [data-intro-logo], [data-logo-loader-copy], [data-login-form], [data-login-title], [data-login-label], [data-login-input], [data-login-error], [data-login-button], [data-entrance-brand], [data-entrance-footer]', { x: 0, y: 0, scale: 1, clipPath: 'inset(0 0% 0 0)', autoAlpha: 1 })
         root.querySelectorAll('[data-intro-logo] [data-logo-outline], [data-intro-logo] [data-logo-glyphs]').forEach((path) => gsap.set(path, { strokeDashoffset: 0 }))
         onPrepare()
         root.dataset.entrancePhase = 'login-ready'
@@ -145,7 +144,6 @@ function Entrance({ onPrepare, onComplete }) {
         .to('[data-login-input]', { scaleX: 1, duration: .52, stagger: .22, ease: 'power3.inOut' }, 6.52)
         .to('[data-login-error]', { y: 0, autoAlpha: 1, duration: .28 }, 6.96)
         .to('[data-login-button]', { scaleX: 1, autoAlpha: 1, duration: .52, ease: 'power4.out' }, 7.02)
-        .to('[data-login-register]', { y: 0, autoAlpha: 1, duration: .35, ease: 'power2.out' }, 7.18)
         .call(onPrepare, null, 7.72)
         .call(() => {
           setCanLogin(true)
@@ -200,9 +198,9 @@ function Entrance({ onPrepare, onComplete }) {
       <i className="rhine-warning-point" data-warning-point />
       <div className="rhine-warning-panel" data-warning-panel><span className="rhine-warning-symbol" data-warning-symbol><i>!</i></span><span data-warning-line /><strong data-warning-title>WARNING</strong><span data-warning-line /></div>
       <div className="rhine-warning-copy" data-warning-copy>
-        <span data-warning-row><small>INCORRECT USERNAME OR PASSWORD</small><i /></span>
-        <span data-warning-row><small>LOGIN FAILED</small><i /></span>
-        <span data-warning-row><small>RETURN TO LOGIN INTERFACE</small><i /></span>
+        <span data-warning-row><small>VEIKO ARCHIVE</small><i /></span>
+        <span data-warning-row><small>ACCESS CODE REQUIRED</small><i /></span>
+        <span data-warning-row><small>PROCEED TO ENTRY</small><i /></span>
       </div>
     </div>
     <i className="rhine-entrance-flash" data-entrance-flash />
@@ -212,11 +210,9 @@ function Entrance({ onPrepare, onComplete }) {
       <div className="rhine-login-logo" data-intro-logo><InfinityLogo /><span data-logo-loader-copy>R H I N E - L A B</span><i className="rhine-logo-dots" aria-hidden="true"><b data-logo-dot /><b data-logo-dot /><b data-logo-dot /></i></div>
       <form className={`rhine-login-form ${loginError ? 'has-error' : ''}`} data-login-form onSubmit={handleLogin} onInput={() => { if (loginError) setLoginError('') }}>
         <h1 data-login-title>WELCOME</h1>
-        <label data-login-label><span>USERNAME:</span><input data-login-input name="rhine-username" autoComplete="username" aria-invalid={Boolean(loginError)} required /></label>
-        <label data-login-label><span>PASSWORD:</span><input data-login-input name="rhine-password" type="password" autoComplete="current-password" aria-invalid={Boolean(loginError)} required /></label>
-        <p className="rhine-login-error" data-login-error role="alert" aria-live="polite">{loginError || '\u00a0'}</p>
-        <button data-login-button type="submit" disabled={!canLogin || authorizing}>LOGIN</button>
-        <a data-login-register href="#rhine-register" onClick={(event) => event.preventDefault()}>REGISTER</a>
+        <label data-login-label><span>访问码：</span><input data-login-input name="rhine-access-code" type="password" inputMode="numeric" autoComplete="off" maxLength={4} aria-describedby="rhine-access-error" aria-invalid={Boolean(loginError)} required /></label>
+        <p id="rhine-access-error" className="rhine-login-error" data-login-error role="alert" aria-live="polite">{loginError || '\u00a0'}</p>
+        <button data-login-button type="submit" disabled={!canLogin || authorizing}>进入</button>
       </form>
     </div>
     <div className="rhine-login-phases" data-login-phases>

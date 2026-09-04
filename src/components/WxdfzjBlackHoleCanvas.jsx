@@ -758,7 +758,7 @@ export const WxdfzjBlackHoleCanvas = memo(function WxdfzjBlackHoleCanvas({
     data-black-hole-error={failure || undefined}
   >
     {status === 'error' && fallback && <img className="rhine-blackhole-fallback" src={fallback} alt="Kerr–Newman black hole" />}
-    <canvas ref={canvasRef} role="img" aria-label="Original baopinsui Kerr-Newman black hole Shadertoy rendering" />
+    <canvas ref={canvasRef} role="img" aria-label="Kerr–Newman black hole rendering" />
   </div>
 })
 

@@ -11,6 +11,7 @@
 !/.github/workflows/deploy-pages.yml
 !/public/
 !/public/CNAME
+!/public/third-party-notices.html
 !/public/favicon.svg
 !/public/rhine-reference/
 !/public/rhine-reference/**
