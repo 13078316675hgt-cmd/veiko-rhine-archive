@@ -4,8 +4,8 @@ import phasesSource from '../vendor/ml3bwf/ml3BWf.frag.glsl?raw'
 /*
  * Exact fragment source: “Phases” by XorDev.
  * Source: https://www.shadertoy.com/view/ml3BWf
- * This component only supplies the WebGL2 fullscreen surface, iTime,
- * iResolution, responsive resolution, and lifecycle controls.
+ * The original lunar geometry stays unchanged. The output wrapper adds
+ * three rotated color halftone screens, with no additional raymarch pass.
  */
 
 const QUALITY_PRESETS = Object.freeze({
@@ -31,14 +31,38 @@ precision highp float;
 
 uniform vec3 iResolution;
 uniform float iTime;
+uniform float uHalftonePitch;
 out vec4 veikoFragColor;
 
 ${phasesSource}
 
+float halftoneDot(vec2 pixel, float angle, float coverage) {
+  mat2 rotation = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+  vec2 cell = fract(rotation * pixel / uHalftonePitch) - .5;
+  float distanceToCenter = length(cell);
+  float radius = sqrt(clamp(coverage, 0., 1.) / 3.14159265);
+  float edge = max(fwidth(distanceToCenter), .025);
+  return (1. - smoothstep(radius - edge, radius + edge, distanceToCenter))
+    * smoothstep(.002, .018, coverage);
+}
+
 void main() {
   vec4 color = vec4(0.0);
   mainImage(color, gl_FragCoord.xy);
-  veikoFragColor = color;
+  float luminance = clamp(dot(color.rgb, vec3(.2126, .7152, .0722)), 0., 1.);
+  float tone = pow(luminance, .86);
+  vec2 uv = (gl_FragCoord.xy - iResolution.xy * .5) / iResolution.y;
+  vec3 cyan = vec3(.12, .78, 1.);
+  vec3 magenta = vec3(1., .23, .55);
+  vec3 palette = mix(cyan, magenta, smoothstep(-.38, .38, uv.x + uv.y * .55));
+  palette = mix(palette, vec3(1., .91, .58), smoothstep(.55, .98, tone));
+  vec3 coverage = clamp(palette * tone * .91, 0., .93);
+  vec3 dots = vec3(
+    halftoneDot(gl_FragCoord.xy, .261799, coverage.r),
+    halftoneDot(gl_FragCoord.xy, .785398, coverage.g),
+    halftoneDot(gl_FragCoord.xy, 1.308997, coverage.b)
+  );
+  veikoFragColor = vec4(dots * .94 + palette * tone * .075, 1.);
 }
 `
 
@@ -134,6 +158,8 @@ export const PhasesCanvas = memo(function PhasesCanvas({
 
     const resolution = gl.getUniformLocation(program, 'iResolution')
     const time = gl.getUniformLocation(program, 'iTime')
+    const halftonePitch = gl.getUniformLocation(program, 'uHalftonePitch')
+    let dotPitch = 5.5
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, preset.maxDpr)
@@ -141,6 +167,7 @@ export const PhasesCanvas = memo(function PhasesCanvas({
       // displayed size once instead of reallocating the drawing buffer per frame.
       const width = Math.max(2, Math.round(canvas.clientWidth * dpr * resolutionScale))
       const height = Math.max(2, Math.round(canvas.clientHeight * dpr * resolutionScale))
+      dotPitch = Math.max(3, 5.5 * width / Math.max(1, canvas.clientWidth))
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width
         canvas.height = height
@@ -155,6 +182,7 @@ export const PhasesCanvas = memo(function PhasesCanvas({
       gl.useProgram(program)
       gl.uniform3f(resolution, canvas.width, canvas.height, 1)
       gl.uniform1f(time, Math.max(0, now - (runtime?.epoch || now)) / 1000)
+      gl.uniform1f(halftonePitch, dotPitch)
       gl.drawArrays(gl.TRIANGLES, 0, 3)
     }
 
@@ -237,7 +265,8 @@ export const PhasesCanvas = memo(function PhasesCanvas({
     className={`rhine-phases-canvas ${failed ? 'has-fallback' : ''} ${className}`.trim()}
     data-phases-quality={tier}
     data-shadertoy-id="ml3BWf"
-    data-shadertoy-source="original"
+    data-shadertoy-source="original-with-color-halftone"
+    data-lunar-treatment="color-halftone"
   >
     <canvas ref={canvasRef} role="img" aria-label={`${label} — ${tier} quality`} />
   </div>
