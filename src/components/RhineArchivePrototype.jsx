@@ -166,29 +166,36 @@ function Entrance({ onPrepare, onComplete }) {
     }
     const context = gsap.context(() => {
       root.dataset.entrancePhase = 'authorizing'
-      gsap.set('[data-login-phases]', { autoAlpha: 0 })
-      gsap.set('[data-login-phases] .rhine-phases-canvas', { scale: AUTHORIZATION_CANVAS_SCALE, autoAlpha: 0, transformOrigin: 'center center' })
+      gsap.set('[data-login-phases]', { autoAlpha: 1, clipPath: 'circle(0% at 50% 50%)' })
+      gsap.set('[data-login-phases] .rhine-phases-canvas', { scale: .18, autoAlpha: 1, transformOrigin: 'center center' })
+      gsap.set('[data-lunar-shock]', { scale: .12, autoAlpha: 0 })
+      gsap.set('[data-lunar-flash]', { autoAlpha: 0 })
       gsap.set('[data-phases-meta]', { y: 10, autoAlpha: 0 })
       gsap.set('[data-phases-title]', { clipPath: 'inset(0 100% 0 0)', y: 7, autoAlpha: 0 })
       gsap.set('[data-phases-rule]', { scaleX: 0, autoAlpha: 0, transformOrigin: 'left center' })
       const authorize = gsap.timeline({ defaults: { ease: 'power3.inOut' } })
         .addLabel('depart', 0)
-        .to('[data-login-form]', { x: -52, scale: .94, autoAlpha: 0, duration: .56, ease: 'power3.inOut' }, 'depart')
-        .to('[data-intro-logo]', { x: 52, scale: .88, autoAlpha: 0, duration: .56, ease: 'power3.inOut' }, 'depart')
-        .to('[data-entrance-brand], [data-entrance-footer]', { autoAlpha: 0, duration: .34, ease: 'sine.inOut' }, 'depart+=.24')
-        .to('[data-login]', { autoAlpha: 0, duration: .12, ease: 'sine.inOut' }, 'depart+=.48')
-        .set('[data-login-phases]', { autoAlpha: 1 }, 'depart+=.48')
-        .call(() => { root.dataset.entrancePhase = 'lunar-phases' }, null, 'depart+=.50')
-        .to('[data-login-phases] .rhine-phases-canvas', { scale: 1, autoAlpha: 1, duration: 1.08, ease: 'power3.out' }, 'depart+=.50')
-        .to('[data-phases-rule]', { scaleX: 1, autoAlpha: 1, duration: .56, ease: 'power3.out' }, 'depart+=1.08')
-        .to('[data-phases-meta]', { y: 0, autoAlpha: 1, duration: .42, ease: 'power2.out' }, 'depart+=1.18')
-        .to('[data-phases-title]', { clipPath: 'inset(0 0% 0 0)', y: 0, autoAlpha: 1, duration: .68, ease: 'power3.inOut' }, 'depart+=1.28')
-        .call(() => { root.dataset.entrancePhase = 'permission-authorized' }, null, 'depart+=1.72')
-        .call(onPrepare, null, 'depart+=2.30')
-        .to('[data-phases-meta], [data-phases-title], [data-phases-rule]', { y: -12, autoAlpha: 0, duration: .42, stagger: .04, ease: 'power2.in' }, 'depart+=2.72')
-        .to('[data-login-phases] .rhine-phases-canvas', { scale: 1.055, autoAlpha: 0, duration: .82, ease: 'power3.in' }, 'depart+=2.82')
-        .to('[data-login-phases]', { autoAlpha: 0, duration: .14, ease: 'sine.inOut' }, 'depart+=3.58')
-        .call(() => { root.dataset.entrancePhase = 'complete'; onComplete() }, null, 'depart+=3.74')
+        .to('[data-login-form]', { x: 100, scale: 1.22, autoAlpha: 0, duration: .22, ease: 'power3.in' }, 'depart')
+        .to('[data-intro-logo]', { x: -100, scale: 1.5, autoAlpha: 0, duration: .22, ease: 'power3.in' }, 'depart')
+        .to('[data-entrance-brand], [data-entrance-footer]', { autoAlpha: 0, duration: .16 }, 'depart')
+        .to('[data-login-phases]', { clipPath: 'circle(75% at 50% 50%)', duration: .34, ease: 'power3.in' }, 'depart')
+        .to('[data-login]', { autoAlpha: 0, duration: .08 }, 'depart+=.18')
+        .call(() => { root.dataset.entrancePhase = 'lunar-phases' }, null, 'depart+=.08')
+        .to('[data-login-phases] .rhine-phases-canvas', { scale: AUTHORIZATION_CANVAS_SCALE, duration: .46, ease: 'power3.in' }, 'depart')
+        .to('[data-login-phases] .rhine-phases-canvas', { scale: 1, duration: .28, ease: 'power3.out' }, 'depart+=.46')
+        .set('[data-lunar-shock]', { autoAlpha: .8 }, 'depart+=.24')
+        .to('[data-lunar-shock]', { scale: 3.8, autoAlpha: 0, duration: .62, ease: 'power3.out' }, 'depart+=.24')
+        .to('[data-lunar-flash]', { autoAlpha: .28, duration: .055, ease: 'none' }, 'depart+=.43')
+        .to('[data-lunar-flash]', { autoAlpha: 0, duration: .2, ease: 'power2.out' }, 'depart+=.485')
+        .to('[data-phases-rule]', { scaleX: 1, autoAlpha: 1, duration: .3, ease: 'power3.out' }, 'depart+=.60')
+        .to('[data-phases-meta]', { y: 0, autoAlpha: 1, duration: .26, ease: 'power2.out' }, 'depart+=.68')
+        .to('[data-phases-title]', { clipPath: 'inset(0 0% 0 0)', y: 0, autoAlpha: 1, duration: .38, ease: 'power3.out' }, 'depart+=.76')
+        .call(() => { root.dataset.entrancePhase = 'permission-authorized' }, null, 'depart+=1.16')
+        .call(onPrepare, null, 'depart+=1.65')
+        .to('[data-phases-meta], [data-phases-title], [data-phases-rule]', { y: -18, autoAlpha: 0, duration: .25, stagger: .025, ease: 'power2.in' }, 'depart+=2.02')
+        .to('[data-login-phases] .rhine-phases-canvas', { scale: 2.8, duration: .56, ease: 'power4.in' }, 'depart+=2.12')
+        .to('[data-login-phases]', { autoAlpha: 0, duration: .28, ease: 'power2.in' }, 'depart+=2.50')
+        .call(() => { root.dataset.entrancePhase = 'complete'; onComplete() }, null, 'depart+=2.80')
     }, root)
     return () => context.revert()
   }, [authorizing, onComplete, onPrepare])
@@ -208,15 +215,20 @@ function Entrance({ onPrepare, onComplete }) {
     <div data-entrance-brand><FixedBrand /></div><div data-entrance-footer><FixedFooter /></div>
     <div className="rhine-login" data-login>
       <div className="rhine-login-logo" data-intro-logo><InfinityLogo /><span data-logo-loader-copy>R H I N E - L A B</span><i className="rhine-logo-dots" aria-hidden="true"><b data-logo-dot /><b data-logo-dot /><b data-logo-dot /></i></div>
-      <form className={`rhine-login-form ${loginError ? 'has-error' : ''}`} data-login-form onSubmit={handleLogin} onInput={() => { if (loginError) setLoginError('') }}>
+      <form className={`rhine-login-form ${loginError ? 'has-error' : ''}`} data-login-form onSubmit={handleLogin} onInput={(event) => {
+        if (loginError) setLoginError('')
+        if (canLogin && !authorizing && event.target.value === RHINE_ACCESS_CODE && !event.nativeEvent.isComposing) event.currentTarget.requestSubmit()
+      }}>
         <h1 data-login-title>WELCOME</h1>
-        <label data-login-label><span>访问码：</span><input data-login-input name="rhine-access-code" type="password" inputMode="numeric" autoComplete="off" maxLength={4} aria-describedby="rhine-access-error" aria-invalid={Boolean(loginError)} required /></label>
+        <label data-login-label><span>访问码：</span><input data-login-input name="rhine-access-code" type="password" inputMode="numeric" autoComplete="off" maxLength={4} disabled={!canLogin} readOnly={authorizing} aria-describedby="rhine-access-error" aria-invalid={Boolean(loginError)} required /></label>
         <p id="rhine-access-error" className="rhine-login-error" data-login-error role="alert" aria-live="polite">{loginError || '\u00a0'}</p>
         <button data-login-button type="submit" disabled={!canLogin || authorizing}>进入</button>
       </form>
     </div>
     <div className="rhine-login-phases" data-login-phases>
       <PhasesCanvas active={authorizing} resolutionScale={AUTHORIZATION_CANVAS_SCALE} />
+      <i className="rhine-lunar-shock" data-lunar-shock aria-hidden="true" />
+      <i className="rhine-lunar-flash" data-lunar-flash aria-hidden="true" />
       <div className="rhine-phases-copy">
         <small data-phases-meta>LUNAR ACCESS / PHASE SEQUENCE 01</small>
         <strong data-phases-title>LUNAR MISSION AUTHORIZED</strong>
@@ -316,6 +328,21 @@ function DepartmentMark({ code }) {
   const lines = code.split('\n')
   return <strong>{lines.map((line) => <span key={line}>{line}</span>)}</strong>
 }
+
+const DepartmentField = memo(function DepartmentField({ index }) {
+  const paths = Array.from({ length: 35 }, (_, row) => {
+    const points = Array.from({ length: 48 }, (_, step) => {
+      const x = -35 + step * 6
+      const band = row / 34
+      const bend = Math.sin(x * .022 + index * .9 + band * 3.1)
+      const fold = Math.sin(x * .046 - band * 4.5 + index) * (12 + 15 * Math.sin(band * Math.PI))
+      const y = -30 + band * 310 + bend * (30 + 24 * Math.cos(band * 5 + index)) + fold
+      return `${step ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`
+    }).join('')
+    return <path key={row} d={points} opacity={.14 + (row % 6) * .09} strokeWidth={row % 5 === 0 ? 1 : .55} />
+  })
+  return <svg className="rhine-department-field" viewBox="0 0 200 240" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="#ddd">{paths}</g></svg>
+})
 
 const MemberCardBody = memo(function MemberCardBody({ base, member }) {
   const imageWidth = 142 * member.scale
@@ -438,6 +465,8 @@ function DepartmentMatrix({ base, selected, onSelect }) {
   const stageRef = useRef(null)
   const pointerFrameRef = useRef(0)
   const pointerRef = useRef({ x: 0, y: 0 })
+  const renderedPointerRef = useRef({ x: 0, y: 0 })
+  const geometryRef = useRef(null)
   const current = selected == null ? null : RHINE_DEPARTMENTS[selected]
 
   const applyPointerTrack = useCallback((x, y) => {
@@ -453,25 +482,62 @@ function DepartmentMatrix({ base, selected, onSelect }) {
     stage.style.setProperty('--department-tile-r', '0deg')
     stage.style.setProperty('--department-signature-x', `${(x * 14).toFixed(2)}px`)
     stage.style.setProperty('--department-signature-y', `${(y * 9).toFixed(2)}px`)
+    const geometry = geometryRef.current
+    if (geometry) {
+      const { width, height, centerX, centerY, half, svg, path, endpoints } = geometry
+      const angle = x * 1.15 * Math.PI / 180
+      const cos = Math.cos(angle), sin = Math.sin(angle)
+      const corners = [[-1,-1],[1,-1],[-1,1],[1,1]]
+      const segments = corners.map(([sx,sy], index) => {
+        const outerX = width * (sx < 0 ? .287 : .729) - x * (sy < 0 ? 40 : 25) + y * sx * 11
+        const outerY = height * (sy < 0 ? .042 : .958) - y * (sx < 0 ? 28 : 42) + x * sy * 8
+        const innerX = centerX + x * 28 + sx * half * cos - sy * half * sin
+        const innerY = centerY + y * 18 + sx * half * sin + sy * half * cos
+        endpoints[index].style.left = `${outerX}px`
+        endpoints[index].style.top = `${outerY}px`
+        return `M${innerX.toFixed(2)} ${innerY.toFixed(2)}L${outerX.toFixed(2)} ${outerY.toFixed(2)}`
+      })
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
+      path.setAttribute('d', segments.join(''))
+    }
   }, [])
 
+  const animatePointerTrack = useCallback(function advance() {
+    const currentPointer = renderedPointerRef.current
+    const target = pointerRef.current
+    currentPointer.x += (target.x - currentPointer.x) * .14
+    currentPointer.y += (target.y - currentPointer.y) * .14
+    const settled = Math.abs(target.x-currentPointer.x) + Math.abs(target.y-currentPointer.y) < .001
+    if (settled) { currentPointer.x = target.x; currentPointer.y = target.y }
+    applyPointerTrack(currentPointer.x, currentPointer.y)
+    pointerFrameRef.current = settled ? 0 : window.requestAnimationFrame(advance)
+  }, [applyPointerTrack])
+
   const trackPointer = useCallback((event) => {
-    if (event.pointerType === 'touch') return
+    if (event.pointerType === 'touch' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const bounds = event.currentTarget.getBoundingClientRect()
     pointerRef.current.x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1))
     pointerRef.current.y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1))
     if (pointerFrameRef.current) return
-    pointerFrameRef.current = window.requestAnimationFrame(() => {
-      pointerFrameRef.current = 0
-      applyPointerTrack(pointerRef.current.x, pointerRef.current.y)
-    })
-  }, [applyPointerTrack])
+    pointerFrameRef.current = window.requestAnimationFrame(animatePointerTrack)
+  }, [animatePointerTrack])
 
   const resetPointerTrack = useCallback(() => {
     pointerRef.current = { x: 0, y: 0 }
-    if (pointerFrameRef.current) window.cancelAnimationFrame(pointerFrameRef.current)
-    pointerFrameRef.current = 0
-    applyPointerTrack(0, 0)
+    if (!pointerFrameRef.current) pointerFrameRef.current = window.requestAnimationFrame(animatePointerTrack)
+  }, [animatePointerTrack])
+
+  useLayoutEffect(() => {
+    const stage = stageRef.current
+    const preview = stage.querySelector('[data-department-preview]')
+    const svg = stage.querySelector('.rhine-department-lines svg')
+    const measure = () => {
+      geometryRef.current = { width: stage.clientWidth, height: stage.clientHeight, centerX: preview.offsetLeft, centerY: preview.offsetTop + preview.offsetHeight / 2, half: preview.offsetWidth / 2 + 9, svg, path: svg.querySelector('path'), endpoints: stage.querySelectorAll('.rhine-department-lines > i') }
+      applyPointerTrack(renderedPointerRef.current.x, renderedPointerRef.current.y)
+    }
+    const observer = new ResizeObserver(measure)
+    observer.observe(stage); observer.observe(preview); measure()
+    return () => { observer.disconnect(); geometryRef.current = null }
   }, [applyPointerTrack])
 
   useEffect(() => () => {
@@ -496,7 +562,7 @@ function DepartmentMatrix({ base, selected, onSelect }) {
     </div>
     <div className="rhine-department-tiles">
       {RHINE_DEPARTMENTS.map((department, index) => <button className={`rhine-department-tile ${selected === index ? 'is-selected' : ''}`} style={{ ...DEPARTMENT_LAYOUT[index], '--tile-order': index, '--tile-delay': `${index * -.47}s` }} type="button" onPointerEnter={() => onSelect(index)} onPointerLeave={() => onSelect(null)} onFocus={() => onSelect(index)} onBlur={() => onSelect(null)} onClick={() => onSelect(index)} aria-pressed={selected === index} key={department.code}>
-        <span className="rhine-department-orbit" aria-hidden="true"><i /><i /><i /></span><span className="rhine-department-trace" aria-hidden="true" />
+        <DepartmentField index={index} /><span className="rhine-department-trace" aria-hidden="true" />
         <DepartmentMark code={department.code} /><small>{department.label}</small>
       </button>)}
     </div>

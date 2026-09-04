@@ -461,13 +461,28 @@ body { min-width: 0; overflow: hidden; }
   background: var(--rhine-paper);
 }
 
-.rhine-departments { background: #d4d7cd; }
-.rhine-department-lines path { stroke: rgba(101,114,93,.62); }
-.rhine-department-lines > i, .rhine-department-lines > span b { background: rgba(241,242,233,.96); box-shadow: 0 0 12px rgba(97,185,185,.2); }
-.rhine-department-tile { background: var(--rhine-panel); box-shadow: 0 8px 18px rgba(7,11,9,.2); }
-.rhine-department-tile.is-selected { box-shadow: 0 0 0 6px var(--rhine-signal), 0 13px 30px rgba(86,105,17,.26); }
-.rhine-department-media { background: var(--rhine-deep); }
-.rhine-department-placeholder > i { background-image: radial-gradient(circle, rgba(97,185,185,.54) 1.35px, transparent 1.75px); }
+.rhine-departments { --rhine-accent: #e99128; --rhine-signal: #e99128; background: #e4e3df; }
+.rhine-active-departments .rhine-main-navigation button.is-active { color: #d78724; }
+.rhine-department-lines { opacity: .86; transform: none; transition: none; }
+.rhine-department-lines path { stroke: rgba(255,255,251,.8); }
+.rhine-department-lines > i, .rhine-department-lines > span b { background: #fafaf5; box-shadow: 0 0 7px rgba(255,255,255,.3); }
+.rhine-department-tracker { transition: none; }
+.rhine-department-signatures .rhine-pioneer-wave-logo .is-gold { stroke: #d2c6a6; }
+.rhine-department-placeholder > i { background-image: radial-gradient(circle, rgba(39,39,36,.6) 1px, transparent 1.5px); background-size: 8px 8px; }
+.rhine-department-placeholder > svg { color: #fffef9; }
+.rhine-department-tile { background: #030303; }
+.rhine-department-tile::before { inset: 0; background: radial-gradient(ellipse at 46% 50%, rgba(0,0,0,.78), transparent 72%); transform: none; z-index: 2; opacity: 1; pointer-events: none; }
+.rhine-department-field { position: absolute; inset: -9%; width: 118%; height: 118%; opacity: .87; pointer-events: none; }
+.rhine-department-tile.is-selected { box-shadow: 0 0 0 4px #e99128; }
+.rhine-department-tile:is(:hover,.is-selected)::before { animation: none; }
+.rhine-department-tile.is-selected .rhine-department-trace { animation: none; border-color: rgba(255,227,191,.6); }
+.rhine-department-tile:is(:hover,.is-selected) .rhine-department-field { animation: rhine-department-contour-drift 4s ease-in-out infinite alternate; }
+.rhine-prototype:not(.rhine-active-departments) .rhine-department-field { animation-play-state: paused; }
+.rhine-department-media { background: #080808; }
+.rhine-department-media img { filter: saturate(.75) contrast(1.04); }
+@keyframes rhine-department-contour-drift { from { transform: translate3d(-2%,1%,0) scale(1.02); } to { transform: translate3d(3%,-2%,0) scale(1.1); } }
+.rhine-lunar-shock { position: absolute; z-index: 1; left: calc(50% - 22vmin); top: calc(50% - 22vmin); width: 44vmin; height: 44vmin; border: 1px solid rgba(244,244,235,.9); border-radius: 50%; box-shadow: 0 0 20px rgba(255,255,245,.24), inset 0 0 12px rgba(255,255,245,.2); opacity: 0; pointer-events: none; }
+.rhine-lunar-flash { position: absolute; z-index: 1; inset: 0; background: radial-gradient(ellipse, rgba(255,255,244,.94), rgba(244,240,222,.2) 58%, transparent 80%); opacity: 0; pointer-events: none; }
 .rhine-pioneer-wave-logo .is-gold { stroke: var(--rhine-signal); }
 
 .rhine-research { --rhine-accent: #61b9b9; --rhine-accent-secondary: #829f5d; background: radial-gradient(ellipse at 56% 49%, #07101d 0%, #040a10 46%, #050906 78%); }
@@ -530,6 +545,11 @@ body { min-width: 0; overflow: hidden; }
   .rhine-headquarters-gallery { inset: 14% 17% 10% 20px; grid-template-columns: 1fr 30%; }.rhine-headquarters-index { display: none; }.rhine-headquarters-status { bottom: -26px; }
   .rhine-blackhole-fallback { width: 100%; max-width: none; }.rhine-pioneer-mark { top: 14%; left: 20px; }.rhine-progress-system { top: 37%; left: 20px; }.rhine-time-meter { width: 86px; height: 86px; }.rhine-time-mass { top: 11px; left: 11px; transform: scale(.76); transform-origin: top left; }.rhine-time-transfer { top: 30px; height: 26px; }
   .rhine-research-copy { bottom: 11%; left: 20px; width: 78vw; }.rhine-research-copy button { width: 70vw; }.rhine-research-readout { right: 20px; bottom: 29%; min-width: 250px; transform: scale(.8); transform-origin: right bottom; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rhine-department-tile .rhine-department-field { animation: none !important; }
+  .rhine-department-tile { transition: none; }
 }
 
 @media (min-width: 901px) and (max-height: 700px) {
