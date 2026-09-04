@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import '../headquarters-memory.css'
 
 const sequences = [
@@ -18,35 +18,55 @@ function MemoryStructure({ sequence, active }) {
     let width = 1, height = 1
     let frame = 0, previous = null
     const motion = matchMedia('(prefers-reduced-motion: reduce)')
+    // Reuse geometry and shade strings: the same 92 rings are drawn every frame.
+    const vertices = new Float64Array(16)
+    const inner = new Float64Array(16)
+    const faceLight = Array.from({ length: 8 }, (_, j) => 140 + 63 * Math.sin(j * .78 + .5))
+    const shades = Array.from({ length: 256 }, (_, shade) => [
+      `rgb(${shade},${shade+1},${shade})`,
+      `rgb(${Math.max(77,shade-45)},${Math.round(shade*.12)},${Math.round(shade*.13)})`,
+    ])
+    const fragments = Array.from({ length: 78 }, (_, i) => {
+      const n = Math.sin(i * 127.1 + 6) * 43758.5453
+      const f = n - Math.floor(n)
+      return { u: i / 78, f, rotation: -.7 + Math.sin(i) * .16, label: `VK.${String(i).padStart(3,'0')}` }
+    })
+    const path = (points) => {
+      ctx.beginPath(); ctx.moveTo(points[0], points[1])
+      for (let j = 2; j < 16; j += 2) ctx.lineTo(points[j], points[j+1])
+      ctx.closePath()
+    }
     const draw = () => {
       const time = elapsedRef.current[sequence]
       ctx.clearRect(0, 0, width, height)
       const mobile = width < 700
       if (sequence === 0) {
-        const rings = []
-        for (let i = 0; i < 92; i++) {
+        for (let i = 91; i >= 0; i--) {
           const u = i / 91
           const wave = u * Math.PI * 2.15 + time * .045
           const x = width * (-.17 + u * 1.38)
           const y = height * (.57 + Math.sin(wave + .4) * (mobile ? .08 : .13))
           const r = Math.min(width * .125, height * .25) * (.79 + .24 * Math.cos(wave))
           const twist = u * 3.4 + time * .025
-          const vertices = []
+          let centerX = 0, centerY = 0
           for (let j = 0; j < 8; j++) {
             const a = j / 8 * Math.PI * 2 + twist
-            vertices.push([x + Math.cos(a) * r * .48, y + Math.sin(a) * r])
+            const k = j * 2
+            vertices[k] = x + Math.cos(a) * r * .48
+            vertices[k+1] = y + Math.sin(a) * r
+            centerX += vertices[k] / 8; centerY += vertices[k+1] / 8
           }
-          rings.push({ vertices, red: i > 34 && i < 55, depth: Math.cos(wave) })
-        }
-        const path = (points) => { ctx.beginPath(); points.forEach(([x,y], i) => i ? ctx.lineTo(x,y) : ctx.moveTo(x,y)); ctx.closePath() }
-        for (let i = rings.length - 1; i >= 0; i--) {
-          const { vertices, red, depth } = rings[i]
-          const center = vertices.reduce((a,p) => [a[0]+p[0]/8,a[1]+p[1]/8], [0,0])
-          const inner = vertices.map(([x,y]) => [center[0]+(x-center[0])*.70, center[1]+(y-center[1])*.70])
+          const red = i > 34 && i < 55, depth = Math.cos(wave)
+          for (let j = 0; j < 16; j += 2) {
+            inner[j] = centerX + (vertices[j]-centerX)*.70
+            inner[j+1] = centerY + (vertices[j+1]-centerY)*.70
+          }
           for (let j = 0; j < 8; j++) {
-            const shade = Math.round(140 + 63 * Math.sin(j * .78 + .5) + depth * 12)
-            path([vertices[j], vertices[(j+1)%8], inner[(j+1)%8], inner[j]])
-            ctx.fillStyle = red ? `rgb(${Math.max(77,shade-45)},${Math.round(shade*.12)},${Math.round(shade*.13)})` : `rgb(${shade},${shade+1},${shade})`
+            const shade = Math.round(faceLight[j] + depth * 12)
+            const k = j * 2, next = (k + 2) % 16
+            ctx.beginPath(); ctx.moveTo(vertices[k],vertices[k+1]); ctx.lineTo(vertices[next],vertices[next+1])
+            ctx.lineTo(inner[next],inner[next+1]); ctx.lineTo(inner[k],inner[k+1]); ctx.closePath()
+            ctx.fillStyle = shades[shade][red ? 1 : 0]
             ctx.fill()
           }
           path(vertices); ctx.strokeStyle = red ? 'rgba(225,157,149,.55)' : 'rgba(255,255,255,.83)'; ctx.lineWidth = 1.3; ctx.stroke()
@@ -55,14 +75,12 @@ function MemoryStructure({ sequence, active }) {
       } else {
         const unit = Math.min(width, height * 1.5)
         for (let i = 0; i < 78; i++) {
-          const n = Math.sin(i * 127.1 + 6) * 43758.5453
-          const f = n - Math.floor(n)
-          const u = i / 78
+          const { f, u, rotation, label } = fragments[i]
           const x = width * (.12 + .72 * u) + Math.cos(i * 4.3 + time * .08) * unit * .16
           const y = height * (.65 - u * .23) + Math.sin(i * 8.1 + time * .08) * height * .18
           const size = unit * (.018 + f * f * .1)
           const red = i % 7 < 3
-          ctx.save(); ctx.translate(x,y); ctx.rotate(-.7 + Math.sin(i) * .16)
+          ctx.save(); ctx.translate(x,y); ctx.rotate(rotation)
           ctx.globalAlpha = .2 + f * .7
           ctx.fillStyle = red ? '#a00b19' : '#bec0be'
           ctx.strokeStyle = red ? '#6e0812' : '#777d78'
@@ -71,14 +89,14 @@ function MemoryStructure({ sequence, active }) {
           ctx.fillStyle = red ? '#260a0d' : '#5b605b'
           if (size > 34) {
             ctx.font = `${Math.max(7,size*.13)}px monospace`
-            ctx.fillText(`VK.${String(i).padStart(3,'0')}`, -size*.39,-size*.24)
+            ctx.fillText(label, -size*.39,-size*.24)
             for (let k = 0; k < 6; k++) ctx.fillRect(-size*.36, size*(.03+k*.064), size*(.25+((i+k)%4)*.1), Math.max(.7,size*.017))
             ctx.strokeRect(size*.12, -size*.08, size*.23,size*.23)
           }
           ctx.restore()
         }
       }
-      canvas.dataset.ready = 'true'
+      if (canvas.dataset.ready !== 'true') canvas.dataset.ready = 'true'
     }
     const canAnimate = () => activeRef.current && !document.hidden && !motion.matches
     const tick = (now) => {
@@ -122,7 +140,7 @@ function MemoryStructure({ sequence, active }) {
   return <canvas ref={ref} className="memory-structure" aria-hidden="true" />
 }
 
-export function HeadquartersMemoryArchive({ active }) {
+export const HeadquartersMemoryArchive = memo(function HeadquartersMemoryArchive({ active }) {
   const [selected, setSelected] = useState(0)
   const scene = sequences[selected]
   const tabs = useRef([])
@@ -164,4 +182,4 @@ export function HeadquartersMemoryArchive({ active }) {
     </nav>
     <div className="memory-bottom-mark" aria-hidden="true"><span>VEIKO / PERSONAL ARCHIVE</span><span>■ □ &nbsp; MEMORY INDEX</span></div>
   </div>
-}
+})

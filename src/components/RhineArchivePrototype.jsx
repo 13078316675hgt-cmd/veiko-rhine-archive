@@ -285,7 +285,7 @@ function Entrance({ onPrepare, onComplete }) {
   </div>
 }
 
-function HomeSystem() {
+const HomeSystem = memo(function HomeSystem() {
   return <div className="rhine-home-system" aria-hidden="true">
     <svg viewBox="0 -110 600 1220" preserveAspectRatio="xMidYMid meet">
       <defs>
@@ -322,7 +322,7 @@ function HomeSystem() {
       <text className="rhine-home-label" x="330" y="532">Tomorrow.</text>
     </svg>
   </div>
-}
+})
 
 function DepartmentMark({ code }) {
   const lines = code.split('\n')
@@ -361,7 +361,7 @@ const MemberCardBody = memo(function MemberCardBody({ base, member }) {
 
 const MEMBER_SLOT_X = { '-2': -42.6, '-1': -21.3, '0': 0, '1': 21.3, '2': 42.6 }
 
-function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
+const MemberCarousel = memo(function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
   const length = RHINE_MEMBERS.length
   const preloadRef = useRef([])
   const move = (direction) => onSelect((selected + direction + length) % length)
@@ -452,7 +452,7 @@ function MemberCarousel({ base, selected, onSelect, moving, onMoveEnd }) {
     <button className="rhine-carousel-control is-left" type="button" onClick={() => move(-1)} aria-label="Previous member"><i /></button>
     <button className="rhine-carousel-control is-right" type="button" onClick={() => move(1)} aria-label="Next member"><i /></button>
   </div>
-}
+})
 
 const DEPARTMENT_LAYOUT = [
   { left: '13.1%', top: '17.2%', '--tile-angle': '0deg' }, { left: '13.1%', top: '41%', '--tile-angle': '0deg' }, { left: '13.1%', top: '64%', '--tile-angle': '0deg' },
@@ -461,10 +461,11 @@ const DEPARTMENT_LAYOUT = [
   { left: '80.1%', top: '17.2%', '--tile-angle': '0deg' }, { left: '80.1%', top: '41%', '--tile-angle': '0deg' }, { left: '80.1%', top: '64%', '--tile-angle': '0deg' },
 ]
 
-function DepartmentMatrix({ base, selected, onSelect }) {
+const DepartmentMatrix = memo(function DepartmentMatrix({ base, selected, onSelect }) {
   const stageRef = useRef(null)
   const pointerFrameRef = useRef(0)
   const pointerRef = useRef({ x: 0, y: 0 })
+  const pendingPointerRef = useRef(null)
   const renderedPointerRef = useRef({ x: 0, y: 0 })
   const geometryRef = useRef(null)
   const current = selected == null ? null : RHINE_DEPARTMENTS[selected]
@@ -472,19 +473,17 @@ function DepartmentMatrix({ base, selected, onSelect }) {
   const applyPointerTrack = useCallback((x, y) => {
     const stage = stageRef.current
     if (!stage) return
-    stage.style.setProperty('--department-track-x', `${(x * 28).toFixed(2)}px`)
-    stage.style.setProperty('--department-track-y', `${(y * 18).toFixed(2)}px`)
-    stage.style.setProperty('--department-track-r', `${(x * 1.15).toFixed(2)}deg`)
-    stage.style.setProperty('--department-line-x', `${(x * 18).toFixed(2)}px`)
-    stage.style.setProperty('--department-line-y', `${(y * 12).toFixed(2)}px`)
-    stage.style.setProperty('--department-tile-x', `${(x * 9).toFixed(2)}px`)
-    stage.style.setProperty('--department-tile-y', `${(y * 6).toFixed(2)}px`)
-    stage.style.setProperty('--department-tile-r', '0deg')
-    stage.style.setProperty('--department-signature-x', `${(x * 14).toFixed(2)}px`)
-    stage.style.setProperty('--department-signature-y', `${(y * 9).toFixed(2)}px`)
     const geometry = geometryRef.current
     if (geometry) {
-      const { width, height, centerX, centerY, half, svg, path, endpoints } = geometry
+      const { width, height, centerX, centerY, half, path, endpoints, tracker, tiles, signatures } = geometry
+      // Write only to the moving groups, rather than invalidating inherited
+      // custom properties across every contour path on each pointer frame.
+      tracker.style.transform = `translate3d(${(x*28).toFixed(2)}px,${(y*18).toFixed(2)}px,0) rotate(${(x*1.15).toFixed(2)}deg)`
+      tiles.style.transform = `translate3d(${(x*9).toFixed(2)}px,${(y*6).toFixed(2)}px,0) rotate(0deg)`
+      const signatureTransform = `translate3d(calc(-50% + ${(x*14).toFixed(2)}px),${(y*9).toFixed(2)}px,0)`
+      signatures.style.transform = signatureTransform
+      const heading = stage.querySelector('.rhine-department-heading')
+      if (heading) heading.style.transform = signatureTransform
       const angle = x * 1.15 * Math.PI / 180
       const cos = Math.cos(angle), sin = Math.sin(angle)
       const corners = [[-1,-1],[1,-1],[-1,1],[1,1]]
@@ -497,12 +496,19 @@ function DepartmentMatrix({ base, selected, onSelect }) {
         endpoints[index].style.top = `${outerY}px`
         return `M${innerX.toFixed(2)} ${innerY.toFixed(2)}L${outerX.toFixed(2)} ${outerY.toFixed(2)}`
       })
-      svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
       path.setAttribute('d', segments.join(''))
     }
   }, [])
 
   const animatePointerTrack = useCallback(function advance() {
+    const pending = pendingPointerRef.current
+    if (pending && stageRef.current) {
+      // Coalesce high-frequency input and read layout once, before frame writes.
+      const bounds = stageRef.current.getBoundingClientRect()
+      pointerRef.current.x = Math.max(-1, Math.min(1, ((pending.x-bounds.left)/bounds.width)*2-1))
+      pointerRef.current.y = Math.max(-1, Math.min(1, ((pending.y-bounds.top)/bounds.height)*2-1))
+      pendingPointerRef.current = null
+    }
     const currentPointer = renderedPointerRef.current
     const target = pointerRef.current
     currentPointer.x += (target.x - currentPointer.x) * .14
@@ -515,14 +521,13 @@ function DepartmentMatrix({ base, selected, onSelect }) {
 
   const trackPointer = useCallback((event) => {
     if (event.pointerType === 'touch' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const bounds = event.currentTarget.getBoundingClientRect()
-    pointerRef.current.x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width) * 2 - 1))
-    pointerRef.current.y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height) * 2 - 1))
+    pendingPointerRef.current = { x: event.clientX, y: event.clientY }
     if (pointerFrameRef.current) return
     pointerFrameRef.current = window.requestAnimationFrame(animatePointerTrack)
   }, [animatePointerTrack])
 
   const resetPointerTrack = useCallback(() => {
+    pendingPointerRef.current = null
     pointerRef.current = { x: 0, y: 0 }
     if (!pointerFrameRef.current) pointerFrameRef.current = window.requestAnimationFrame(animatePointerTrack)
   }, [animatePointerTrack])
@@ -532,13 +537,18 @@ function DepartmentMatrix({ base, selected, onSelect }) {
     const preview = stage.querySelector('[data-department-preview]')
     const svg = stage.querySelector('.rhine-department-lines svg')
     const measure = () => {
-      geometryRef.current = { width: stage.clientWidth, height: stage.clientHeight, centerX: preview.offsetLeft, centerY: preview.offsetTop + preview.offsetHeight / 2, half: preview.offsetWidth / 2 + 9, svg, path: svg.querySelector('path'), endpoints: stage.querySelectorAll('.rhine-department-lines > i') }
+      geometryRef.current = { width: stage.clientWidth, height: stage.clientHeight, centerX: preview.offsetLeft, centerY: preview.offsetTop + preview.offsetHeight / 2, half: preview.offsetWidth / 2 + 9, path: svg.querySelector('path'), endpoints: stage.querySelectorAll('.rhine-department-lines > i'), tracker: stage.querySelector('[data-department-tracker]'), tiles: stage.querySelector('.rhine-department-tiles'), signatures: stage.querySelector('.rhine-department-signatures') }
+      svg.setAttribute('viewBox', `0 0 ${geometryRef.current.width} ${geometryRef.current.height}`)
       applyPointerTrack(renderedPointerRef.current.x, renderedPointerRef.current.y)
     }
     const observer = new ResizeObserver(measure)
     observer.observe(stage); observer.observe(preview); measure()
     return () => { observer.disconnect(); geometryRef.current = null }
   }, [applyPointerTrack])
+
+  useLayoutEffect(() => {
+    applyPointerTrack(renderedPointerRef.current.x, renderedPointerRef.current.y)
+  }, [selected, applyPointerTrack])
 
   useEffect(() => () => {
     if (pointerFrameRef.current) window.cancelAnimationFrame(pointerFrameRef.current)
@@ -571,7 +581,7 @@ function DepartmentMatrix({ base, selected, onSelect }) {
       <span className="is-rhine"><InfinityLogo compact /><small>RHINE LAB</small></span>
     </div>
   </div>
-}
+})
 
 function BlackHoleSystem({ active, prepare }) {
   return <figure className="rhine-blackhole-visual" aria-label="Original Kerr-Newman black hole rendering">
@@ -602,7 +612,7 @@ const RHINE_TIME_DOTS = {
   target: createTimeDots('target'),
 }
 
-function ResearchScene({ active, prepareBlackHole, onContinue }) {
+const ResearchScene = memo(function ResearchScene({ active, prepareBlackHole, onContinue }) {
   return <div className="rhine-research-scene">
     <BlackHoleSystem active={active} prepare={prepareBlackHole} />
     <div className="rhine-pioneer-mark" data-research-ui><span>{RHINE_RESEARCH.title}<small>{RHINE_RESEARCH.english}</small></span><MoonProjectLogo /></div>
@@ -610,7 +620,7 @@ function ResearchScene({ active, prepareBlackHole, onContinue }) {
     <div className="rhine-research-copy" data-research-ui><p>{RHINE_RESEARCH.copy.map((line) => <span key={line}>{line}</span>)}</p><button type="button" onClick={onContinue}>{RHINE_RESEARCH.button}<i /></button></div>
     <div className="rhine-research-readout" data-research-ui><b>R / 01 — 037</b><span>{RHINE_RESEARCH.readout.slice(1).map((line) => <small key={line}>{line}</small>)}</span><i /></div>
   </div>
-}
+})
 
 export function RhineArchivePrototype() {
   const bypass = new URLSearchParams(window.location.search).get('rhineBypass') === '1'
@@ -837,10 +847,11 @@ export function RhineArchivePrototype() {
     return () => context.revert()
   }, [departmentIndex, entered])
 
-  const jumpTo = (id) => {
+  const jumpTo = useCallback((id) => {
     setActive(id)
     rootRef.current?.querySelector(`#rhine-${id}`)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
-  }
+  }, [])
+  const returnHome = useCallback(() => jumpTo('home'), [jumpTo])
 
   return <main className={`rhine-prototype rhine-active-${active}${gliding ? ' rhine-is-gliding' : ''}`} ref={rootRef} style={{ '--rhine-paper': RHINE_CLONE.colors.paper, '--rhine-ink': RHINE_CLONE.colors.ink, '--rhine-accent': RHINE_CLONE.colors.accent, '--rhine-pale': RHINE_CLONE.colors.pale, '--rhine-cyan': RHINE_CLONE.colors.cyan }}>
     {!entered && <Entrance onPrepare={prepareSite} onComplete={finishEntrance} />}
@@ -856,7 +867,7 @@ export function RhineArchivePrototype() {
         <section id="rhine-headquarters" className="rhine-view rhine-headquarters" data-rhine-view="headquarters"><HeadquartersMemoryArchive base={base} active={active === 'headquarters' && !gliding} /><SectionTransitionCue code="02" label="MEMBER ARCHIVE" target="members" /></section>
         <section id="rhine-members" className="rhine-view rhine-members" data-rhine-view="members"><MemberCarousel base={base} selected={memberIndex} onSelect={chooseMember} moving={memberMove} onMoveEnd={finishMemberMove} /><SectionTransitionCue code="03" label="DEPARTMENT MATRIX" target="departments" /></section>
         <section id="rhine-departments" className="rhine-view rhine-departments" data-rhine-view="departments"><DepartmentMatrix base={base} selected={departmentIndex} onSelect={setDepartmentIndex} /><SectionTransitionCue code="04" label="RESEARCH / EVENT HORIZON" target="research" tone="dark" /></section>
-        <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene active={active === 'research' && !gliding} prepareBlackHole={!entered || (!gliding && (active === 'members' || active === 'departments'))} onContinue={() => jumpTo('home')} /></section>
+        <section id="rhine-research" className="rhine-view rhine-research" data-rhine-view="research"><ResearchScene active={active === 'research' && !gliding} prepareBlackHole={!entered || (!gliding && (active === 'members' || active === 'departments'))} onContinue={returnHome} /></section>
       </div>
     </>}
   </main>
